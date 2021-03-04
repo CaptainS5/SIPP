@@ -4,7 +4,11 @@ function [keys] = keyConfig()
 KbName('UnifyKeyNames');
 keys.escape       = KbName('Escape');
 keys.space         = KbName('Space');
-keys.delete         = KbName('LeftArrow');
+keys.delete         = KbName('Backspace');
+keys.up         = KbName('UpArrow');
+keys.down         = KbName('DownArrow');
+keys.continue         = KbName('X');
+keys.recalibration         = KbName('C');
 
 end
 

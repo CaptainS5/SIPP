@@ -37,29 +37,12 @@ pathConfig;
 const.expName              = 'MicroPursuit'; 								% Experiment name
 const.stimType             = 1;                                             % 1: constant internal motion; 2: perturbation of internal motion
 const.startExp             = 1;                                             % 1 = experiment mode; 0 = debugging mode
-const.expType              = 1;                                             % 0: practice(not implemented...); 1: experiment
+const.expType              = 1;                                             % 1: experiment; --not implemented...-1: practice; 0: baseline
 const.checkEyeFix          = 1;                                             % 1 = checks gaze fixation (this needs to be 1 also when in dummy mode)
 % const.feedback             = 1;												% 1 = show task feedback (defined in runSingleTrial); 0 = off
 const.makeVideo            = 0;                                             % 1 = creates a video of a single trial(set any conditions manually in expMain); 0 = off (normal experiment mode)
 const.runScreenCalib       = 0;                                             % 1 = run screen calibration instead of experiment; 0 = experiment mode
 const.showGaze             = 0;
-% Some dsign-related things (These will be used in paramConfig):
-const.numTrialsPerBlock    = [5 5 5];                                          % Each column = number of trials in block; number of columns = number of blocks
-if const.makeVideo; const.numTrialsPerBlock = 1; end
-const.numTrials            = sum(const.numTrialsPerBlock);                  % total number of trials
-
-
-% Eyelink Setup:
-eyelink.mode               = 1;                                             % 1 = use eyelink; 0 = off
-eyelink.dummy              = 0;                                             % 1 = eyelink in dummy mode; 0 = eyelink dummy off
-eyelink.recalib            = true;                                          % true = recalibrate between blocks (recommanded); false = no calibration between blocks
-eyelink.dummyEye           = [0,0];                                         % dummy start pos
-% eyelink.edfFile            = cell(const.numTrials,1); 
-eyelink.edfFile            = cell(numel(const.numTrialsPerBlock),1);        % structure setup for edf files
-for ii = 1:numel(const.numTrialsPerBlock)
-    eyelink.edfFile{ii}     = sprintf('%.7d', ii);
-end     
-
 
 % Photodiode Setup
 photo.mode                 = 0;                                             % 1 = use Photodiode; 0 = off
@@ -82,6 +65,19 @@ dpi_init(dpi_set, photo)                                                    % ru
 
 % if use sound:
 % [mysound]                  = soundConfig(const);
+
+%% set up eyelink
+% Eyelink Setup:
+eyelink.mode               = 1;                                             % 1 = use eyelink; 0 = off
+eyelink.dummy              = 0;                                             % 1 = eyelink in dummy mode; 0 = eyelink dummy off
+eyelink.recalib            = true;                                          % true = recalibrate between blocks (recommanded); false = no calibration between blocks
+eyelink.dummyEye           = [0,0];                                         % dummy start pos
+% eyelink.edfFile            = cell(const.numTrials,1); 
+eyelink.edfFile            = cell(numel(const.numTrialsPerBlock),1);        % structure setup for edf files
+for ii = 1:numel(const.numTrialsPerBlock)
+    eyelink.edfFile{ii}     = sprintf('%.2d', ii);
+end     
+
 
 %% Generate Target Trajectory and Other Stimuli: now doing it trial by trial to save memory
 % [const]                    = generateTargetTrajectory(const,screen);        % Moving target trajectory

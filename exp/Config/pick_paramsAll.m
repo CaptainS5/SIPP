@@ -22,7 +22,7 @@ function randomCons = pick_paramsAll(conditions, blockTrialAll)
 % blocked conditions, but all conditions.trial will be the same within each
 % block. If both blockPartial and block exist, "block" should be randomized
 % within "blockPartial"; all blockPartial will have the same "block"
-% conditions in total.
+% conditions in total
 % created by Xiuyun Wu, 24/02/2020; edited 11/16/2020
 
 trialPerBlock = blockTrialAll(1);

@@ -46,8 +46,8 @@ end
 
 
 %% (1.3) Show General Experiment Instructions
-disp('EXP: Begin experiment: show instructions');
-PTBinstruction_page(1,screen)
+% disp('EXP: Begin experiment: show instructions');
+% PTBinstruction_page(1,screen)
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (2) SETUP & CALIBRATE DPI; ENTER BLOCK LOOP:
