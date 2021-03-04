@@ -1,0 +1,22 @@
+*.doc
+*.docx
+*.sav
+*.spv
+*.mat
+*.pdf
+*.xlsx
+*.png
+*.fig
+*.edf
+*.asv
+*.txt
+*.dat
+*.jpg
+*.avi
+*.asc
+*.pptx
+*.csv
+*.xlsx
+data/*
+results/*
+DDM toolbox/*
