@@ -1,4 +1,4 @@
-function bPressed = PTBcheck_anykey_press()
+function bPressed= PTBcheck_anykey_press()
     bPressed = 0;
 
     while KbCheck

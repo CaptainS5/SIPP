@@ -9,5 +9,5 @@ function PTBdraw_target(screen, pos, rgb, const) % target is in center coordinat
     pos_ = PTBcenter_to_screen(pos,screen);
 
 %     PTBdraw_circles(el, [pos_; pos_], [const.StimRadPX ; 2], [rgb; 2 2 2]);
-    PTBdraw_circles(screen, [pos_; pos_], [const.flashSizePX  ; 3], [rgb; rgb]);
+    PTBdraw_circles(screen, [pos_; pos_], [const.flashSizePX ; 2], [rgb; rgb]);
 end

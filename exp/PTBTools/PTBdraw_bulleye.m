@@ -8,26 +8,23 @@ function PTBdraw_bulleye(screen, center, radiusOUT, radiusIN, colorOUT, colorIN)
 %         color     - color of outer/inner bulleye circle - needs 2 colors
 
 %% OUTER OVAL
-radiusOUT_PX = radiusOUT * screen.x_ppd;
+radiusOUT_PX = round(tan(radiusOUT/180*pi) * screen.dist * screen.ppcX);
 left         = center(1) - radiusOUT_PX;
 right        = center(1) + radiusOUT_PX;
-top          = center(2) - (radiusOUT_PX*screen.pixelRatio);
-bottom       = center(2) + (radiusOUT_PX*screen.pixelRatio);
+top          = center(2) - (radiusOUT_PX*screen.pixelRatioWidthPerHeight);
+bottom       = center(2) + (radiusOUT_PX*screen.pixelRatioWidthPerHeight);
 position_out = [left top right bottom];        
 Screen('FillOval', screen.window, colorOUT, position_out);
 
 
 %% INNER OVAL
-radiusIN_PX  = radiusIN * screen.ppd;
+radiusIN_PX  = tan(radiusIN) * screen.dist * screen.ppcX;
 left         = center(1) - radiusIN_PX;
 right        = center(1) + radiusIN_PX;
-top          = center(2) - (radiusIN_PX*screen.pixelRatio);
-bottom       = center(2) + (radiusIN_PX*screen.pixelRatio);
+top          = center(2) - (radiusIN_PX*screen.pixelRatioWidthPerHeight);
+bottom       = center(2) + (radiusIN_PX*screen.pixelRatioWidthPerHeight);
 position_in  = [left top right bottom];        
 Screen('FillOval', screen.window, colorIN, position_in);
-
-
-
 
 end
 

@@ -21,9 +21,9 @@ if sbj.block == 1 && sbj.trial==1 % ~exist([sbj.sbjFolder ,'/trialData.mat'],'fi
     trialCondition = table;
     % (1) SET UP MEASURE VARIABLES                                              % These will be filled in during the experiment
 % now just write into trialData directly during the experiment
-%     trialCondition.tMainSync          = zeros(const.numTrials, 1);                   % Time (GetSecs) at trial start, also fixation on.
-%     trialCondition.tRDKon        = NaN(const.numTrials, 1);
-%     trialCondition.tRDKoff  = NaN(const.numTrials, 1);                     % actual measured time that the target appeared/disappeared
+    trialCondition.tMainSync          = zeros(const.numTrials, 1);                   % Time (GetSecs) at trial start, also fixation on.
+    trialCondition.tRDKon        = NaN(const.numTrials, 1);
+    trialCondition.tRDKoff  = NaN(const.numTrials, 1);                     % actual measured time that the target appeared/disappeared
 %     trialCondition.tResponse          = NaN(const.numTrials, 1);               % also the end of the trial
 %     %     trialData.t_start_VBL        = NaN(const.numTrials, 5);
 %     %     trialData.t_rdkOn_VBL         = NaN(const.numTrials, 5);

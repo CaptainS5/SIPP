@@ -18,7 +18,7 @@ if sbj.block == 1 && sbj.trial==1
     if const.stimType==1 % constant internal motion
         const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
     elseif const.stimType==2 % perturbation of internal motion
-        const.numTrialsPerBlock    = 38*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+        const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
     end
     if const.makeVideo; const.numTrialsPerBlock = 1; end
     const.numTrials            = sum(const.numTrialsPerBlock);                  % total number of trials
@@ -36,7 +36,7 @@ if sbj.block == 1 && sbj.trial==1
     [const.fixation.windowRadiusPxl, ] = dva2pxl(const.fixation.windowRadius, const.fixation.windowRadius, screen); % in pixel
     
     % RDK stimulus
-    const.rdk.duration = 0.8; % display duration of the whole RDK, s
+    const.rdk.duration = 1; % display duration of the whole RDK, s
     const.rdk.dotDensity = 1; % dot per dva^2
     const.rdk.lifeTime = const.rdk.duration;
     % how long before a dot disappears and reappears
@@ -50,14 +50,14 @@ if sbj.block == 1 && sbj.trial==1
     % so be careful with the relationship between lifeTime and labelUpdateTime
     % ========================================================================
     const.rdk.dotRadius = 0.05;
-    const.rdk.apertureRadius = 5;
+    const.rdk.apertureRadius = 3;
     const.rdk.dotTextureRadius = 5;
     const.rdk.apertureSpeed = 15; % dva per sec
-    const.rdk.internalSpeed = 15; % speed of each internal dot
+    const.rdk.internalSpeed = 10; % speed of each internal dot
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotTextureRadius^2);
     const.rdk.apertureDir = [180 0]; % left and right
-    const.rdk.internalDir = [45 -45]; 
+    const.rdk.internalDir = [45 -45]; % 45: above the aperture direction; -45: below the aperture direction
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
     const.rdk.coh = [.2 .6 1]; % for classical RDKs
     

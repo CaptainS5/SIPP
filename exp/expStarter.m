@@ -36,7 +36,7 @@ pathConfig;
 
 const.expName              = 'MicroPursuit'; 								% Experiment name
 const.stimType             = 1;                                             % 1: constant internal motion; 2: perturbation of internal motion
-const.startExp             = 1;                                             % 1 = experiment mode; 0 = debugging mode
+const.startExp             = 0;                                             % 1 = experiment mode; 0 = debugging mode
 const.expType              = 1;                                             % 1: experiment; --not implemented...-1: practice; 0: baseline
 const.checkEyeFix          = 1;                                             % 1 = checks gaze fixation (this needs to be 1 also when in dummy mode)
 % const.feedback             = 1;												% 1 = show task feedback (defined in runSingleTrial); 0 = off
@@ -54,29 +54,28 @@ dpi_set.recalib            = true;                                          % tr
 dpi_set.dummyEye           = [0,0];                                         % dummy start pos
 dpi_init(dpi_set, photo)                                                    % run DPI initialization 
 
+% Eyelink Setup:
+eyelink.mode               = 0;                                             % 1 = use eyelink; 0 = off
+eyelink.dummy              = 1;                                             % 1 = eyelink in dummy mode; 0 = eyelink dummy off
+eyelink.recalib            = true;                                          % true = recalibrate between blocks (recommanded); false = no calibration between blocks
+eyelink.dummyEye           = [0,0];                                         % dummy start pos
+% eyelink.edfFile            = cell(const.numTrials,1); 
+% eyelink.edfFile            = cell(numel(const.numTrialsPerBlock),1);        % structure setup for edf files
+% for ii = 1:numel(const.numTrialsPerBlock)
+%     eyelink.edfFile{ii}     = sprintf('%.2d', ii);
+% end   
+
 %% Do some configurations (keys, screen, constants, trialData, sbj):
 [sbj]                      = sbjConfig(const);
 [keys] 					   = keyConfig;                                     % unify and define some keys
 [screen]                   = screenConfig(const);                           % screen configurations (update if changes on setup or new setup used); opens PTB!
-[const]                    = constConfig(screen, const);                    % set some constants and variables used in experiment
+[const]                    = constConfig(screen, const, sbj);                    % set some constants and variables used in experiment
 [trialCondition, trialData]                = paramConfig(const,sbj);        % changed from trialData to trialCondition
 % now making the original copy of condition assignment as "trialCondition", 
 % which remain untouched during the exp, and then record everything in trialData
 
 % if use sound:
-% [mysound]                  = soundConfig(const);
-
-%% set up eyelink
-% Eyelink Setup:
-eyelink.mode               = 1;                                             % 1 = use eyelink; 0 = off
-eyelink.dummy              = 0;                                             % 1 = eyelink in dummy mode; 0 = eyelink dummy off
-eyelink.recalib            = true;                                          % true = recalibrate between blocks (recommanded); false = no calibration between blocks
-eyelink.dummyEye           = [0,0];                                         % dummy start pos
-% eyelink.edfFile            = cell(const.numTrials,1); 
-eyelink.edfFile            = cell(numel(const.numTrialsPerBlock),1);        % structure setup for edf files
-for ii = 1:numel(const.numTrialsPerBlock)
-    eyelink.edfFile{ii}     = sprintf('%.2d', ii);
-end     
+% [mysound]                  = soundConfig(const); 
 
 
 %% Generate Target Trajectory and Other Stimuli: now doing it trial by trial to save memory

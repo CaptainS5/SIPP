@@ -1,4 +1,4 @@
-function PTBinstruction_page(msg,screen)
+function keyPressed = PTBinstruction_page(msg,screen,const)
 % Function draws blank screen, presents instruciton message and waits for
 % keypress.
 % INPUT: screen-Structure (backgroundcolour & window) and a message
@@ -87,6 +87,7 @@ Screen('TextSize', screen.window, textSize);
 Screen('TextFont', screen.window, textFont);
 Screen('Preference', 'TextAntiAliasing',1);
 Screen('FillRect', screen.window, screen.background);
+PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.black);
 
 sizeT = size(text);
 sizeB = size(button);
@@ -109,7 +110,8 @@ end
 
     
 Screen('Flip',  screen.window, [], 1);
-PTBwait_anykey_press; 
+PTBwait_anykey_press;
 Screen('FillRect', screen.window, screen.background);
+PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.black);
 Screen('Flip',  screen.window, [], 1);
 end

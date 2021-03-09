@@ -117,7 +117,6 @@ screen.white               = WhiteIndex(screen.window);
 screen.black               = BlackIndex(screen.window);
 screen.gray                = round((screen.white+screen.black)./2);
 screen.orange              = [255,150,0];
-screen.targetColor         = [255 255 255];
 screen.calibBlack          = BlackIndex(screen.window);
 screen.calibWhite          = WhiteIndex(screen.window);
 screen.calibGray           = round((screen.calibWhite+screen.calibBlack)./2);
