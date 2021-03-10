@@ -36,11 +36,11 @@ if sbj.block == 1 && sbj.trial==1
     [const.fixation.windowRadiusPxl, ] = dva2pxl(const.fixation.windowRadius, const.fixation.windowRadius, screen); % in pixel
     
     % RDK stimulus
-    const.rdk.duration = 1; % display duration of the whole RDK, s
+    const.rdk.duration = 1.2; % display duration of the whole RDK, s
     const.rdk.dotDensity = 1; % dot per dva^2
     const.rdk.lifeTime = const.rdk.duration;
     % how long before a dot disappears and reappears
-    const.rdk.labelUpdateTime = 0.012; % change labels and assign new directions for all
+    const.rdk.labelUpdateTime = 0.050; % change labels and assign new directions for all
     % for Transparent motion, label update time >= the whole rdk duration;
     % for Brownian motion, label update time = one frame
     % for RDK with Gaussian distributed directions, label update time equals
@@ -52,14 +52,14 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.dotRadius = 0.05;
     const.rdk.apertureRadius = 3;
     const.rdk.dotTextureRadius = 5;
-    const.rdk.apertureSpeed = 15; % dva per sec
-    const.rdk.internalSpeed = 10; % speed of each internal dot
+    const.rdk.apertureSpeed = 10; % dva per sec
+    const.rdk.internalSpeed = 5; % speed of each internal dot
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotTextureRadius^2);
     const.rdk.apertureDir = [180 0]; % left and right
     const.rdk.internalDir = [45 -45]; % 45: above the aperture direction; -45: below the aperture direction
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
-    const.rdk.coh = [.2 .6 1]; % for classical RDKs
+    const.rdk.coh = [0 .5 1]; % for classical RDKs
     
     % warning beep for feedback on fixation maintainance
     const.beep.samplingRate = 44100;

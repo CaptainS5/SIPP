@@ -53,6 +53,16 @@ Screen('FillRect', screen.window, screen.background);                           
 switch control.mode
 %% (2.1) --------------------------------------------------------------
     case 1                                                                  % PHASE 1: Fixation
+        % calculate the step-ramp distance, then place fixation relatively
+        % closer to the screen center
+        stepTime = 0.15; % how many secs it takes for the aperture center to move from the step to the fixation
+        [stepDis, ] = dva2pxl(const.rdk.apertureSpeed*stepTime, const.rdk.apertureSpeed*stepTime, screen);
+        if control.rdkApertureDir==0 % moving rightward
+            fixationCenter = [rdkControl.apertureCenterPos{1}(1)+stepDis, rdkControl.apertureCenterPos{1}(2)];
+        else % moving leftward
+            fixationCenter = [rdkControl.apertureCenterPos{1}(1)-stepDis, rdkControl.apertureCenterPos{1}(2)];
+        end
+        
         % draw target
         if ~eyelink.dummy
             if Eyelink( 'NewFloatSampleAvailable') > 0
@@ -64,20 +74,20 @@ switch control.mode
                 %% do we have valid data and is the pupil visible?
                 if xeye~=eyelink.el.MISSING_DATA && yeye~=eyelink.el.MISSING_DATA && evt.pa(eyelink.eye_used+1)>0
                     % if data is valid, compare gaze position with the limits of the tolerance window
-                    diffFix = sqrt((xeye-screen.center(1))^2+((yeye-screen.center(2))/screen.pixelRatioWidthPerHeight)^2);
+                    diffFix = sqrt((xeye-fixationCenter(1))^2+((yeye-fixationCenter(2))/screen.pixelRatioWidthPerHeight)^2);
                     if diffFix <= const.fixation.windowRadiusPxl % fixation ok
-                        PTBdraw_circles(screen, screen.center, const.fixation.dotRadiusPxl, const.fixation.colour);
+                        PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
                         control.frameFix = control.frameFix+1;
                     elseif diffFix > const.fixation.windowRadiusPxl % fixation out of range, show warning
 %                         Snd('Play', const.beep.sound, const.beep.samplingRate, 16);
                         % Plays the sound in case of wrong fixation
                         % show white fixation
-                        PTBdraw_circles(screen, screen.center, const.fixation.dotRadiusPxl, screen.warningColor);
+                        PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
                     end
                 else
                     % if data is invalid (e.g. during a blink), show white
                     % fixation
-                    PTBdraw_circles(screen, screen.center, const.fixation.dotRadiusPxl, screen.warningColor);
+                    PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
                     disp('Eyelink data invalid')
                 end
             else
@@ -90,12 +100,12 @@ switch control.mode
                 control.repeat = 1;
             end
         else
-            PTBdraw_circles(screen, screen.center, const.fixation.dotRadiusPxl, const.fixation.colour);
+            PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
             control.frameFix = control.frameFix+1;
         end
         
         % draw square for photodiode:
-        if photo.mode                                                       % Photodiode Event 1: Fixation target 1 on
+         if photo.mode                                                       % Photodiode Event 1: Fixation target 1 on
             PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.white);
         end
         

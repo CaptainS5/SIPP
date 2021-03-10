@@ -1,4 +1,4 @@
-function eyelink_recalibration(control,const,el,forceCalib)
+function eyelink_recalibration(control,const,el)
 %Recalibration of the Eyelink between Blocks:
 %   PK 27/03/2019
 
@@ -12,7 +12,7 @@ for i = 1:numel(const.numTrialsPerBlock)                                  % star
     end
 end
 
-if forceCalib
+if control.forceRecalibrationEL
     recalibrate = 1;
 end
 

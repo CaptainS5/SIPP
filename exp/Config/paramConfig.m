@@ -45,7 +45,7 @@ if sbj.block == 1 && sbj.trial==1 % ~exist([sbj.sbjFolder ,'/trialData.mat'],'fi
     % if both blockPartial and block exist, "block" should be randomized
     % within "blockPartial"; all blockPartial will have the same "block"
     % conditions in total
-    randVar.continuous.fixationDuration = [0.5 0.8]; % Intial fixation time (random between 300 and 700 ms)
+    randVar.continuous.fixationDuration = [1 1.5]; % Intial fixation time (random between 300 and 700 ms)
 %     randVar.trial.dotDirSD = const.rdk.dotDirSD;
     randVar.trial.rdkCoh = const.rdk.coh;
     randVar.trial.rdkApertureDir = const.rdk.apertureDir; % upwards is minus, and downwards is plus

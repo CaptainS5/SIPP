@@ -36,7 +36,7 @@ pathConfig;
 
 const.expName              = 'MicroPursuit'; 								% Experiment name
 const.stimType             = 1;                                             % 1: constant internal motion; 2: perturbation of internal motion
-const.startExp             = 0;                                             % 1 = experiment mode; 0 = debugging mode
+const.startExp             = 1;                                             % 1 = experiment mode; 0 = debugging mode
 const.expType              = 1;                                             % 1: experiment; --not implemented...-1: practice; 0: baseline
 const.checkEyeFix          = 1;                                             % 1 = checks gaze fixation (this needs to be 1 also when in dummy mode)
 % const.feedback             = 1;												% 1 = show task feedback (defined in runSingleTrial); 0 = off
@@ -55,8 +55,8 @@ dpi_set.dummyEye           = [0,0];                                         % du
 dpi_init(dpi_set, photo)                                                    % run DPI initialization 
 
 % Eyelink Setup:
-eyelink.mode               = 0;                                             % 1 = use eyelink; 0 = off
-eyelink.dummy              = 1;                                             % 1 = eyelink in dummy mode; 0 = eyelink dummy off
+eyelink.mode               = 1;                                             % 1 = use eyelink; 0 = off
+eyelink.dummy              = 0;                                             % 1 = eyelink in dummy mode; 0 = eyelink dummy off
 eyelink.recalib            = true;                                          % true = recalibrate between blocks (recommanded); false = no calibration between blocks
 eyelink.dummyEye           = [0,0];                                         % dummy start pos
 % eyelink.edfFile            = cell(const.numTrials,1); 

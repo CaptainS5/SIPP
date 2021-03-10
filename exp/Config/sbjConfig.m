@@ -4,6 +4,7 @@ function [sbj] = sbjConfig(const)
 % modified by XiuyunWu 24/02/2020
 
 if const.startExp ~=0
+    % for the actual experiment
    sbj.name   = input(sprintf('\n\tID: '),'s');
    sbj.block  = input(sprintf('\n\tFrom Block: '));
    sbj.trial  = input(sprintf('\n\tFrom Trial (within the current block): '));

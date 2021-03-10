@@ -116,6 +116,9 @@ try
         if block==sbj.block % assign if just started running; newBlock will be renewed whenever finished a block
             if sbj.trial==1 % if starting a new block, initialize trialData for the current block
                 newBlock = 1;
+                % delete potential earlier trials in the block, if
+                % necessary...
+                trialData(trialData.blockN==block, :) = [];
             else
                 newBlock = 0;
             end
@@ -157,7 +160,7 @@ try
         PTBwrite_msg(screen, 'press [space] to continue', 'center', -15, screen.black)
         %         Screen('Flip', screen.window,screen.refreshRate);
         Screen('Flip', screen.window, screen.refreshRate, 0, 0, 2);
-        keyPressed = 0;
+          keyPressed = 0;
         while keyPressed==0
             keyPressed = PTBcheck_key_press(keys.space);
         end
@@ -207,7 +210,7 @@ try
             % generate aperture for rdk
             const.rdk.aperture = PTBmakeAperture(const, screen);
             
-            fprintf('EXP: begin trial %d\n', currentTrial);
+            fprintf('EXP: begin Block %d Trial %d \n', block, trialData.trialCounter(currentTrial, 1));
             
             
             %% (3.3) Start DPI recording for current trial:
@@ -258,12 +261,12 @@ try
                 end
                 
                 %% (4.3) Eyelink Data Acquisition
-                if eyelink.mode == 1
-                    [eyelink] = eyelink_dataAcquisition(eyelink.el,eyelink,trialData,currentTrial);
-                    %                     control.data_time = eyelink.Data.time;
-                    %                 else                                                                % for dummy mode
-                    %                     control.data_time = GetSecs - trialData.tMainSync(currentTrial);
-                end
+%                 if eyelink.mode == 1
+%                     [eyelink] = eyelink_dataAcquisition(eyelink.el,eyelink,trialData,currentTrial);
+%                     %                     control.data_time = eyelink.Data.time;
+%                     %                 else                                                                % for dummy mode
+%                     %                     control.data_time = GetSecs - trialData.tMainSync(currentTrial);
+%                 end
                 
                 %% Update trial timer
                 if iterations>1
@@ -363,7 +366,7 @@ try
                         dpi_saveData(filename,blockFolder)                      % save eye trial data
                     end
                     trialData.iterations(currentTrial, 1) = iterations;
-                    fprintf('EXP: Trial %d finished \n', currentTrial);
+                    fprintf('EXP: Block %d Trial %d finished \n', block, trialData.trialCounter(currentTrial, 1));
                     break; % BREAK the while loop, if trial was finished!
                 end
                 
@@ -394,7 +397,7 @@ try
             %% (5.1) if recalibration is forced (repeats trial) or trial finished properly:
             if control.forceRecalibEL                                               % check if Eyelink calibration was forced
                 Eyelink('Message', 'FORCE_RECALIB_EL');                             % send Eyelink Message
-                eyelink_recalibration(control,const,eyelink.el,forceRecalibrationEL);
+                eyelink_recalibration(control,const,eyelink.el);
             end
             
             %% (5.2) Save and move target file/ save trialData
@@ -538,7 +541,7 @@ catch myerr                                                                 % th
         currentTime = clock;
         currentDate = sprintf('%d-%d-%d_%d%d', currentTime(1:5));
         newName = [sbj.sbjFolder '\' eyelink.edfName(1:end-4) '_' currentDate '.edf'];
-        movefile(['rename "' oldName '" "' newName '"'])
+        copyfile(oldName, newName)
     end
     
     save([sbj.sbjFolder, '/trialData.mat'], 'trialData');                    % save data in subjectFolder
@@ -554,7 +557,7 @@ catch myerr                                                                 % th
     % above.  Importantly, it closes the onscreen window if its open.
     fclose('all');                                                          % close any open files
     delete(DPI);
-    cleanup();
+    cleanup(eyelink);
     commandwindow;
     myerr;
     myerr.message
