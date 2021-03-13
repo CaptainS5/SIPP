@@ -8,7 +8,7 @@ keys.delete         = KbName('Backspace');
 keys.up         = KbName('UpArrow');
 keys.down         = KbName('DownArrow');
 keys.continue         = KbName('X');
-keys.recalibration         = KbName('C');
+keys.recalibration         = KbName('R');
 
 end
 

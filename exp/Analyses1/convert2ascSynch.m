@@ -9,7 +9,7 @@ function convert2ascSynch(Experiment)
 % startFolder = [pwd '\Analyses1\'];                                        % where is the edf2asc program?
 startFolder = [pwd '/Analyses1/'];
 % dataPath = [pwd '\data\' Experiment.sbj.sbjFolder(6:end) '\'];
-dataPath = [pwd '/data/' Experiment.sbj.sbjFolder(6:end) '/'];
+dataPath = [pwd '../data/' Experiment.sbj.sbjFolder(6:end) '/'];
  
 % run edf2asc.exe over the current subject:
 % [res, stat] = system([startFolder 'edf2asc -y ' dataPath '\*.edf']);

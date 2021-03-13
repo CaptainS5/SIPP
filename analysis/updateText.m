@@ -37,48 +37,48 @@ trialNoText = uicontrol(fig,'Style','text',...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
 
-if trial.log.eyeCondition==0
-    eyeConditionName = 'Fixation';
+% if trial.log.eyeCondition==0
+%     eyeConditionName = 'Fixation';
+% else
+%     eyeConditionName = 'Pursuit';
+% end
+% if trial.log.instruction==0
+%     instructionName = 'Fast';
+% else
+%     instructionName = 'Accurate';
+% end
+% textblock = textblock+1;
+% trialNoText = uicontrol(fig,'Style','text',...
+%     'String', [eyeConditionName, ', ', instructionName],...
+%     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
+%     'HorizontalAlignment','left');
+
+if trial.log.rdkApertureDir==0
+    rdkDir = 'right';
 else
-    eyeConditionName = 'Pursuit';
+    rdkDir = 'left';
 end
-if trial.log.instruction==0
-    instructionName = 'Fast';
+if trial.log.rdkInternalDir>0
+    sdText = 'up';
 else
-    instructionName = 'Accurate';
+    sdText = 'down';
 end
 textblock = textblock+1;
 trialNoText = uicontrol(fig,'Style','text',...
-    'String', [eyeConditionName, ', ', instructionName],...
+    'String', ['RDK: ' rdkDir ',', num2str(trial.log.rdkCoh), ',', sdText],...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
 
-if trial.log.rdkDirMean>0
-    rdkDir = 'up';
-else
-    rdkDir = 'down';
-end
-if trial.log.rdkDirSD<50
-    sdText = 'small SD';
-else
-    sdText = 'large SD';
-end
-textblock = textblock+1;
-trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['RDK: ' rdkDir '; ', sdText],...
-    'Position',[xPosition yPosition-textblock*verticalDistance width height],...
-    'HorizontalAlignment','left');
-
-if trial.log.choice>0
-    choice = 'up';
-else
-    choice = 'down';
-end
-textblock = textblock+1;
-trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['Choice: ', choice],...
-    'Position',[xPosition yPosition-textblock*verticalDistance width height],...
-    'HorizontalAlignment','left');
+% if trial.log.choice>0
+%     choice = 'up';
+% else
+%     choice = 'down';
+% end
+% textblock = textblock+1;
+% trialNoText = uicontrol(fig,'Style','text',...
+%     'String', ['Choice: ', choice],...
+%     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
+%     'HorizontalAlignment','left');
 
 end
 

@@ -5,7 +5,7 @@
 % 2012-2018     JF added stuff to and edited analyzePursuit.m
 % 14-07-2018    JF commented to make the script more accecable for future
 %               VPOM students; for questions email jolande.fooken@rwth-aachen.de
-% 13-Jan-2021   XW modified based on using findPursuitNew.m; xiuyunwu5@gmail.com
+% 11-Mar-2021   XW modified based on using findPursuitNew.m; xiuyunwu5@gmail.com
 %
 % input: trial --> structure containing relevant current trial information
 %        pursuit --> structure containing pursuit onset
@@ -114,22 +114,11 @@ end
 %% now analyze closed loop
 % if there is no pursuit onset, use stimulus onset as onset
 closedLoopFrames = [nanmax([trial.log.targetOnset + openLoopDuration, pursuit.openLoopEnd]); pursuitOff];
-decisionFrames = [pursuitOff-150; pursuitOff-50];
-if pursuitOff-100 < closedLoopFrames(1)
-    decisionFrames = closedLoopFrames;
-end
 
 pursuit.closedLoopDuration = closedLoopFrames(2) - closedLoopFrames(1);
-pursuit.decisionWindowDuration = decisionFrames(2) - decisionFrames(1);
 
 if pursuit.closedLoopDuration < 0 % closed loop phase too short
     pursuit.gain = NaN;
-    pursuit.gainDecision = NaN;
-    pursuit.dirGain = NaN;
-    pursuit.dirGainDecision = NaN;
-    pursuit.dirError = NaN;
-    pursuit.dirErrorDecision = NaN;
-%     pursuit.velocityError = NaN;
 else
     % calculate gain first,  the ratio of magnitude only
     speedXY_noSac = sqrt(trial.DX_noSac.^2 + trial.DY_noSac.^2);
@@ -138,34 +127,6 @@ else
     pursuitGain = (speedXY_noSac)./absoluteTargetVel; 
     zScore = zscore(pursuitGain(~isnan(pursuitGain)));
     pursuitGain((zScore > 3 | zScore < -3)) = NaN;
-    
-    pursuit.targetVelCLP = nanmean(absoluteTargetVel(closedLoopFrames));
-    pursuit.clpVel2D = nanmean(speedXY_noSac(closedLoopFrames));
-    pursuit.decisionVel2D = nanmean(speedXY_noSac(decisionFrames));
-    pursuit.gain = nanmean(pursuitGain(closedLoopFrames));
-    pursuit.gain(pursuit.gain>2.5) = NaN;
-    pursuit.gainDecision = nanmean(pursuitGain(decisionFrames));
-    pursuit.gainDecision(pursuit.gainDecision>2.5) = NaN;
-    
-    % consider the direction as well, the ratio of (magnitude of projection on the target velocity direction)/(magnitude of target velocity) 
-    eyeDot = [trial.DX_noSac'; trial.DY_noSac'];
-    targetDot = [trial.target.velocityX'; trial.target.velocityY'];
-    dotProduct = dot(eyeDot, targetDot)';
-    dirGainAll = dotProduct./(trial.target.velocityX.^2 + trial.target.velocityY.^2);
-    pursuit.dirGain = nanmean(dirGainAll(closedLoopFrames));
-    pursuit.dirGainDecision = nanmean(dirGainAll(decisionFrames));
-    
-    % the mean direction error of eye velocity compared to target velocity
-    targetDir = (atan2(trial.DY_noSac, trial.DX_noSac))/pi*180;
-    diffDir = (atan2(trial.DY_noSac, trial.DX_noSac)-atan2(trial.target.velocityY, trial.target.velocityX))/pi*180;
-    pursuit.targetMeanDirCLP = nanmean(targetDir(closedLoopFrames));
-    pursuit.dirError = nanmean(diffDir(closedLoopFrames)); % in degs, how ccw the pursuit velocity rotated from the target velocity
-    pursuit.dirErrorDecision = nanmean(diffDir(decisionFrames));
-    
-    % % calculate position error--not applicable to RDKs
-    % horizontalError = trial.X_noSac(closedLoopFrames)-trial.target.X(closedLoopFrames);
-    % verticalError = trial.target.Y(closedLoopFrames)-trial.Y_noSac(closedLoopFrames);
-    % pursuit.positionError = nanmean(sqrt(horizontalError.^2+ verticalError.^2));
     
     %     % calculate velocity error
     %     pursuit.velocityError = nanmean(sqrt((trial.target.velocityX(closedLoopFrames) - trial.DX_noSac(closedLoopFrames)).^2 + ...

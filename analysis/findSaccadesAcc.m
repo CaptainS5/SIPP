@@ -94,15 +94,15 @@ for idx = 1:length(binEdges)-1
     peakIdx(idx, 1) = find(abs(acceleration(startI:endI))==abs(peakAccs(idx, 1)))+startI-1;
 end
 
-if log.eyeCondition==1 % pursuit trial
+% if log.eyeCondition==1 % pursuit trial
     mBinIdx = find(binEdges<log.targetOnset+50); % until 50ms after target onset
     mBinIdx(end) = [];
     % the idx of the peaks before target onset
     largePeaks = abs(peakAccs)>sThreshold;
     largePeaks(mBinIdx) = abs(peakAccs(mBinIdx))>=mThreshold;
-else % fixation trial, use micro-saccade threshold through out
-    largePeaks = abs(peakAccs)>=mThreshold;
-end
+% else % fixation trial, use micro-saccade threshold through out
+%     largePeaks = abs(peakAccs)>=mThreshold;
+% end
 successor = [0; largePeaks(1:end-1)];
 relevantPeaks = (largePeaks+successor==2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

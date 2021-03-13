@@ -64,7 +64,7 @@ switch control.mode
         end
         
         % draw target
-        if ~eyelink.dummy
+        if eyelink.mode && ~eyelink.dummy
             if Eyelink( 'NewFloatSampleAvailable') > 0
                 % get the sample in the form of an event structure
                 evt = Eyelink( 'NewestFloatSample');
@@ -125,7 +125,13 @@ switch control.mode
     case 2                                                                  % PHASE 2: RDK display
         control.frameRDK = control.frameRDK + 1;   % start counting frames for RDK display
         % draw target:
-        PTBdraw_target_RDK(screen, const, rdkControl.dotPos{control.frameRDK}, rdkControl.apertureCenterPos{control.frameRDK}, rdkControl.apertureWindow{control.frameRDK});
+        if const.apertureType==1 % aperture translates across the dot field
+            PTBdraw_target_RDK(screen, const, rdkControl.dotPos{control.frameRDK}, rdkControl.apertureTexture{control.frameRDK}, ...
+                rdkControl.textureCenterPos, rdkControl.textureWindow);
+        else % dots move together with the aperture
+            PTBdraw_target_RDK(screen, const, rdkControl.dotPos{control.frameRDK}, rdkControl.apertureTexture, ...
+                rdkControl.textureCenterPos{control.frameRDK}, rdkControl.textureWindow{control.frameRDK});
+        end
         
         % draw square for photodiode:
         if photo.mode                                                       % Photodiode Event 2: Fixation target 2 on

@@ -12,13 +12,13 @@ for i = 1:numel(const.numTrialsPerBlock)                                  % star
     end
 end
 
-if control.forceRecalibrationEL
+if control.forceRecalibEL
     recalibrate = 1;
 end
 
 
 if recalibrate
-    disp('EYECATCH: Recalibrate / Validate the eye tracker');
+    disp('EYELINK: Recalibrate / Validate the eye tracker');
     EyelinkDoTrackerSetup(el);
 end
 

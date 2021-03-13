@@ -27,23 +27,38 @@ rdkApertureDir = control.rdkApertureDir;
 if rdkApertureDir==0 % moving rightward
     rdkInternalDir = control.rdkApertureDir-control.rdkInternalDir; % flip since for PTB it is up-negative, down-positive
     rdkControl.apertureCenterPos{1} = [screen.x_mid-apertureStartDis screen.y_mid]; % the initial starting position, depends on moving direction and speed
-    % dots will be plotted relative to the center position of the aperture
 else
     rdkInternalDir = control.rdkApertureDir+control.rdkInternalDir; 
     rdkControl.apertureCenterPos{1} = [screen.x_mid+apertureStartDis screen.y_mid];
     moveDistanceAperture = -moveDistanceAperture; % adding the negative sign if moving leftward
 end
-[apertureRadiusX, apertureRadiusY] = dva2pxl(const.rdk.apertureRadius, const.rdk.apertureRadius, screen);
-rdkControl.apertureWindow{1} = [rdkControl.apertureCenterPos{1}(1)-apertureRadiusX, ...
-    rdkControl.apertureCenterPos{1}(2)-apertureRadiusY, rdkControl.apertureCenterPos{1}(1)+apertureRadiusX, ...
-    rdkControl.apertureCenterPos{1}(2)+apertureRadiusY]; % the window to draw aperture texture in
 
+% Define the texture center and texture window for both the whole aperture texture and RDK dot field 
+% They should always overlap, regardless whether the aperture is the same
+% size of the whole texture (dots move together with the aperture) or the
+% aperture is a smaller "hole" translating across the dot field.
+% Dots will be plotted relative to the center position of the whole  aperture texture, 
+% which may not be the aperture center if the aperture is translating across the dot field
+[dotFieldRadiusX, dotFieldRadiusY] = dva2pxl(const.rdk.dotFieldRadius, const.rdk.dotFieldRadius, screen);
+if const.apertureType==1 % aperture translates across the dot field
+    rdkControl.textureCenterPos = screen.center;
+    rdkControl.textureWindow = [rdkControl.textureCenterPos(1)-dotFieldRadiusX, ...
+        rdkControl.textureCenterPos(2)-dotFieldRadiusY, rdkControl.textureCenterPos(1)+dotFieldRadiusX, ...
+        rdkControl.textureCenterPos(2)+dotFieldRadiusY]; % the window to draw aperture texture in
+else % dots move together with the aperture
+    rdkControl.textureCenterPos{1} = rdkControl.apertureCenterPos{1};
+    rdkControl.textureWindow{1} = [rdkControl.textureCenterPos{1}(1)-dotFieldRadiusX, ...
+        rdkControl.textureCenterPos{1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{1}(1)+dotFieldRadiusX, ...
+        rdkControl.textureCenterPos{1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
+end
+
+% initialize timing parameters
 rdkFrames = ceil(sec2frm(const.rdk.duration, screen));
 rdkLifeTime = round(sec2frm(const.rdk.lifeTime, screen));
 
+% initialize RDK dot parameters
 [dots.radiusX, ] = dva2pxl(const.rdk.dotRadius, const.rdk.dotRadius, screen);
 dots.diameterX = dots.radiusX*2;
-[apertureRadiusX, apertureRadiusY] = dva2pxl(const.rdk.apertureRadius, const.rdk.apertureRadius, screen);
 % since in dva2pxl we already equate cm and pixels, later they are just used interchageablly, conceptually mixed...
 
 % should already be shuffled at the begining of each experiment, now record
@@ -53,7 +68,7 @@ seed = rng;
 % Postion dots in a circular aperture using distanceToCenter and
 % positionAxis (calculated from theta)
 % 1. The initial position (center of the dots) are determined by distance to center and theta, the angle of the distannce vector
-dots.distanceToCenterX{1} = apertureRadiusX * sqrt((rand(const.rdk.dotNumber, 1))); % distance of dots from center of the aperture
+dots.distanceToCenterX{1} = dotFieldRadiusX * sqrt((rand(const.rdk.dotNumber, 1))); % distance of dots from center of the aperture
 % just use the aperture radius to make sure dots are within the aperture...
 % not sure how to use drawdots with transparent aperture; need to create texture for this
 theta = 2 * pi * rand(const.rdk.dotNumber,1); % values between 0 and 2pi (2pi ~ 6.28)
@@ -86,12 +101,16 @@ dots.movement{1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanc
 
 % generate the dot matrices of the RDK for the whole trial
 for frameN = 1:rdkFrames-1
-    % generate the moving window to draw aperture in and update aperture
-    % center location
+    % update the center position of the translating aperture
     rdkControl.apertureCenterPos{frameN+1} = [rdkControl.apertureCenterPos{frameN}(1)+moveDistanceAperture, rdkControl.apertureCenterPos{frameN}(2)];
-    rdkControl.apertureWindow{frameN+1} = [rdkControl.apertureCenterPos{frameN+1}(1)-apertureRadiusX, ...
-    rdkControl.apertureCenterPos{frameN+1}(2)-apertureRadiusY, rdkControl.apertureCenterPos{frameN+1}(1)+apertureRadiusX, ...
-    rdkControl.apertureCenterPos{frameN+1}(2)+apertureRadiusY];
+    % if needed (dots translate together with the aperture), update the
+    % center position and window of the texture as well
+    if const.apertureType==0
+        rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
+        rdkControl.textureWindow{frameN+1} = [rdkControl.textureCenterPos{frameN+1}(1)-dotFieldRadiusX, ...
+            rdkControl.textureCenterPos{frameN+1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{frameN+1}(1)+dotFieldRadiusX, ...
+            rdkControl.textureCenterPos{frameN+1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
+    end
 
     % update dot position
     rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN} + dots.movement{frameN}; % without aperture movement
@@ -124,7 +143,7 @@ for frameN = 1:rdkFrames-1
     expiredDots = find(dots.showTime{frameN+1}' <= 0);
     if expiredDots
         dotsN = length(expiredDots);
-        dis2CenterX = apertureRadiusX * sqrt((rand(dotsN,1)));
+        dis2CenterX = dotFieldRadiusX * sqrt((rand(dotsN,1)));
         theta = 2 * pi * rand(dotsN,1);
         % generate new positions and update lifetime
         rdkControl.dotDir(frameN+1, expiredDots) = -theta; % in radians, for this up is positive and down is negative
@@ -134,7 +153,7 @@ for frameN = 1:rdkFrames-1
     % 2. Relocate dots out of the aperture
     dotDist = rdkControl.dotPos{frameN+1}(:, 1).^2 + ...
        ((rdkControl.dotPos{frameN+1}(:, 2)/screen.pixelRatioWidthPerHeight)).^2;
-    outDots = find(dotDist>apertureRadiusX^2); % all dots out of the aperture
+    outDots = find(dotDist>dotFieldRadiusX^2); % all dots out of the aperture
     % move dots in the aperture from the opposite edge, continue the assigned motion
     rdkControl.dotPos{frameN+1}(outDots, :) = -rdkControl.dotPos{frameN+1}(outDots, :)+dots.movement{frameN}(outDots, :);
 end

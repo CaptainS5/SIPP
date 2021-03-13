@@ -34,16 +34,16 @@ trial.log.subject = currentSubject;
 trial.log.trialNumber = currentTrial;
 trialIdxInData = eventLog.trialIdxInData(currentTrial, 1);
 trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
-trial.log.rdkDirMean = -Experiment.trialData.dotDirMean(trialIdxInData, 1); % positive is up, negative is down
-trial.log.rdkDirSD = Experiment.trialData.dotDirSD(trialIdxInData, 1); % direction std
-trial.log.choice = -Experiment.trialData.choice(trialIdxInData, 1); % -1 = down, 1 = up
-trial.log.eyeCondition = Experiment.trialData.eyeCondition(trialIdxInData, 1);
-trial.log.instruction = Experiment.trialData.instruction(trialIdxInData, 1);
+trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % positive is up, negative is down
+trial.log.rdkInternalDir = Experiment.trialData.rdkInternalDir(trialIdxInData, 1); % direction std
+trial.log.rdkCoh = Experiment.trialData.rdkCoh(trialIdxInData, 1);
 trial.log.eyeSampleRate = eyeData.sampleRate;
+trial.target.velocityX = Experiment.const.rdk.apertureSpeed;
+trial.target.velocityY = 0;
 
 % frame indices of all events; after comparing eventLog with eyeData.frameIdx
 trial.log.trialStart = 1; % the first frame, fixation onset, decided in readEyeData
 trial.log.targetOnset = find(eyeData.timeStamp==eventLog.rdkOn(currentTrial, 1)); % rdk onset
 trial.log.targetOffset = find(eyeData.timeStamp==eventLog.rdkOff(currentTrial, 1)); % rdk offset
-trial.log.trialEnd = find(eyeData.timeStamp==eventLog.respond(currentTrial, 1)); % response given
+trial.log.trialEnd = find(eyeData.timeStamp==eventLog.trialEnd(currentTrial, 1)); % response given
 end

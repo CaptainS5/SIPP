@@ -80,6 +80,8 @@ try
             end
             
             eyelink.el=EyelinkInitDefaults(screen.window);
+            eyelink.el.backgroundcolour = screen.background;
+            EyelinkUpdateDefaults(eyelink.el);
             
             % check which eye is recorded
             eyelink.eye_used = Eyelink('EyeAvailable'); % get eye that's tracked
@@ -118,7 +120,9 @@ try
                 newBlock = 1;
                 % delete potential earlier trials in the block, if
                 % necessary...
-                trialData(trialData.blockN==block, :) = [];
+                if size(trialData, 1)>0
+                    trialData(trialData.blockN==block, :) = [];
+                end
             else
                 newBlock = 0;
             end
@@ -208,7 +212,13 @@ try
             %         control.targetFID       = fopen(control.targetFile, 'w');
             [rdkControl seed] = generateTrialRDKpositions(const, screen, control); % generate the position of dots in each frame in the whole trial
             % generate aperture for rdk
-            const.rdk.aperture = PTBmakeAperture(const, screen);
+            if const.apertureType==1 % aperture translates across the dot field
+                for frameN = 1:size(rdkControl.apertureCenterPos, 2)
+                    rdkControl.apertureTexture{frameN} = PTBmakeAperture(const, screen, rdkControl.apertureCenterPos{frameN});
+                end
+            else % dots move together with the aperture
+                rdkControl.apertureTexture = PTBmakeAperture(const, screen, 0);
+            end
             
             fprintf('EXP: begin Block %d Trial %d \n', block, trialData.trialCounter(currentTrial, 1));
             
@@ -225,6 +235,7 @@ try
                 Eyelink('Command', 'set_idle_mode'); %it puts the tracker into offline mode
                 WaitSecs(0.05); % it waits for 50ms before calling the startRecording function
                 Eyelink('StartRecording');
+                Eyelink('Message', 'SYNCTIME');
             end
             
             %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -371,11 +382,13 @@ try
                 end
                 
                 % check key press
-                [bPressed keyPressed] = PTBcheck_key_press(keys.escape);
+                [bPressed keyPressed] = PTBcheck_key_press([keys.escape, keys.recalibration]);
                 if keyPressed==keys.escape
                     fprintf('EXP: Experiment aborted by pressing esc key \n');
                     control.abort = 1;
                     break;                                                      % BREAK the while loop, if trial was aborted by ESC press
+                elseif keyPressed==keys.recalibration
+                    control.forceRecalibEL = 1;
                 end
                 
                 % check forced Recalibration:
@@ -392,13 +405,19 @@ try
             %     2) Trial Abort, 3) create video, 4) update trial counter,
             %     5) run post calibration
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            
+            if eyelink.mode
+                Eyelink('Message', 'TRIALEND');
+                Eyelink('Command','clear_screen 0'); % clears the box from the Eyelink-operator screen
+                Eyelink('Command', 'set_idle_mode');
+                WaitSecs(0.05);
+                Eyelink('StopRecording');
+            end
             
             %% (5.1) if recalibration is forced (repeats trial) or trial finished properly:
             if control.forceRecalibEL                                               % check if Eyelink calibration was forced
                 Eyelink('Message', 'FORCE_RECALIB_EL');                             % send Eyelink Message
                 eyelink_recalibration(control,const,eyelink.el);
-            end
+            end         
             
             %% (5.2) Save and move target file/ save trialData
             % close TARGET file and save/move file

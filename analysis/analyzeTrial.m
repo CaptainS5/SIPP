@@ -28,7 +28,7 @@ else
     
     %% extract all relevant experimental data and store it in trial variable
     trial = readoutTrial(eyeData, currentSubject, analysisPath, Experiment, currentTrial, eventLog);
-    trial.target = readoutTarget(eyeData, Experiment.const.rdk.speed, currentSubjectPath, currentTrial, eventLog);%, rdkFrameLog);
+%     trial.target = readoutTarget(eyeData, Experiment.const.rdk.apertureSpeed, currentSubjectPath, currentTrial, eventLog, rdkFrameLog);
     trial.stim_onset = trial.log.targetOnset;
     trial.stim_offset = trial.log.targetOffset;
     trial.length = trial.log.trialEnd;
@@ -50,7 +50,7 @@ else
         trial = removeSaccades(trial, saccades);
         clear saccades;
         
-        if trial.log.eyeCondition==1 % pursuit trials
+%         if trial.log.eyeCondition==1 % pursuit trials
             %% find and analyze pursuit
             pursuit = findPursuitNew(trial);
             % analyze pursuit
@@ -58,7 +58,7 @@ else
             
             %% analyze saccades
             %     [trial] = analyzeSaccades(trial);
-        else
+%         else
             %% OPTIONAL: find micro saccades
             % % remove saccades
             % trial = removeSaccades(trial);
@@ -67,7 +67,7 @@ else
             % [saccades.Y.onsets, saccades.Y.offsets] = findSaccades(onset, offset, trial.DY_noSac, trial.DDY_noSac, m_threshold, 0);
             % % analyze micro-saccades
             % [trial] = analyzeMicroSaccades(trial, saccades);
-        end
+%         end
     end
 end
 

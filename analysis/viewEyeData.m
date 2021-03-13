@@ -15,7 +15,7 @@
 clear all; %clc
 
 %% Define these parameters
-currentTrial = 1; % chose trial you want to look at here; default = 1;
+currentTrial = 22; % chose trial you want to look at here; default = 1;
 % pk0, ib2; yz0, dc1, xw0 
 saccadeThreshold = 300; % acceleration
 microSaccadeThreshold = 200;
@@ -46,8 +46,7 @@ load info_Experiment % load mat file containing experimental info
 % from Experiment.trialData
 
 load eventLog % variable matrix has all the event message frame indice
-% load rdkFrameLog
-% for later use in locating eye data frames
+load rdkFrameLog
 cd(analysisPath);
 
 % get sub ID

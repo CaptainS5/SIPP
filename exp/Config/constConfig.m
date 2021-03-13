@@ -15,9 +15,9 @@ function [const] = constConfig(screen, const, sbj)
 %%
 if sbj.block == 1 && sbj.trial==1
     % Some dsign-related things (These will be used in paramConfig):
-    if const.stimType==1 % constant internal motion
+    if const.internalOnsetType==1 % constant internal motion
         const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
-    elseif const.stimType==2 % perturbation of internal motion
+    elseif const.internalOnsetType==2 % perturbation of internal motion
         const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
     end
     if const.makeVideo; const.numTrialsPerBlock = 1; end
@@ -37,7 +37,7 @@ if sbj.block == 1 && sbj.trial==1
     
     % RDK stimulus
     const.rdk.duration = 1.2; % display duration of the whole RDK, s
-    const.rdk.dotDensity = 1; % dot per dva^2
+    const.rdk.dotDensity = 3; % dot per dva^2
     const.rdk.lifeTime = const.rdk.duration;
     % how long before a dot disappears and reappears
     const.rdk.labelUpdateTime = 0.050; % change labels and assign new directions for all
@@ -51,11 +51,15 @@ if sbj.block == 1 && sbj.trial==1
     % ========================================================================
     const.rdk.dotRadius = 0.05;
     const.rdk.apertureRadius = 3;
-    const.rdk.dotTextureRadius = 5;
+    if const.apertureType==1 % aperture translates across the dot field
+        const.rdk.dotFieldRadius = 15;
+    else % dots move together with the aperture
+        const.rdk.dotFieldRadius = const.rdk.apertureRadius;
+    end
     const.rdk.apertureSpeed = 10; % dva per sec
     const.rdk.internalSpeed = 5; % speed of each internal dot
     const.rdk.colour = screen.white;
-    const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotTextureRadius^2);
+    const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
     const.rdk.apertureDir = [180 0]; % left and right
     const.rdk.internalDir = [45 -45]; % 45: above the aperture direction; -45: below the aperture direction
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
