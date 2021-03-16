@@ -31,7 +31,7 @@ nHeader = 10; % this number depends on data collection; lines to skip when readi
 % cd(currentFolder);
 
 % or Loop over all subjects and convert
-for ii = 3:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
+for ii = 4:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
     % define current subject/folder
     currentSubject{ii-2} = folderNames(ii).name;
     currentFolder = [dataPath currentSubject{ii-2}];
@@ -72,11 +72,11 @@ for ii = 3:length(folderNames) % we are starting at 3 because matlab always has 
                         % initialize for the frame log
                         rdkFrameLog{trialCounter} = table;
                         frameCounter = 1;
-                        % only for w00...
-                        eventLog.trialIDFrame(trialCounter, 1) = str2num(entries{2}{lineN});
+%                         % only for w00...
+%                         eventLog.trialIDFrame(trialCounter, 1) = str2num(entries{2}{lineN});
                     end
-%                 elseif strcmp(entries{3}{lineN}, 'SYNCTIME') && valid==1
-%                     eventLog.trialStart(trialCounter, 1) = str2num(entries{2}{lineN});
+                elseif strcmp(entries{3}{lineN}, 'SYNCTIME') && valid==1
+                    eventLog.trialStart(trialCounter, 1) = str2num(entries{2}{lineN});
                 elseif strcmp(entries{3}{lineN}, 'fixationOn') && valid==1
                     eventLog.trialStart(trialCounter, 1) = str2num(entries{2}{lineN}); % just for w00...
                     eventLog.fixationOn(trialCounter, 1) = str2num(entries{2}{lineN}); % read frame idx in original data
@@ -95,8 +95,8 @@ for ii = 3:length(folderNames) % we are starting at 3 because matlab always has 
                     eventLog.rdkOff(trialCounter, 1) = str2num(entries{2}{lineN});
 %                 elseif strcmp(entries{3}{lineN}, 'respond') && valid==1
 %                     eventLog.respond(trialCounter, 1) = str2num(entries{2}{lineN});
-%                 elseif strcmp(entries{3}{lineN}, 'TRIALEND') && valid==1
-%                     eventLog.trialEnd(trialCounter, 1) = str2num(entries{2}{lineN});
+                elseif strcmp(entries{3}{lineN}, 'TRIALEND') && valid==1
+                    eventLog.trialEnd(trialCounter, 1) = str2num(entries{2}{lineN});
                 end
             end
         end
@@ -119,19 +119,19 @@ for ii = 3:length(folderNames) % we are starting at 3 because matlab always has 
         for trialN = 1:size(trialInLog, 1)
             currentTrial = trialInLog(trialN, 1);
             startI = find(rawAsc(:, 1)==eventLog.trialStart(currentTrial, 1));
-            %             endI = find(rawAsc(:, 1)==eventLog.trialEnd(currentTrial, 1));
-            % only for w00:
-            if trialN<size(trialInLog, 1)
-                endI = find(rawAsc(:, 1)==eventLog.trialIDFrame(currentTrial+1, 1))-1;
-            else % the last trial in the block
-                endI = length(rawAsc);
-            end
-            eventLog.trialEnd(currentTrial, 1) = rawAsc(endI, 1);
+            endI = find(rawAsc(:, 1)==eventLog.trialEnd(currentTrial, 1));
+%             % only for w00:
+%             if trialN<size(trialInLog, 1)
+%                 endI = find(rawAsc(:, 1)==eventLog.trialIDFrame(currentTrial+1, 1))-1;
+%             else % the last trial in the block
+%                 endI = length(rawAsc);
+%             end
+%             eventLog.trialEnd(currentTrial, 1) = rawAsc(endI, 1);
             %%%%%
             allData = rawAsc(startI:endI, :);
             save([currentSubject{ii-2}, 't', num2str(currentTrial, '%03d'), '.mat'], 'allData') % if you have over 1000 trials, make it "04d"
         end
     end
 end
-% only for w00
-save('eventLog.mat', 'eventLog')
+% % only for w00
+% save('eventLog.mat', 'eventLog')

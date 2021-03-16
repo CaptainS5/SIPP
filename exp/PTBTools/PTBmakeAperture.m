@@ -35,8 +35,8 @@ if any(apertureCenterPos~=0) % aperture translates across the dot field
     % now the apertureCenterPos is the location in imgApt, row and column idx
     
     % now put patchApt to the correct position within the whole texture
-    transApt(patchCenterPos(1)-apertureRadiusX:patchCenterPos(1)+apertureRadiusX, ...
-        patchCenterPos(2)-apertureRadiusY:patchCenterPos(2)+apertureRadiusY) = patchApt;
+    transApt(patchCenterPos(1)-apertureRadiusY:patchCenterPos(1)+apertureRadiusY, ...
+        patchCenterPos(2)-apertureRadiusX:patchCenterPos(2)+apertureRadiusX) = patchApt;
 else % dots move together with the aperture, the aperture is as large as the dot field
     transApt(radiusA<=1) = 0; % transparent inside the circle
 end
