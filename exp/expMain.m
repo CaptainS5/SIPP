@@ -188,6 +188,7 @@ try
             
             control.rdkCoh          = trialData.rdkCoh(currentTrial);
             control.rdkApertureDir  = trialData.rdkApertureDir(currentTrial);
+            control.rdkInternalSpeed = trialData.rdkInternalSpeed(currentTrial);
             control.rdkInternalDir  = trialData.rdkInternalDir(currentTrial);
             control.fixationFrames = ceil(sec2frm(trialData.fixationDuration(currentTrial), screen));
             
@@ -212,13 +213,13 @@ try
             %         control.targetFID       = fopen(control.targetFile, 'w');
             [rdkControl seed] = generateTrialRDKpositions(const, screen, control); % generate the position of dots in each frame in the whole trial
             % generate aperture for rdk
-            if const.apertureType==1 % aperture translates across the dot field
-                for frameN = 1:size(rdkControl.apertureCenterPos, 2)
-                    rdkControl.apertureTexture{frameN} = PTBmakeAperture(const, screen, rdkControl.apertureCenterPos{frameN});
-                end
-            else % dots move together with the aperture
+%             if const.apertureType==1 % aperture translates across the dot field
+%                 for frameN = 1:size(rdkControl.apertureCenterPos, 2)
+%                     rdkControl.apertureTexture{frameN} = PTBmakeAperture(const, screen, rdkControl.apertureCenterPos{frameN});
+%                 end
+%             else % dots move together with the aperture
                 rdkControl.apertureTexture = PTBmakeAperture(const, screen, 0);
-            end
+%             end
             
             fprintf('EXP: begin Block %d Trial %d \n', block, trialData.trialCounter(currentTrial, 1));
             
@@ -261,7 +262,7 @@ try
             %% ================================================================
             while  1                                                            % begin WITHIN-TRIAL-WHILE-loop (code will run through this part until break
                 iterations = iterations + 1;                                    % this runs every refresh Rate cycle (should be free of heavy computations)
-                
+
                 %% (4.2) Check Eyelink Recording:
                 if eyelink.mode == 1
                     errorEyelink = Eyelink('CheckRecording');
@@ -281,7 +282,7 @@ try
                 
                 %% Update trial timer
                 if iterations>1
-                    control.data_time = GetSecs - trialData.tMainSync(currentTrial);    % trial timer: how much time has passed since trial started
+                    control.data_time = GetSecs - trialData.tMainSync(currentTrial, 1);    % trial timer: how much time has passed since trial started
                 else
                     control.data_time = 0;
                 end
@@ -290,7 +291,7 @@ try
                 % =============================================================
                 [const, control] = drawSingleFrameEyelink(const, trialData, control, screen, photo, rdkControl, eyelink);
                 % =============================================================
-                
+
                 % show gaze or finger if it is turned on
                 %         if eyelink.mode && const.showGaze
                 %             PTBdraw_circles(screen, eyelink.Data.coord, 10, [255 255 255]);

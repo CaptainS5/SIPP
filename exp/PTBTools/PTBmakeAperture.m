@@ -24,22 +24,22 @@ x = x/apertureRadiusX;
 y = y/apertureRadiusY;
 radiusA = sqrt(x.^2+y.^2);
 
-if any(apertureCenterPos~=0) % aperture translates across the dot field
-    % first, create the aperture related values in the transparent layer,
-    % the same size as radiusA, kind of a patch that we will later put into
-    % the transparent layer
-    patchApt = ones(size(radiusA))*255;
-    patchApt(radiusA<=1) = 0; % only within the aperture is transparent
-    
-    patchCenterPos = apertureCenterPos-screen.center+[dotFieldRadiusX, dotFieldRadiusY]+1; % align the position with the current texture center
-    % now the apertureCenterPos is the location in imgApt, row and column idx
-    
-    % now put patchApt to the correct position within the whole texture
-    transApt(patchCenterPos(1)-apertureRadiusY:patchCenterPos(1)+apertureRadiusY, ...
-        patchCenterPos(2)-apertureRadiusX:patchCenterPos(2)+apertureRadiusX) = patchApt;
-else % dots move together with the aperture, the aperture is as large as the dot field
+% if any(apertureCenterPos~=0) % aperture translates across the dot field
+%     % first, create the aperture related values in the transparent layer,
+%     % the same size as radiusA, kind of a patch that we will later put into
+%     % the transparent layer
+%     patchApt = ones(size(radiusA))*255;
+%     patchApt(radiusA<=1) = 0; % only within the aperture is transparent
+%     
+%     patchCenterPos = apertureCenterPos-screen.center+[dotFieldRadiusX, dotFieldRadiusY]+1; % align the position with the current texture center
+%     % now the apertureCenterPos is the location in imgApt, row and column idx
+%     
+%     % now put patchApt to the correct position within the whole texture
+%     transApt(patchCenterPos(1)-apertureRadiusY:patchCenterPos(1)+apertureRadiusY, ...
+%         patchCenterPos(2)-apertureRadiusX:patchCenterPos(2)+apertureRadiusX) = patchApt;
+% else % dots move together with the aperture, the aperture is as large as the dot field
     transApt(radiusA<=1) = 0; % transparent inside the circle
-end
+% end
 imgApt(:, :, 2) = transApt;
 aperture = Screen('MakeTexture', screen.window, imgApt);
 

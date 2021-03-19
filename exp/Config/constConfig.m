@@ -15,10 +15,14 @@ function [const] = constConfig(screen, const, sbj)
 %%
 if sbj.block == 1 && sbj.trial==1
     % Some dsign-related things (These will be used in paramConfig):
-    if const.internalOnsetType==1 % constant internal motion
-        const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
-    elseif const.internalOnsetType==2 % perturbation of internal motion
-        const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+    if const.startExp==1
+        if const.internalOnsetType==1 % constant internal motion
+            const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+        elseif const.internalOnsetType==2 % perturbation of internal motion
+            const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+        end
+    elseif const.startExp==-1
+        const.numTrialsPerBlock    = 32*ones(1, 10);
     end
     if const.makeVideo; const.numTrialsPerBlock = 1; end
     const.numTrials            = sum(const.numTrialsPerBlock);                  % total number of trials
@@ -51,23 +55,23 @@ if sbj.block == 1 && sbj.trial==1
     % ========================================================================
     const.rdk.dotRadius = 0.05;
     const.rdk.apertureRadius = 1;
-    if const.apertureType==1 % aperture translates across the dot field
-        const.rdk.dotFieldRadius = 15;
-    else % dots move together with the aperture
+%     if const.apertureType==1 % aperture translates across the dot field
+%         const.rdk.dotFieldRadius = 15;
+%     else % dots move together with the aperture
         const.rdk.dotFieldRadius = const.rdk.apertureRadius;
-    end
+%     end
     const.rdk.apertureSpeed = 10; % dva per sec
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
     const.rdk.apertureDir = [180 0]; % left and right    
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
-    const.rdk.coh = [0 .5 1]; % for classical RDKs
-    if const.apertureType==0
+    const.rdk.coh = [.5 1]; % for classical RDKs
+%     if const.apertureType==0
         %% for aperture type 0, simply define the relative retinal motion of the
         % internal dots:
-        const.rdk.internalSpeed = 5; % speed of each internal dot
-        const.rdk.internalDir = [135 -135]; % 45: above the aperture direction; -45: below the aperture direction
-    else
+        const.rdk.internalSpeed = [5 10]; % speed of each internal dot
+        const.rdk.internalDir = [45 -45]; % 45: above the aperture direction; -45: below the aperture direction
+%     else
 %         %% for aperture type 1, calculate the parameters to reach the same retinal motion as in aperture type 0
 %         retinalMotionSpeed = 5; % the same as const.rdk.internalSpeed for aperture type 0
 %         retinalMotionDir = [45 -45]; % the same as const.rdk.internalDir for aperture type 0
@@ -79,7 +83,7 @@ if sbj.block == 1 && sbj.trial==1
 %         velVec = ; % assuming the two vectors are always symmetrical around horizontal, here just consider the above horizontal one
 %         const.rdk.internalSpeed = 5; % speed of each internal dot, length of velVec
 %         const.rdk.internalDir = [45 -45]; % relative direction, angle of velVec
-    end
+%     end
     
     % warning beep for feedback on fixation maintainance
     const.beep.samplingRate = 44100;

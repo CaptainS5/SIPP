@@ -111,11 +111,11 @@ line([trial.stim_offset trial.stim_offset], [minVel maxVel],'Color','k','LineSty
     line([trial.pursuit.onset trial.pursuit.onset], [minVel maxVel],'Color','b','LineStyle','-');
     line([trial.pursuit.onset+140 trial.pursuit.onset+140], [minVel maxVel],'Color','b','LineStyle','--');
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% debugging for pursuit latency
-    line([trial.pursuit.baselineStart trial.pursuit.baselineStart], [minVel maxVel],'Color','g','LineStyle','--');
-    line([trial.pursuit.baselineEnd trial.pursuit.baselineEnd], [minVel maxVel],'Color','g','LineStyle','--');
-    line([trial.pursuit.pursuitIntervalStart trial.pursuit.pursuitIntervalStart], [minVel maxVel],'Color','r','LineStyle','--');
-    line([trial.pursuit.pursuitIntervalEnd trial.pursuit.pursuitIntervalEnd], [minVel maxVel],'Color','r','LineStyle','--');
-    line([startFrame endFrame], [trial.pursuit.meanBaseline+4*trial.pursuit.sdBaseline trial.pursuit.meanBaseline+4*trial.pursuit.sdBaseline],'Color','b','LineStyle','--')
+%     line([trial.pursuit.baselineStart trial.pursuit.baselineStart], [minVel maxVel],'Color','g','LineStyle','--');
+%     line([trial.pursuit.baselineEnd trial.pursuit.baselineEnd], [minVel maxVel],'Color','g','LineStyle','--');
+%     line([trial.pursuit.pursuitIntervalStart trial.pursuit.pursuitIntervalStart], [minVel maxVel],'Color','r','LineStyle','--');
+%     line([trial.pursuit.pursuitIntervalEnd trial.pursuit.pursuitIntervalEnd], [minVel maxVel],'Color','r','LineStyle','--');
+%     line([startFrame endFrame], [trial.pursuit.meanBaseline+4*trial.pursuit.sdBaseline trial.pursuit.meanBaseline+4*trial.pursuit.sdBaseline],'Color','b','LineStyle','--')
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % end
 line([startFrame endFrame], [0 0],'Color','k','LineStyle','--')

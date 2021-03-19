@@ -46,10 +46,11 @@ if sbj.block == 1 && sbj.trial==1 % ~exist([sbj.sbjFolder ,'/trialData.mat'],'fi
     % within "blockPartial"; all blockPartial will have the same "block"
     % conditions in total
     randVar.continuous.fixationDuration = [1 1.5]; % Intial fixation time (random between 300 and 700 ms)
-%     randVar.trial.dotDirSD = const.rdk.dotDirSD;
+    %     randVar.trial.dotDirSD = const.rdk.dotDirSD;
     randVar.trial.rdkCoh = const.rdk.coh;
-    randVar.trial.rdkApertureDir = const.rdk.apertureDir; % upwards is minus, and downwards is plus
-    randVar.trial.rdkInternalDir = const.rdk.internalDir;
+    randVar.trial.rdkApertureDir = const.rdk.apertureDir;
+    randVar.trial.rdkInternalSpeed = const.rdk.internalSpeed;
+    randVar.trial.rdkInternalDir = const.rdk.internalDir; % upwards is minus, and downwards is plus
     
 %     if const.startExp~=-1 % make accurate blocks first, and then fast, just so that it's easier to learn
 %         randVar.blockPartial.instruction = [0 1]; % 0-fast, 1-accurate;

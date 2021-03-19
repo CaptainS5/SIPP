@@ -38,8 +38,7 @@ function [const, control] = drawSingleFrameEyelink(const, trialData, control, sc
 timePassed = control.data_time;                                                      % in expMain this is defined as GetSecs-tMainSync (i.e. equivalent to when experiment started
 % if const.makeVideo == 1; timePassed = control.frameCounter*screen.refreshRate; end
 
-
-curTrial    = control.currentTrial;                                         % current trial
+curTrial = control.currentTrial;                                         % current trial
 Screen('FillRect', screen.window, screen.background);                            % Draw background
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -57,10 +56,15 @@ switch control.mode
         % closer to the screen center
         stepTime = 0.15; % how many secs it takes for the aperture center to move from the step to the fixation
         [stepDis, ] = dva2pxl(const.rdk.apertureSpeed*stepTime, const.rdk.apertureSpeed*stepTime, screen);
-        if control.rdkApertureDir==0 % moving rightward
-            fixationCenter = [rdkControl.apertureCenterPos{1}(1)+stepDis, rdkControl.apertureCenterPos{1}(2)];
-        else % moving leftward
-            fixationCenter = [rdkControl.apertureCenterPos{1}(1)-stepDis, rdkControl.apertureCenterPos{1}(2)];
+        
+        if const.startExp==1
+            if control.rdkApertureDir==0 % moving rightward
+                fixationCenter = [rdkControl.apertureCenterPos{1}(1)+stepDis, rdkControl.apertureCenterPos{1}(2)];
+            else % moving leftward
+                fixationCenter = [rdkControl.apertureCenterPos{1}(1)-stepDis, rdkControl.apertureCenterPos{1}(2)];
+            end
+        elseif const.startExp==-1
+            fixationCenter = screen.center;
         end
         
         % draw target
@@ -70,11 +74,12 @@ switch control.mode
                 evt = Eyelink( 'NewestFloatSample');
                 xeye = evt.gx(eyelink.eye_used+1); % +1 as we're accessing MATLAB array
                 yeye = evt.gy(eyelink.eye_used+1);
-                
+
                 %% do we have valid data and is the pupil visible?
                 if xeye~=eyelink.el.MISSING_DATA && yeye~=eyelink.el.MISSING_DATA && evt.pa(eyelink.eye_used+1)>0
                     % if data is valid, compare gaze position with the limits of the tolerance window
                     diffFix = sqrt((xeye-fixationCenter(1))^2+((yeye-fixationCenter(2))/screen.pixelRatioWidthPerHeight)^2);
+
                     if diffFix <= const.fixation.windowRadiusPxl % fixation ok
                         PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
                         control.frameFix = control.frameFix+1;
@@ -107,7 +112,7 @@ switch control.mode
         % draw square for photodiode:
          if photo.mode                                                       % Photodiode Event 1: Fixation target 1 on
             PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.white);
-        end
+         end
         
         % Check whether Fixation time is passed:
         if control.frameFix == control.fixationFrames
@@ -125,13 +130,13 @@ switch control.mode
     case 2                                                                  % PHASE 2: RDK display
         control.frameRDK = control.frameRDK + 1;   % start counting frames for RDK display
         % draw target:
-        if const.apertureType==1 % aperture translates across the dot field
-            PTBdraw_target_RDK(screen, const, rdkControl.dotPos{control.frameRDK}, rdkControl.apertureTexture{control.frameRDK}, ...
-                rdkControl.textureCenterPos, rdkControl.textureWindow);
-        else % dots move together with the aperture
+%         if const.apertureType==1 % aperture translates across the dot field
+%             PTBdraw_target_RDK(screen, const, rdkControl.dotPos{control.frameRDK}, rdkControl.apertureTexture{control.frameRDK}, ...
+%                 rdkControl.textureCenterPos, rdkControl.textureWindow);
+%         else % dots move together with the aperture
             PTBdraw_target_RDK(screen, const, rdkControl.dotPos{control.frameRDK}, rdkControl.apertureTexture, ...
                 rdkControl.textureCenterPos{control.frameRDK}, rdkControl.textureWindow{control.frameRDK});
-        end
+%         end
         
         % draw square for photodiode:
         if photo.mode                                                       % Photodiode Event 2: Fixation target 2 on
