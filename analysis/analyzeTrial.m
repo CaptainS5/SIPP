@@ -57,7 +57,7 @@ else
             trial = analyzePursuit(trial, pursuit);
             
             %% analyze saccades
-            %     [trial] = analyzeSaccades(trial);
+            trial = analyzeSaccades(trial);
 %         else
             %% OPTIONAL: find micro saccades
             % % remove saccades
@@ -77,10 +77,9 @@ if trial.signalLoss
     trial.log.trialNumber = currentTrial;
     trialIdxInData = eventLog.trialIdxInData(currentTrial, 1);
     trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
-    trial.log.rdkDirMean = -Experiment.trialData.dotDirMean(trialIdxInData, 1); % positive is up, negative is down
-    trial.log.rdkDirSD = Experiment.trialData.dotDirSD(trialIdxInData, 1); % direction std
-    trial.log.choice = -Experiment.trialData.choice(trialIdxInData, 1); % -1 = down, 1 = up
-    trial.log.eyeCondition = Experiment.trialData.eyeCondition(trialIdxInData, 1);
-    trial.log.instruction = Experiment.trialData.instruction(trialIdxInData, 1);
-    trial.stimulus.absoluteVelocity = Experiment.const.rdk.speed;
+    trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % positive is up, negative is down
+    trial.log.rdkInternalDir = Experiment.trialData.rdkInternalDir(trialIdxInData, 1); % direction std
+    trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed; %Experiment.trialData.rdkInternalSpeed(trialIdxInData, 1);
+    trial.log.rdkCoh = Experiment.trialData.rdkCoh(trialIdxInData, 1);
+    trial.stimulus.absoluteVelocity = Experiment.const.rdk.apertureSpeed;
 end

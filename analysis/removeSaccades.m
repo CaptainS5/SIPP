@@ -6,6 +6,7 @@
 % 2012-2018     JF added stuff to and edited analyzeSaccades.m
 % 13-07-2018    JF commented to make the script more accecable for future
 %               VPOM students
+% 23-Mar-2021   XW edited due to the need for the translating RDK exp
 % for questions email jolande.fooken@rwth-aachen.de
 %
 % input: trial --> structure containing relevant current trial information
@@ -103,90 +104,60 @@ else
     trial.saccades.Y.offsetsDuring = [];
 end
 
-% store all found on and offsets together
-trial.saccades.onsets = [trial.saccades.X.onsets; trial.saccades.Y.onsets];
-trial.saccades.offsets = [trial.saccades.X.offsets; trial.saccades.Y.offsets];
-% trial.saccades.onsetsDuring = [trial.saccades.X.onsetsDuring; trial.saccades.Y.onsetsDuring];
-% trial.saccades.offsetsDuring = [trial.saccades.X.offsetsDuring; trial.saccades.Y.offsetsDuring];
 % merge saccades on X and Y that are actually the same...
 xSac = length(trial.saccades.X.onsets);
 ySac = length(trial.saccades.Y.onsets);
-if ~isempty(ySac) && ~isempty(xSac) && numel(trial.saccades.onsets) ~= 0
-    testOnsets = sort(trial.saccades.onsets);
-    testOffsets = sort(trial.saccades.offsets);
-    onsets = [];
-    offsets = [];
-    diffOnsets = [diff(testOnsets); 999];
-    diffOffsets = [diff(testOffsets); 999];
-    ii = 1;
-    while ii <= length(testOnsets)
-        if abs(diffOnsets(ii))<=25 || abs(diffOffsets(ii))<=25
-            tempOnset = min(testOnsets(ii), testOnsets(ii+1));
-            tempOffset = max(testOffsets(ii), testOffsets(ii+1));
-            ii = ii+1;
-        else
-            tempOnset = testOnsets(ii);
-            tempOffset = testOffsets(ii);
-        end
-        onsets = [onsets; tempOnset];
-        offsets = [offsets; tempOffset];
-        ii = ii+1;
+if ~isempty(ySac) && ~isempty(xSac) ~= 0
+    % find if x and y saccades overlap; if yes, then treat them as one
+    % first, creat "saccade vectors", each point is one time point, 0 means
+    % not in a saccade, 1 means saccade
+    xSacVec = zeros(size(trial.eyeX_filt));
+    for ii = 1:xSac
+        xSacVec(trial.saccades.X.onsets(ii):trial.saccades.X.offsets(ii), 1) = 1;
     end
-    trial.saccades.onsets = onsets;
-    trial.saccades.offsets = offsets;
-%     % original codes
+    ySacVec = zeros(size(trial.eyeX_filt));
+    for ii = 1:ySac
+        ySacVec(trial.saccades.Y.onsets(ii):trial.saccades.Y.offsets(ii), 1) = 1;
+    end
+    
+    % mark it as a saccade as long as it is a saccade on one dimension
+    merged = (xSacVec==1 | ySacVec==1);
+    
+    % now find the corresponding saccade onsets and offsets
+    diffMerged = [NaN; diff(merged)];
+    trial.saccades.onsets = find(diffMerged==1);
+    trial.saccades.offsets = find(diffMerged==-1)-1;
+    if length(trial.saccades.offsets)>length(trial.saccades.onsets)% the first frame is already a saccade
+        trial.saccades.onsets = [1;trial.saccades.onsets];
+    elseif length(trial.saccades.offsets)<length(trial.saccades.onsets)% the last frame is still a saccade
+        trial.saccades.offsets = [trial.saccades.offsets; length(diffMerged)];
+    end
+    
+%     % only using relative onset/offset time of saccades, not very
+%     % accurate...
 %     testOnsets = sort(trial.saccades.onsets);
 %     testOffsets = sort(trial.saccades.offsets);
-%     count1 = 1;
-%     tempOnset1 = [];
-%     tempOffset1 = [];
-%     count2 = 1;
-%     tempOnset2 = [];
-%     tempOffset2 = [];   
-%     for ii = 1:length(testOnsets)-1
-%         if testOnsets(ii+1)-testOnsets(ii) < 20
-%             tempOnset1(count1) = testOnsets(ii);
-%             tempOffset1(count1) = testOffsets(ii);
-%             count1 = length(tempOnset1) +1;
+%     onsets = [];
+%     offsets = [];
+%     diffOnsets = [diff(testOnsets); 999];
+%     diffOffsets = [diff(testOffsets); 999];
+%     ii = 1;
+%     while ii <= length(testOnsets)
+%         if abs(diffOnsets(ii))<=25 || abs(diffOffsets(ii))<=25
+%             tempOnset = min(testOnsets(ii), testOnsets(ii+1));
+%             tempOffset = max(testOffsets(ii), testOffsets(ii+1));
+%             ii = ii+1;
 %         else
-%             tempOnset2(count2) = testOnsets(ii+1);
-%             tempOffset2(count2) = testOffsets(ii+1);
-%             count2 = length(tempOnset2) +1;
+%             tempOnset = testOnsets(ii);
+%             tempOffset = testOffsets(ii);
 %         end
+%         onsets = [onsets; tempOnset];
+%         offsets = [offsets; tempOffset];
+%         ii = ii+1;
 %     end
-%     onsets = unique([tempOnset1 tempOnset2 testOnsets(1)])';
-%     offsets = unique([tempOffset1 tempOffset2 testOffsets(1)])';
 %     trial.saccades.onsets = onsets;
 %     trial.saccades.offsets = offsets;
 end
-
-% xSac = length(trial.saccades.X.onsetsDuring);
-% ySac = length(trial.saccades.Y.onsetsDuring);
-% if ~isempty(ySac) && ~isempty(xSac) && numel(trial.saccades.onsetsDuring) ~= 0
-%     testOnsets = sort(trial.saccades.onsetsDuring);
-%     testOffsets = sort(trial.saccades.offsetsDuring);
-%     count1 = 1;
-%     tempOnset1 = [];
-%     tempOffset1 = [];
-%     count2 = 1;
-%     tempOnset2 = [];
-%     tempOffset2 = [];   
-%     for i = 1:length(testOnsets)-1
-%         if testOnsets(i+1)-testOnsets(i) < 20
-%             tempOnset1(count1) = testOnsets(i);
-%             tempOffset1(count1) = testOffsets(i);
-%             count1 = length(tempOnset1) +1;
-%         else
-%             tempOnset2(count2) = testOnsets(i+1);
-%             tempOffset2(count2) = testOffsets(i+1);
-%             count2 = length(tempOnset2) +1;
-%         end
-%     end
-%     onsets = unique([tempOnset1 tempOnset2 testOnsets(1)])';
-%     offsets = unique([tempOffset1 tempOffset2 testOffsets(1)])';
-%     trial.saccades.onsetsDuring = onsets;
-%     trial.saccades.offsetsDuring = offsets;
-% end
 
 % open eye movement data structure
 trial.X_noSac = trial.eyeX_filt;
@@ -231,26 +202,5 @@ for ii = 1:length(trial.saccades.onsets)
         trial.DDY_interpolSac(trial.saccades.onsets(ii)-1+j) = trial.eyeDDY_filt(trial.saccades.onsets(ii)) + slopeDDY*j;
     end   
 end
-% % do the exact same thing for y
-% for i = 1:length(trial.saccades.Y.onsets)
-%     
-%     lengthSacY = trial.saccades.Y.offsets(i) - trial.saccades.Y.onsets(i);
-%     slopeY = (trial.eyeY_filt(trial.saccades.Y.offsets(i))-trial.eyeY_filt(trial.saccades.Y.onsets(i)))./lengthSacY;
-%     slopeDY = (trial.eyeDY_filt(trial.saccades.Y.offsets(i))-trial.eyeDY_filt(trial.saccades.Y.onsets(i)))./lengthSacY;
-%     slopeX = (trial.eyeX_filt(trial.saccades.Y.offsets(i))-trial.eyeX_filt(trial.saccades.Y.onsets(i)))./lengthSacY;
-%     slopeDX = (trial.eyeDX_filt(trial.saccades.Y.offsets(i))-trial.eyeDX_filt(trial.saccades.Y.onsets(i)))./lengthSacY;
-%     
-%     trial.X_noSac(trial.saccades.Y.onsets(i):trial.saccades.Y.offsets(i)) = NaN;
-%     trial.Y_noSac(trial.saccades.Y.onsets(i):trial.saccades.Y.offsets(i)) = NaN;
-%     trial.DX_noSac(trial.saccades.Y.onsets(i):trial.saccades.Y.offsets(i)) = NaN;
-%     trial.DY_noSac(trial.saccades.Y.onsets(i):trial.saccades.Y.offsets(i)) = NaN;
-%     
-%     for j = 1:lengthSacY+1
-%         trial.Y_interpolSac(trial.saccades.Y.onsets(i)-1+j) = trial.eyeY_filt(trial.saccades.Y.onsets(i)) + slopeY*j;
-%         trial.X_interpolSac(trial.saccades.Y.onsets(i)-1+j) = trial.eyeX_filt(trial.saccades.Y.onsets(i)) + slopeX*j;
-%         trial.DY_interpolSac(trial.saccades.Y.onsets(i)-1+j) = trial.eyeDY_filt(trial.saccades.Y.onsets(i)) + slopeDY*j;
-%         trial.DX_interpolSac(trial.saccades.Y.onsets(i)-1+j) = trial.eyeDX_filt(trial.saccades.Y.onsets(i)) + slopeDX*j;
-%     end    
-% end
-% done
+
 end

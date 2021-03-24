@@ -28,8 +28,8 @@ minPosX = -10;
 maxPosX = 10;
 minPosY = -3;
 maxPosY = 3;
-minVel = -20;
-maxVel = 20;
+minVel = -30;
+maxVel = 30;
 minAcc = -500;
 maxAcc = 500;
 minJerk = -300000;
@@ -93,9 +93,11 @@ ylabel('Speed (degree/second)', 'fontsize', 12);
 % plot x- and y- eye velocity over time
 plot(startFrame:endFrame,trial.eyeDX_filt(startFrame:endFrame),'k');
 plot(startFrame:endFrame,trial.eyeDY_filt(startFrame:endFrame),'b');
-% % also plot 2D velocity...
-% vel2D = sqrt(trial.DX_interpolSac(startFrame:endFrame).^2 + trial.DY_interpolSac(startFrame:endFrame).^2);
-% plot(startFrame:endFrame,vel2D,'r');
+% also plot 2D velocity...
+vel2D = sqrt(trial.DX_interpolSac.^2 + trial.DY_interpolSac.^2);
+plot(startFrame:endFrame,vel2D(startFrame:endFrame),'r');
+plot(trial.saccades.onsets,vel2D(trial.saccades.onsets),'y*');
+plot(trial.saccades.offsets,vel2D(trial.saccades.offsets),'c*'); % plot combined saccades found
 % plot saccade onsets in x- and y with different colors
 plot(trial.saccades.X_left.onsets,trial.eyeDX_filt(trial.saccades.X_left.onsets),'go');
 plot(trial.saccades.X_left.offsets,trial.eyeDX_filt(trial.saccades.X_left.offsets),'mo');

@@ -44,6 +44,8 @@ if pursuit.onsetType==0
     startFrame = nanmax([trial.log.targetOnset, pursuit.onset]); % if there is no pursuit onset we still want to analyze eye movement quaility
     endFrame = nanmax([trial.log.targetOnset + openLoopDuration, pursuit.openLoopEnd]);
     
+    pursuit.latency = startFrame-trial.log.targetOnset;
+    
     % first analyze initial pursuit in X
     velocityX = trial.eyeDX_filt(startFrame:endFrame);
     pursuit.initialMeanVelocityX = nanmean(velocityX); % why we used abs in the earlier version?... anyway
@@ -118,15 +120,68 @@ closedLoopFrames = [nanmax([trial.log.targetOnset + openLoopDuration, pursuit.op
 pursuit.closedLoopDuration = closedLoopFrames(2) - closedLoopFrames(1);
 
 if pursuit.closedLoopDuration < 0 % closed loop phase too short
-    pursuit.gain = NaN;
+    pursuit.gainX = NaN;
+    pursuit.gainY = NaN;
+    pursuit.gain2D = NaN;
 else
     % calculate gain first,  the ratio of magnitude only
+    % horizontal pursuit gain, if only account for external aperture motion
+    absoluteTargetVelX = trial.target.velocityX;
+    absoluteTargetVelX(absoluteTargetVelX < 0.05) = NaN;        
+    pursuitGainX = trial.DX_noSac./absoluteTargetVelX; 
+    zScore = zscore(pursuitGainX(~isnan(pursuitGainX)));
+    pursuitGainX((zScore > 3 | zScore < -3)) = NaN;
+    pursuit.gainX = nanmean(pursuitGainX(closedLoopFrames));
+    pursuit.gainX(pursuit.gainX>2.5) = NaN;
+    
+    % vertical pursuit gain, if only account for internal dot motion
+    absoluteTargetVelY = trial.log.rdkInternalSpeed.*sin(trial.log.rdkInternalDir/180*pi);
+    absoluteTargetVelY(absoluteTargetVelY < 0.05) = NaN;        
+    pursuitGainY = trial.DY_noSac./absoluteTargetVelY; 
+    zScore = zscore(pursuitGainY(~isnan(pursuitGainY)));
+    pursuitGainY((zScore > 3 | zScore < -3)) = NaN;
+    pursuit.gainY = nanmean(pursuitGainY(closedLoopFrames));
+    pursuit.gainY(pursuit.gainY>2.5) = NaN;
+    
+    % pursuit gain, if account for external+internal vector average
     speedXY_noSac = sqrt(trial.DX_noSac.^2 + trial.DY_noSac.^2);
-    absoluteTargetVel = sqrt(trial.target.velocityX.^2 + trial.target.velocityY.^2);
+    % the averaged target vector (external+internal)
+    vecX = trial.target.velocityX+trial.log.rdkInternalSpeed.*cos(trial.log.rdkInternalDir/180*pi);
+    vecY = trial.log.rdkInternalSpeed.*sin(trial.log.rdkInternalDir/180*pi);
+    % make them into vectors the same length as eye velocity
+    vecX = repmat(vecX, size(speedXY_noSac));
+    vecY = repmat(vecY, size(speedXY_noSac)); 
+    % now we can calculate the averaged vector velocity
+    absoluteTargetVel = sqrt(vecX.^2 + vecY.^2);
     absoluteTargetVel(absoluteTargetVel < 0.05) = NaN;        
     pursuitGain = (speedXY_noSac)./absoluteTargetVel; 
     zScore = zscore(pursuitGain(~isnan(pursuitGain)));
     pursuitGain((zScore > 3 | zScore < -3)) = NaN;
+    pursuit.gain2D = nanmean(pursuitGain(closedLoopFrames));
+    pursuit.gain2D(pursuit.gain2D>2.5) = NaN;
+    
+    % consider the direction as well, the ratio of (magnitude of projection on the target velocity direction)/(magnitude of target velocity) 
+    eyeDot = [trial.DX_noSac'; trial.DY_noSac'];
+    targetDot = [vecX'; vecY'];
+    dotProduct = dot(eyeDot, targetDot)';
+    dirGainAll = dotProduct./(vecX.^2 + vecY.^2);
+    pursuit.dirGain = nanmean(dirGainAll(closedLoopFrames));
+    
+    % the mean direction of eye velocity
+    dir = atan2(trial.DY_noSac, trial.DX_noSac)/pi*180;
+    pursuit.dirClp = nanmean(dir(closedLoopFrames)); % in degs, horizontal right is 0, ccw is positive
+    
+    % the mean direction error of eye velocity compared to averaged target
+    % velocity (external+internal)
+    targetDir = (atan2(vecY, vecX))/pi*180;
+    diffDir = (atan2(trial.DY_noSac, trial.DX_noSac)-atan2(vecY, vecX))/pi*180;
+    pursuit.targetMeanDirCLP = nanmean(targetDir(closedLoopFrames));
+    pursuit.dirError = nanmean(diffDir(closedLoopFrames)); % in degs, how ccw the pursuit velocity rotated from the target velocity
+    
+    % velocity variation
+    pursuit.velCovX = nanstd(trial.DX_noSac(closedLoopFrames))/nanmean(trial.DX_noSac(closedLoopFrames));
+    pursuit.velCovY = nanstd(trial.DY_noSac(closedLoopFrames))/nanmean(trial.DY_noSac(closedLoopFrames));
+    pursuit.velCov2D = nanstd(speedXY_noSac(closedLoopFrames))/nanmean(speedXY_noSac(closedLoopFrames));
     
     %     % calculate velocity error
     %     pursuit.velocityError = nanmean(sqrt((trial.target.velocityX(closedLoopFrames) - trial.DX_noSac(closedLoopFrames)).^2 + ...

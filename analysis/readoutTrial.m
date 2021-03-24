@@ -36,6 +36,11 @@ trialIdxInData = eventLog.trialIdxInData(currentTrial, 1);
 trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
 trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % positive is up, negative is down
 trial.log.rdkInternalDir = Experiment.trialData.rdkInternalDir(trialIdxInData, 1); % direction std
+if strcmp(currentSubject, 'w07')
+    trial.log.rdkInternalSpeed = Experiment.trialData.rdkInternalSpeed(trialIdxInData, 1);
+else
+    trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed;
+end
 trial.log.rdkCoh = Experiment.trialData.rdkCoh(trialIdxInData, 1);
 trial.log.eyeSampleRate = eyeData.sampleRate;
 trial.target.velocityX = Experiment.const.rdk.apertureSpeed;

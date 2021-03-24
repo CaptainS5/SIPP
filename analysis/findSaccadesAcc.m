@@ -91,7 +91,8 @@ for idx = 1:length(binEdges)-1
     else
         peakAccs(idx, 1) = min(acceleration(startI:endI));
     end
-    peakIdx(idx, 1) = find(abs(acceleration(startI:endI))==abs(peakAccs(idx, 1)))+startI-1;
+    peakIdxTemp = find(abs(acceleration(startI:endI))==abs(peakAccs(idx, 1)));
+    peakIdx(idx, 1) = peakIdxTemp(1)+startI-1;
 end
 
 % if log.eyeCondition==1 % pursuit trial
