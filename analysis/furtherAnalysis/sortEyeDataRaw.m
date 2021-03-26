@@ -48,6 +48,7 @@ for subN = subStartI:length(names)
         eyeTrialData.trialIdx(subN, currentTrial) = currentTrial;
         eyeTrialData.trialIdxInData(subN, currentTrial) = trialIdxInData;
         eyeTrialData.blockN(subN, currentTrial) = Experiment.trialData.blockN(trialIdxInData, 1);
+        eyeTrialData.errorStatus(subN, currentTrial) = errorStatus(currentTrial, 1);
         
         if errorStatus(currentTrial, 1)==0
             analyzeTrial;

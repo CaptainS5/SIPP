@@ -43,7 +43,11 @@ else
 end
 trial.log.rdkCoh = Experiment.trialData.rdkCoh(trialIdxInData, 1);
 trial.log.eyeSampleRate = eyeData.sampleRate;
-trial.target.velocityX = Experiment.const.rdk.apertureSpeed;
+if trial.log.rdkApertureDir==0 % rightward
+    trial.target.velocityX = Experiment.const.rdk.apertureSpeed;
+else
+    trial.target.velocityX = -Experiment.const.rdk.apertureSpeed;
+end
 trial.target.velocityY = 0;
 
 % frame indices of all events; after comparing eventLog with eyeData.frameIdx
