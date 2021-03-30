@@ -17,6 +17,7 @@ load('eyeTrialData_all.mat');
 perceptFolder = ['..\perceptPlots\'];
 eyeTracesFolder = ['..\eyeTraces\'];
 pursuitFolder = ['..\pursuitPlots\'];
+saccadeFolder = ['..\saccadePlots\'];
 correlationFolder = ['..\corrPlots\'];
 % RFolder = pwd;
 

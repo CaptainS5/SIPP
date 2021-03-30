@@ -70,27 +70,27 @@ for ii = 1:length(groupN)
     if individualPlots
         for subN = 1:size(names, 2)
             % align at rdk onset
-            % position
-            figure
-            hold on
-            for conN = 1:size(allCons, 1)
-                internalDirN = floor((conN-1)/3)+1;
-                if allCons(conN, 1)>0 % upward internal dir
-                    lineStyle = '-';
-                else % downward internal dir
-                    lineStyle = '--';
-                end
-                p{conN} = plot(indiMean{ii}.pos{conN, 1}(subN, :), indiMean{ii}.pos{conN, 2}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(mod(conN, 3)+1, :)); %, 'LineWidth', 1);
-            end
-            legend([p{:}], conNames, 'Location', 'best')
-            title(names{subN})
-            xlabel('Horizontal eye position (deg)')
-            ylabel('Vertical eye position (deg)')
-            %             xlim([-500 700])
-            %             ylim(yRange)
-            box off
-            %             saveas(gcf, [eyeTracesFolder, '\individuals\posTrace_' groupName{groupN(ii)} '_' names{subN} '.pdf'])
-            
+%             % position
+%             figure
+%             hold on
+%             for conN = 1:size(allCons, 1)
+%                 internalDirN = floor((conN-1)/3)+1;
+%                 if allCons(conN, 1)>0 % upward internal dir
+%                     lineStyle = '-';
+%                 else % downward internal dir
+%                     lineStyle = '--';
+%                 end
+%                 p{conN} = plot(indiMean{ii}.pos{conN, 1}(subN, :), indiMean{ii}.pos{conN, 2}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(mod(conN, 3)+1, :)); %, 'LineWidth', 1);
+%             end
+%             legend([p{:}], conNames, 'Location', 'best')
+%             title(names{subN})
+%             xlabel('Horizontal eye position (deg)')
+%             ylabel('Vertical eye position (deg)')
+%             %             xlim([-500 700])
+%             %             ylim(yRange)
+%             box off
+%             %             saveas(gcf, [eyeTracesFolder, '\individuals\posTrace_' groupName{groupN(ii)} '_' names{subN} '.pdf'])
+%             
             % velocity
             figure
             for dimN = 1:2
@@ -105,7 +105,9 @@ for ii = 1:length(groupN)
                     end
                     p{conN} = plot(timePointsOnset, indiMean{ii}.vel{conN, dimN}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(mod(conN, 3)+1, :)); %, 'LineWidth', 1);
                 end
+                if dimN==1
                 legend([p{:}], conNames, 'Location', 'best')
+                end
                 title(names{subN})
                 xlabel('Time from RDK onset (ms)')
                 ylabel([dimNames{dimN}, ' eye velocity (deg/s)'])
@@ -113,7 +115,7 @@ for ii = 1:length(groupN)
                 %             ylim(yRange)
                 box off
             end
-%             saveas(gcf, [eyeTracesFolder, '\individuals\velTrace_' groupName{groupN(ii)} '_' names{subN} '.pdf'])
+            saveas(gcf, [eyeTracesFolder, 'velTrace_' groupName{groupN(ii)} '_' names{subN} '.pdf'])
         end
     end
     
@@ -181,8 +183,8 @@ for conN = 1:size(allCons, 1)
     internalDirN = floor((conN-1)/3)+1;
     indiMean.vel{conN, 1} = NaN(length(names), minFrameLength); % horizontal
     indiMean.vel{conN, 2} = NaN(length(names), minFrameLength); % vertical
-    indiMean.pos{conN, 1} = NaN(length(names), minFrameLength); % horizontal
-    indiMean.pos{conN, 2} = NaN(length(names), minFrameLength); % vertical
+%     indiMean.pos{conN, 1} = NaN(length(names), minFrameLength); % horizontal
+%     indiMean.pos{conN, 2} = NaN(length(names), minFrameLength); % vertical
     
     for subN = 1:size(names, 2)
         idxT = find(eyeTrialData.errorStatus(subN, :)==0 & eyeTrialData.rdkInternalDir(subN, :)*allCons(conN, 1)>1);
@@ -191,6 +193,8 @@ for conN = 1:size(allCons, 1)
             case 1 % trials by visual motion
                 leftIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==180 & eyeTrialData.rdkCoh(subN, idxT)==allCons(conN, 2));
                 rightIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==0 & eyeTrialData.rdkCoh(subN, idxT)==allCons(conN, 2));
+%                 upIdx = find(eyeTrialData.rdkInternalDir(subN, idxT)>0 & eyeTrialData.rdkCoh(subN, idxT)==allCons(conN, 2));
+%                 downIdx = find(eyeTrialData.rdkInternalDir(subN, idxT)<0 & eyeTrialData.rdkCoh(subN, idxT)==allCons(conN, 2));
                 %             case 2 % trials by perceived motion
                 %                 upIdx = find(eyeTrialData.choice(subN, idxT)>0 & eyeTrialData.rdkDirSD(subN, idxT)==sdValue);
                 %                 downIdx = find(eyeTrialData.choice(subN, idxT)<0 & eyeTrialData.rdkDirSD(subN, idxT)==sdValue);
@@ -198,9 +202,9 @@ for conN = 1:size(allCons, 1)
         
         % individual mean traces
         indiMean.vel{conN, 1}(subN, :) = nanmean([-frames.onset{subN, internalDirN}.velX(leftIdx, 1:minFrameLength); frames.onset{subN, internalDirN}.velX(rightIdx, 1:minFrameLength)], 1);
-        indiMean.vel{conN, 2}(subN, :) = nanmean([frames.onset{subN, internalDirN}.velY(leftIdx, 1:minFrameLength); frames.onset{subN, internalDirN}.velY(rightIdx, 1:minFrameLength)], 1);
-        indiMean.pos{conN, 1}(subN, :) = nanmean([-frames.onset{subN, internalDirN}.posX(leftIdx, 1:minFrameLength); frames.onset{subN, internalDirN}.posX(rightIdx, 1:minFrameLength)], 1);
-        indiMean.pos{conN, 2}(subN, :) = nanmean([frames.onset{subN, internalDirN}.posY(leftIdx, 1:minFrameLength); frames.onset{subN, internalDirN}.posY(rightIdx, 1:minFrameLength)], 1);
+        indiMean.vel{conN, 2}(subN, :) = sign(allCons(conN, 1))*nanmean([frames.onset{subN, internalDirN}.velY(leftIdx, 1:minFrameLength); frames.onset{subN, internalDirN}.velY(rightIdx, 1:minFrameLength)], 1);
+%         indiMean.pos{conN, 1}(subN, :) = nanmean([-frames.onset{subN, internalDirN}.posX(leftIdx, 1:minFrameLength); frames.onset{subN, internalDirN}.posX(rightIdx, 1:minFrameLength)], 1);
+%         indiMean.pos{conN, 2}(subN, :) = nanmean([frames.onset{subN, internalDirN}.posY(leftIdx, 1:minFrameLength); frames.onset{subN, internalDirN}.posY(rightIdx, 1:minFrameLength)], 1);
         
         trialNumber{conN}(subN, 1) = length(leftIdx)+length(rightIdx);
     end
