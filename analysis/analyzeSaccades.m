@@ -50,6 +50,7 @@ if numel(trial.saccades.onsets_pursuit) == 0
     trial.saccades.meanAmpXRight = NaN;
     trial.saccades.meanAmpYUp = NaN;
     trial.saccades.meanAmpYDown = NaN;
+    trial.saccades.sumAmp2D = NaN;
         
 else
         trial.saccades.amplitudes2D = sqrt((trial.eyeX_filt(trial.saccades.offsets_pursuit) - trial.eyeX_filt(trial.saccades.onsets_pursuit)).^2 ...
@@ -62,6 +63,7 @@ else
         trial.saccades.meanAmpXRight = nanmean(trial.saccades.amplitudesX(trial.saccades.amplitudesX>0));
         trial.saccades.meanAmpYUp = nanmean(trial.saccades.amplitudesY(trial.saccades.amplitudesY>0));
         trial.saccades.meanAmpYDown = nanmean(trial.saccades.amplitudesY(trial.saccades.amplitudesY<=0));
+        trial.saccades.sumAmp2D = nansum(trial.saccades.amplitudes2D);
 end
 
 % xSacL = length(trial.saccades.X_left.onsets_pursuit);

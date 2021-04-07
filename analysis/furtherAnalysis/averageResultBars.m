@@ -9,16 +9,19 @@ averagePlots = 0;
 % so maybe one giant plot with each condition as one group of bars
 
 % input the parameters to plot
-% checkVariables = {'initialAccelerationFit2D', 'latency', 'gainX', 'gainY', 'gain2D', 'velCovX', 'velCovY', 'velCov2D', 'dirClp', 'dirError', 'dirGain'}; % for generating summaryData and save the mat file
-checkVariables = {'dirGain'};
+checkVariables = {'initialAccelerationFit2D', 'latency', 'gainX', 'gainY', 'gain2D', 'velCovX', 'velCovY', 'velCov2D', 'dirClp', 'dirError', 'dirGain'}; % for generating summaryData and save the mat file
+% checkVariables = {'dirGain'};
 % % for saccades
-% checkVariables = {'number', 'meanAmp2D'};
+% checkVariables = {'number', 'meanAmp2D', 'sumAmp2D'};
 
 % plot settings
 textFontSize = 8;
-barNames = {'down-0' 'down-0.5' 'down-1' 'up-0' 'up-0.5' 'up-1'}; % w00-w06
-% cons = [5, 0.5; 5, 1; 10, 0.5; 10, 1]; % for w07; first column is internal speed, second column is coh
-% barNames = {'5-coh 0.5' '5-coh 1' '10-coh 0.5' '10-coh 1'}; % w07
+% w00-w06
+% barNames = {'down-0' 'down-0.5' 'down-1' 'up-0' 'up-0.5' 'up-1'}; 
+
+% w07
+cons = [5, 0.5; 5, 1; 10, 0.5; 10, 1]; % first column is internal speed, second column is coh
+barNames = {'5-coh 0.5' '5-coh 1' '10-coh 0.5' '10-coh 1'}; % w07
 
 % flip left directions, only analyze trials with no saccadic initiation
 idxT = find(eyeTrialData.errorStatus==0 & eyeTrialData.pursuit.onsetType==0 & eyeTrialData.rdkApertureDir==180); % leftward valid trials
@@ -32,60 +35,61 @@ eyeTrialData.pursuit.dirError = abs(eyeTrialData.pursuit.dirError);
 % initialization
 summaryData = table;
 count = 1;
-for subN = 1:size(names, 2)
-    for cohN = 1:3 % w00-w06, for pursuit conditions
-%             for conN = 1:size(cons, 1) % w07
+for subN = 8:8%1:size(names, 2)
+%     for cohN = 1:3 % w00-w06, for pursuit conditions
+            for conN = 1:size(cons, 1) % w07
         
         summaryData.sub(count, 1) = subN;
         
-        % w00-w06:
         % internal direction merged
-        idxT = find(eyeTrialData.rdkCoh(subN, :)==cohCons(cohN) & ...
-            eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
-            eyeTrialData.errorStatus(subN, :)==0); % for pursuit conditions
-        summaryData.rdkCoh(count, 1) = cohCons(cohN);
         
-%                 % w07
-%                 idxT = find(eyeTrialData.rdkCoh(subN, :)==cons(conN, 2) & ...
-%                     eyeTrialData.rdkInternalSpeed(subN, :)==cons(conN, 1) & ...
-%                     eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
-%                     eyeTrialData.errorStatus(subN, :)==0);
-%                 summaryData.rdkCoh(count, 1) = cons(conN, 2);
-%                 summaryData.rdkInternalSpeed(count, 1) = cons(conN, 1);
+%         % w00-w06:
+%         idxT = find(eyeTrialData.rdkCoh(subN, :)==cohCons(cohN) & ...
+%             eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
+%             eyeTrialData.errorStatus(subN, :)==0); % for pursuit conditions
+%         summaryData.rdkCoh(count, 1) = cohCons(cohN);
+        
+                % w07
+                idxT = find(eyeTrialData.rdkCoh(subN, :)==cons(conN, 2) & ...
+                    eyeTrialData.rdkInternalSpeed(subN, :)==cons(conN, 1) & ...
+                    eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
+                    eyeTrialData.errorStatus(subN, :)==0);
+                summaryData.rdkCoh(count, 1) = cons(conN, 2);
+                summaryData.rdkInternalSpeed(count, 1) = cons(conN, 1);
         
         for varN = 1:length(checkVariables)
             if strcmp(checkVariables{varN}, 'latency') % needs to calculate from onset
                 onsetT = eyeTrialData.pursuit.onset(subN, idxT);
                 rdkOnT = eyeTrialData.frameLog.rdkOn(subN, idxT);
-%                                 % w07
-%                                 yMeanSub.(checkVariables{varN})(subN, conN) = nanmean(onsetT-rdkOnT);
-%                                 yStdSub.(checkVariables{varN})(subN, conN) = nanstd(onsetT-rdkOnT);
-                
-                % w00-w06
-                yMeanSub.(checkVariables{varN})(subN, cohN) = nanmean(onsetT-rdkOnT);
-                yStdSub.(checkVariables{varN})(subN, cohN) = nanstd(onsetT-rdkOnT);
-            else
-%                                 % w07
-% %                                 % saccade parameters
-% %                                 yMeanSub.(checkVariables{varN})(subN, conN) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-% %                                 yStdSub.(checkVariables{varN})(subN, conN) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-%                                 % pursuit parameters
-%                                 yMeanSub.(checkVariables{varN})(subN, conN) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
-%                                 yStdSub.(checkVariables{varN})(subN, conN) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+                                % w07
+                                yMeanSub.(checkVariables{varN})(subN, conN) = nanmean(onsetT-rdkOnT);
+                                yStdSub.(checkVariables{varN})(subN, conN) = nanstd(onsetT-rdkOnT);
                 
 %                 % w00-w06
+%                 yMeanSub.(checkVariables{varN})(subN, cohN) = nanmean(onsetT-rdkOnT);
+%                 yStdSub.(checkVariables{varN})(subN, cohN) = nanstd(onsetT-rdkOnT);
+            else
+                                % w07
+%                                 % saccade parameters
+%                                 yMeanSub.(checkVariables{varN})(subN, conN) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+%                                 yStdSub.(checkVariables{varN})(subN, conN) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+                                % pursuit parameters
+                                yMeanSub.(checkVariables{varN})(subN, conN) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+                                yStdSub.(checkVariables{varN})(subN, conN) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+                
+% %                 % w00-w06
 %                 % saccade parameters
 %                                 yMeanSub.(checkVariables{varN})(subN, cohN) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
 %                                 yStdSub.(checkVariables{varN})(subN, cohN) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-                % pursuit parameters
-                yMeanSub.(checkVariables{varN})(subN, cohN) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
-                yStdSub.(checkVariables{varN})(subN, cohN) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+% %                 % pursuit parameters
+% %                 yMeanSub.(checkVariables{varN})(subN, cohN) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+% %                 yStdSub.(checkVariables{varN})(subN, cohN) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
             end
-            % w00-w06
-            summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(subN, cohN);
+%             % w00-w06
+%             summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(subN, cohN);
             
-%                         % w07
-%                         summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(subN, conN);
+                        % w07
+                        summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(subN, conN);
         end
         
         %             % get the variable for plotting, internal direction not
@@ -122,14 +126,13 @@ if individualPlots
         % for the pilot data, do a giant plot including all conditions...
         figure
         hold on
-        %         % w07
-        %             b = bar(yMeanSub.(checkVariables{varN})(end, :));
+                % w07
+                    b = bar(yMeanSub.(checkVariables{varN})(end, :));
         
-        % w00-w06
-        b = bar(yMeanSub.(checkVariables{varN}));
-        legend(cohNames, 'box', 'on', 'location', 'best', 'color', 'w') % w00-w06
+%         % w00-w06
+%         b = bar(yMeanSub.(checkVariables{varN}));
         
-        for ii = 1:size(yMeanSub.(checkVariables{varN}), 2)
+        for ii = 1:1%size(yMeanSub.(checkVariables{varN}), 2)
             xtips{ii} = b(ii).XEndPoints;
             ytips{ii} = b(ii).YEndPoints;
             for jj = 1:length(b(ii).YData)
@@ -137,19 +140,25 @@ if individualPlots
             end
             text(xtips{ii},ytips{ii},labels{ii},'HorizontalAlignment','center',...
                 'VerticalAlignment','bottom')
+%             % w00-w06
+%             errorbar(xtips{ii},ytips{ii},yStdSub.(checkVariables{varN})(:, ii), 'lineStyle', 'none', 'color', 'k')
+            
+            % w07
+            errorbar(xtips{ii},ytips{ii},yStdSub.(checkVariables{varN})(end, :), 'lineStyle', 'none', 'color', 'k')
         end
-%         % w07
-%         xticks(1:length(barNames))
-%         xticklabels(barNames)
+%         % w00-w06
+%         xticks(1:length(names))
+%         xticklabels(names)
+%         legend(cohNames, 'box', 'on', 'location', 'best', 'color', 'w') % w00-w06
         
-                    % w00-w06
-                    xticks(1:length(names))
-                    xticklabels(names)
+        % w07
+        xticks(1:length(barNames))
+        xticklabels(barNames)
         
         ylabel(checkVariables{varN})
         %                 title(names{subN})
-        %             saveas(gcf, [saccadeFolder, '\fixation_sac', checkVariables{varN}, '_barplot_w07.pdf'])
-        saveas(gcf, [pursuitFolder, '\all_', checkVariables{varN}, '_barplot_w07.pdf'])
+%                     saveas(gcf, [saccadeFolder, '\fixation_sac', checkVariables{varN}, '_barplot_w07.pdf'])
+        saveas(gcf, [pursuitFolder, '\fixation_', checkVariables{varN}, '_barplot_w07.pdf'])
         
             %             figure
             %             hold on
