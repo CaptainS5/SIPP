@@ -203,8 +203,9 @@ try
             
             % For Trial Videos:
             if const.makeVideo == 1                                             % settings for single-trial video:
-                trialData.tMainSync(currentTrial, 1)        = 0;                       % can change params to show here.
-                control.frameCounter                 = 1;
+                demoN = 1;
+%                 trialData.tMainSync(currentTrial, 1)        = 0;                       % can change params to show here.
+%                 control.frameCounter                 = 1;
             end
             
             %% (3.2) Open Target-File (record displayed target path):
@@ -363,8 +364,10 @@ try
                 
                 % Trial Video:
                 if const.makeVideo == 1                                         % if making video, here images are taken of each frame
-                    imageArray(:,:,:,control.frameCounter) = Screen('GetImage',screen.window);
-                    control.frameCounter = control.frameCounter + 1;            % update frameCounter
+                    imgDemo{demoN} = Screen('GetImage', screen.window); %, [], 'backbuffer');
+                    demoN = demoN + 1;
+%                     imageArray(:,:,:,control.frameCounter) = Screen('GetImage',screen.window);
+%                     control.frameCounter = control.frameCounter + 1;            % update frameCounter
                 end
                 
                 %% (4.5) End the trial (i.e. break while-loop; stop DPI recording)
@@ -447,16 +450,23 @@ try
             
             %% (5.4) Create Video, if chosen:
             if const.makeVideo == 1                                             % put the single images into a video clip:
-                if ~exist('./data/video', 'dir'); mkdir('./data/video'); end
-                m = cat(4,imageArray);
-                vidName = input(sprintf('\n\tVideo name:\t'),'s');
-                fprintf('\n\tProcessing video - please wait...\n')
-                writerObj = VideoWriter(sprintf('./data/video/%s',vidName),'MPEG-4');
-                writerObj.FrameRate = 120;
-                writerObj.Quality = 100;
-                open(writerObj);
-                writeVideo(writerObj,m);
-                close(writerObj);
+                demoName = input(sprintf('\n\tDemo video name:\t'),'s');
+                
+                if ~exist(['./demoVideo/', demoName], 'dir'); mkdir(['./demoVideo/', demoName]); end
+                
+                for ii = 1:length(imgDemo)
+                    imwrite(imgDemo{ii}, ['./demoVideo/' demoName, '/', 'frame', num2str(ii), '.jpg'])
+                end
+                % edit the demo later in that folder...
+%                 m = cat(4,imageArray);
+%                 vidName = input(sprintf('\n\tVideo name:\t'),'s');
+%                 fprintf('\n\tProcessing video - please wait...\n')
+%                 writerObj = VideoWriter(sprintf('./data/video/%s',vidName),'MPEG-4');
+%                 writerObj.FrameRate = 120;
+%                 writerObj.Quality = 100;
+%                 open(writerObj);
+%                 writeVideo(writerObj,m);
+%                 close(writerObj);
             end
             
             %% (5.5) Update trial counter

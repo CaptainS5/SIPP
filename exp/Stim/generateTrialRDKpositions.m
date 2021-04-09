@@ -24,7 +24,7 @@ else
     rdkInternalDir = control.rdkApertureDir+control.rdkInternalDir;
 end
 
-if const.startExp==1 % actual experiment, translating aperture
+if const.startExp==1 || const.startExp==0 % actual experiment, translating aperture
     % since in PTB it is up-negative, down-positive, and the polar direction is
     % "circular", need to be careful about the correspondence--eventually, an
     % internal dir of 45 means 45 degs above the moving direction. To match
@@ -112,7 +112,7 @@ dots.movement{1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanc
 
 % generate the dot matrices of the RDK for the whole trial
 for frameN = 1:rdkFrames-1
-    if const.startExp==1
+    if const.startExp==1 || const.startExp==0
         % update the center position of the translating aperture
         rdkControl.apertureCenterPos{frameN+1} = [rdkControl.apertureCenterPos{frameN}(1)+moveDistanceAperture, rdkControl.apertureCenterPos{frameN}(2)];
 %         % if needed (dots translate together with the aperture), update the
@@ -171,6 +171,21 @@ for frameN = 1:rdkFrames-1
     dotDist = rdkControl.dotPos{frameN+1}(:, 1).^2 + ...
        ((rdkControl.dotPos{frameN+1}(:, 2)/screen.pixelRatioWidthPerHeight)).^2;
     outDots = find(dotDist>dotFieldRadiusX^2); % all dots out of the aperture
-    % move dots in the aperture from the opposite edge, continue the assigned motion
-    rdkControl.dotPos{frameN+1}(outDots, :) = -rdkControl.dotPos{frameN+1}(outDots, :)+dots.movement{frameN}(outDots, :);
+    % simply generate new random positions for these dots--to avoid
+    % opposite direction at the edge of a small aperture (for example, 
+    % signal direction is up, a dot is at the left edge of a 1deg-RDK, two
+    % steps it will move out of the aperture, then it could look like moving
+    % downward constantly...)
+    if outDots
+        dotsN = length(outDots);
+        dis2CenterX = dotFieldRadiusX * sqrt((rand(dotsN,1)));
+        theta = 2 * pi * rand(dotsN,1);
+        % generate new positions
+        rdkControl.dotDir(frameN+1, outDots) = -theta; % in radians, for this up is positive and down is negative
+        rdkControl.dotPos{frameN+1}(outDots, :) = [cos(theta) sin(theta)] .* [dis2CenterX dis2CenterX*screen.pixelRatioWidthPerHeight];
+        dots.showTime{frameN+1}(outDots) = rdkLifeTime;
+    end
+    
+%     % move dots in the aperture from the opposite edge, continue the assigned motion
+%     rdkControl.dotPos{frameN+1}(outDots, :) = -rdkControl.dotPos{frameN+1}(outDots, :)+dots.movement{frameN}(outDots, :);
 end

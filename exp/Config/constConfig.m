@@ -15,7 +15,7 @@ function [const] = constConfig(screen, const, sbj)
 %%
 if sbj.block == 1 && sbj.trial==1
     % Some dsign-related things (These will be used in paramConfig):
-    if const.startExp==1
+    if const.startExp==1 || const.startExp==0
         if const.internalOnsetType==1 % constant internal motion
             const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
         elseif const.internalOnsetType==2 % perturbation of internal motion
@@ -60,17 +60,17 @@ if sbj.block == 1 && sbj.trial==1
 %     else % dots move together with the aperture
         const.rdk.dotFieldRadius = const.rdk.apertureRadius;
 %     end
-    const.rdk.apertureSpeed = 10; % dva per sec
+    const.rdk.apertureSpeed = 0; % dva per sec
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
-    const.rdk.apertureDir = [180 0]; % left and right    
+    const.rdk.apertureDir = [0]; % left and right    
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
-    const.rdk.coh = [0 .5 1]; % for classical RDKs
+    const.rdk.coh = [1]; % for classical RDKs
 %     if const.apertureType==0
         %% for aperture type 0, simply define the relative retinal motion of the
         % internal dots:
         const.rdk.internalSpeed = 5; % speed of each internal dot
-        const.rdk.internalDir = [90 -90]; % 45: above the aperture direction; -45: below the aperture direction
+        const.rdk.internalDir = [-45]; % 45: above the aperture direction; -45: below the aperture direction
 %     else
 %         %% for aperture type 1, calculate the parameters to reach the same retinal motion as in aperture type 0
 %         retinalMotionSpeed = 5; % the same as const.rdk.internalSpeed for aperture type 0

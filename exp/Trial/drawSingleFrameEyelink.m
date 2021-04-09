@@ -57,7 +57,7 @@ switch control.mode
         stepTime = 0.15; % how many secs it takes for the aperture center to move from the step to the fixation
         [stepDis, ] = dva2pxl(const.rdk.apertureSpeed*stepTime, const.rdk.apertureSpeed*stepTime, screen);
         
-        if const.startExp==1
+        if const.startExp==1 || const.startExp==0
             if control.rdkApertureDir==0 % moving rightward
                 fixationCenter = [rdkControl.apertureCenterPos{1}(1)+stepDis, rdkControl.apertureCenterPos{1}(2)];
             else % moving leftward

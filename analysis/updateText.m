@@ -58,14 +58,14 @@ if trial.log.rdkApertureDir==0
 else
     rdkDir = 'left';
 end
-if trial.log.rdkInternalDir>0
-    sdText = 'up';
-else
-    sdText = 'down';
-end
+% if trial.log.rdkInternalDir>0
+%     sdText = 'up';
+% else
+%     sdText = 'down';
+% end
 textblock = textblock+1;
 trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['RDK: ' rdkDir ',', num2str(trial.log.rdkCoh), ',', sdText],...
+    'String', ['RDK: ' rdkDir ',', num2str(trial.log.rdkCoh), ',', num2str(trial.log.rdkInternalDir)],...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
 
