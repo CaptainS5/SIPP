@@ -4,7 +4,7 @@
 
 clear all; close all; clc
 
-names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07'};
+names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07' 'w08' 'w09' 'w10'};
 subStartI = 1;
 
 cd ..
@@ -32,7 +32,7 @@ for subN = subStartI:length(names)
     
     clear eyeTrialDataSub
     
-    if strcmp(currentSubject, 'w07') % fixation condition...
+    if strcmp(currentSubject, 'w07') || strcmp(currentSubject, 'w10') % fixation condition...
         % saccade algorithm threshold
         saccadeThreshold = 300; % acceleration
         microSaccadeThreshold = 200;
@@ -76,6 +76,7 @@ for subN = subStartI:length(names)
             eyeTrialData.saccades.meanAmpXRight(subN, currentTrial) = trial.saccades.meanAmpXRight;
             eyeTrialData.saccades.meanAmpYUp(subN, currentTrial) = trial.saccades.meanAmpYUp;
             eyeTrialData.saccades.meanAmpYDown(subN, currentTrial) = trial.saccades.meanAmpYDown;
+            eyeTrialData.saccades.sumAmp2D(subN, currentTrial) = trial.saccades.sumAmp2D;
 
             %                 % record saccades in both directions...
             % %                 if trial. log.rdkDir>0 || (trial.log.rdkDir==0 && trial.pursuit.closedLoopMeanVelX>=0)% first use rdk dir to judge, then see pursuit; trial.pursuit.closedLoopMeanVelX>=0 % right ward pursuit
@@ -142,6 +143,7 @@ for subN = subStartI:length(names)
             eyeTrialData.saccades.meanAmpXRight(subN, currentTrial) = NaN;
             eyeTrialData.saccades.meanAmpYUp(subN, currentTrial) = NaN;
             eyeTrialData.saccades.meanAmpYDown(subN, currentTrial) = NaN;
+            eyeTrialData.saccades.sumAmp2D(subN, currentTrial) = NaN;
             
             eyeTrialDataSub.trial{1, currentTrial} = NaN; % for velocity traces
         end

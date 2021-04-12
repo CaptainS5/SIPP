@@ -208,11 +208,11 @@ for ii = 1:length(onsets)
     
     % check if overlapping with the previous saccade
     if ii>1 && onsets(ii)<=offsets(ii-1)
-        onsets(ii) = offsets(ii-1)+1;
+        onsets(ii) = offsets(ii-1)+2; % so that consecutive saccades will not be count as one later...
     end
     % check if overlapping with the next potential saccade
     if ii<length(onsets) && offsets(ii)>=binEdges(onsetIntervals(ii+1))
-        offsets(ii) = binEdges(onsetIntervals(ii+1))-1;
+        offsets(ii) = binEdges(onsetIntervals(ii+1))-2;
     end
     %     % can use jerk as a sanity check, does this interval really contain a
     %     % saccade? not necessary in most cases...

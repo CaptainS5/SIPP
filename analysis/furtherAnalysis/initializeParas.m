@@ -3,7 +3,7 @@
 
 clear all; close all; clc
 
-names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07'};
+names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07' 'w08' 'w09' 'w10'};
 
 internalDirCons = [-1 1]; % -1:left, 1-right
 cohCons = [0 0.5 1]; % RDK coherence

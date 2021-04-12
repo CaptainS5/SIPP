@@ -33,6 +33,11 @@ trial.eyeDDDY = eyeData.DDDY;
 trial.log.subject = currentSubject;
 trial.log.trialNumber = currentTrial;
 trialIdxInData = eventLog.trialIdxInData(currentTrial, 1);
+if Experiment.const.startExp==-1
+    trial.log.eyeType = 0; % fixation condition
+elseif Experiment.const.startExp==1
+    trial.log.eyeType = 1; % pursuit condition
+end
 trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
 trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % positive is up, negative is down
 trial.log.rdkInternalDir = Experiment.trialData.rdkInternalDir(trialIdxInData, 1); % direction std
