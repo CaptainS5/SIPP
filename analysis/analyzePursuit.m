@@ -127,20 +127,24 @@ if pursuit.closedLoopDuration < 0 % closed loop phase too short
     pursuit.gain2D = NaN;
 else
     % the averaged target vector (external+internal)
+    externalVecX = trial.target.velocityX;
+    externalVecY = 0;
     if trial.log.rdkCoh==0
-        vecX = trial.target.velocityX;
-        vecY = 0;
+        internalVecX = 0;
+        internalVecY = 0;
     else
         if trial.log.rdkApertureDir==0 % rightward
-            vecX = trial.target.velocityX+trial.log.rdkInternalSpeed.*cos(trial.log.rdkInternalDir/180*pi);
+            internalVecX = trial.log.rdkInternalSpeed.*cos(trial.log.rdkInternalDir/180*pi);
         else
-            vecX = trial.target.velocityX+trial.log.rdkInternalSpeed.*cos((180-trial.log.rdkInternalDir)/180*pi);
+            internalVecX = trial.log.rdkInternalSpeed.*cos((180-trial.log.rdkInternalDir)/180*pi);
         end
-        vecY = trial.log.rdkInternalSpeed.*sin(trial.log.rdkInternalDir/180*pi);
+        internalVecY = trial.log.rdkInternalSpeed.*sin(trial.log.rdkInternalDir/180*pi);
     end
+    averageVecX = externalVecX+internalVecX;
+    averageVecY = externalVecY+internalVecY;
     % make them into vectors the same length as eye velocity
-    vecX = repmat(vecX, size(trial.DX_noSac));
-    vecY = repmat(vecY, size(trial.DX_noSac));
+    averageVecX = repmat(averageVecX, size(trial.DX_noSac));
+    averageVecY = repmat(averageVecY, size(trial.DX_noSac));
     
     % calculate gain first,  the ratio of magnitude only
     % horizontal pursuit gain, if only account for external aperture motion
@@ -152,7 +156,7 @@ else
     pursuit.gainXexternal = nanmean(pursuitGainX(closedLoopFrames));
     pursuit.gainXexternal(pursuit.gainXexternal>2.5) = NaN;
     % horizontal gain in relation to average target motion
-    targetVelX = vecX;
+    targetVelX = averageVecX;
     targetVelX(abs(targetVelX) < 0.05) = NaN;        
     pursuitGainX = trial.DX_noSac./targetVelX; 
     zScore = zscore(pursuitGainX(~isnan(pursuitGainX)));
@@ -169,7 +173,7 @@ else
     pursuit.gainYinternal = nanmean(pursuitGainY(closedLoopFrames));
     pursuit.gainYinternal(pursuit.gainYinternal>2.5) = NaN;
     % vertical pursuit gain, in relation to average target motion
-    targetVelY = vecY;
+    targetVelY = averageVecY;
     targetVelY(abs(targetVelY) < 0.05) = NaN;        
     pursuitGainY = trial.DY_noSac./targetVelY; 
     zScore = zscore(pursuitGainY(~isnan(pursuitGainY)));
@@ -180,7 +184,7 @@ else
     % pursuit gain, if account for external+internal vector average
     speedXY_noSac = sqrt(trial.DX_noSac.^2 + trial.DY_noSac.^2); 
     % calculate the averaged vector velocity in 2D
-    absoluteTargetVel = sqrt(vecX.^2 + vecY.^2);
+    absoluteTargetVel = sqrt(averageVecX.^2 + averageVecY.^2);
     absoluteTargetVel(absoluteTargetVel < 0.05) = NaN;        
     pursuitGain = (speedXY_noSac)./absoluteTargetVel; 
     zScore = zscore(pursuitGain(~isnan(pursuitGain)));
@@ -190,9 +194,9 @@ else
     
     % consider the direction as well, the ratio of (magnitude of projection on the target velocity direction)/(magnitude of target velocity) 
     eyeDot = [trial.DX_noSac'; trial.DY_noSac'];
-    targetDot = [vecX'; vecY'];
+    targetDot = [averageVecX'; averageVecY'];
     dotProduct = dot(eyeDot, targetDot)';
-    dirGainAll = dotProduct./(vecX.^2 + vecY.^2);
+    dirGainAll = dotProduct./(averageVecX.^2 + averageVecY.^2);
     pursuit.dirGain = nanmean(dirGainAll(closedLoopFrames));
     
     % the mean direction of eye velocity
@@ -221,7 +225,7 @@ else
     % the mean direction error of eye velocity compared to averaged target
     % velocity (external+internal)
     % normalize target velocity vectors
-    targetDir = [vecX, vecY];
+    targetDir = [averageVecX, averageVecY];
     normTarget = vecnorm(targetDir, 2, 2);
     targetDir = targetDir./repmat(normTarget, 1, 2);
     % now calculate the angle between each pairs of the vectors

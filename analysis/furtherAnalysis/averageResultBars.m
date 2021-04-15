@@ -9,10 +9,10 @@ averagePlots = 0;
 % so maybe one giant plot with each condition as one group of bars
 
 % input the parameters to plot
-checkVariables = {'initialAccelerationFit2D', 'latency', 'gainXexternal', 'gainXaverage', 'gainYaverage', 'velCovX', 'velCovY', 'velCov2D', 'dirClp', 'dirError', 'dirGain'}; % for generating summaryData and save the mat file
-% checkVariables = {'dirError'};
-% % for saccades
-% checkVariables = {'number', 'meanAmp2D', 'sumAmp2D'};
+% checkVariables = {'initialAccelerationFit2D', 'latency', 'gainXexternal', 'gainXaverage', 'gainYinternal', 'gainYaverage', 'velCovX', 'velCovY', 'velCov2D', 'dirClp', 'dirError', 'dirGain'}; % for generating summaryData and save the mat file
+% checkVariables = {'gainXexternal', 'gainYinternal', 'velCovX', 'velCovY', 'velCov2D', 'dirClp', 'dirError', 'dirGain'};
+% for saccades
+checkVariables = {'number', 'meanAmp2D', 'sumAmp2D'};
 
 % plot settings
 textFontSize = 8;
@@ -34,6 +34,10 @@ plotSub = {'w01' 'w08' 'w03' 'w09'};
 cons = [45; 90; 135]; % absolute internal direction
 legendNames = {'unlimited lifetime' '200ms lifetime'};
 
+% % w10
+% cons = [0; 1];
+% barNames = {'coh 0' 'coh-1'};
+
 % flip left directions
 idxT = find(eyeTrialData.errorStatus==0 & eyeTrialData.rdkApertureDir==180); % leftward valid trials
 eyeTrialData.pursuit.dirClpX(idxT) = -eyeTrialData.pursuit.dirClpX(idxT);
@@ -47,117 +51,126 @@ count = 1;
 %%
 for subPlotN = 1:size(plotSub, 2)
     subN = find(strcmp(names, plotSub{subPlotN}));
-    for conN = 1:size(cons, 1) % w00-w06, w08; w07; w01, w08, w03, w09
+    for conN = 1:size(cons, 1) % w00-w06, w08; w07; w01, w08, w03, w09; w10
         % for conN = 1:1 % w07&w10
         
         summaryData.sub(count, 1) = subPlotN;
         
         % internal direction merged
         
-        %         % w00-w06, w08:
-        %         idxT = find(eyeTrialData.rdkCoh(subN, :)==cons(conN) & ...
-        %             eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
-        %             eyeTrialData.errorStatus(subN, :)==0); % for pursuit conditions
-        %         summaryData.rdkCoh(count, 1) = cohCons(cohN);
+%         % w00-w06, w08
+%         idxT = find(eyeTrialData.rdkCoh(subN, :)==cons(conN) & ...
+%             eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
+%             eyeTrialData.errorStatus(subN, :)==0); % for pursuit conditions
+%         summaryData.rdkCoh(count, 1) = cons(conN);
+
+% % w10
+%         idxT = find(eyeTrialData.rdkCoh(subN, :)==cons(conN) & ...
+%             eyeTrialData.errorStatus(subN, :)==0); % for pursuit conditions
+%         summaryData.rdkCoh(count, 1) = cons(conN);
         
-        %                 % w07
-        %                 idxT = find(eyeTrialData.rdkCoh(subN, :)==cons(conN, 2) & ...
-        %                     eyeTrialData.rdkInternalSpeed(subN, :)==cons(conN, 1) & ...
-        %                     eyeTrialData.errorStatus(subN, :)==0);
-        %                 summaryData.rdkCoh(count, 1) = cons(conN, 2);
-        %                 summaryData.rdkInternalSpeed(count, 1) = cons(conN, 1);
+        %                         % w07
+        %                         idxT = find(eyeTrialData.rdkCoh(subN, :)==cons(conN, 2) & ...
+        %                             eyeTrialData.rdkInternalSpeed(subN, :)==cons(conN, 1) & ...
+        %                             eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
+        %                             eyeTrialData.errorStatus(subN, :)==0);
+        %                         summaryData.rdkCoh(count, 1) = cons(conN, 2);
+        %                         summaryData.rdkInternalSpeed(count, 1) = cons(conN, 1);
         
         % % w07&w10
         % idxT = find(eyeTrialData.rdkCoh(subN, :)==1 & ...
         %     eyeTrialData.rdkInternalSpeed(subN, :)==5 & ...
+        %         eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
         %     eyeTrialData.errorStatus(subN, :)==0);
         % summaryData.rdkCoh(count, 1) = 1;
         % summaryData.rdkInternalSpeed(count, 1) = 5;
         
-        % w01, w08, w03, w09
-        if strcmp(plotSub(subPlotN), 'w09')
-            idxT = find(eyeTrialData.rdkCoh(subN, :)==1 & ...
-                eyeTrialData.rdkInternalSpeed(subN, :)==5 & ...
-                abs(eyeTrialData.rdkInternalDir(subN, :))==cons(conN) & ...
-                eyeTrialData.errorStatus(subN, :)==0);
-            summaryData.rdkInternalDir(count, 1) = cons(conN);
-        else
-            idxT = find(eyeTrialData.rdkCoh(subN, :)==1 & ...
-                eyeTrialData.rdkInternalSpeed(subN, :)==5 & ...
-                eyeTrialData.errorStatus(subN, :)==0);
-            summaryData.rdkInternalDir(count, 1) = cons(subPlotN);
-            conN = subPlotN;
-        end
-        summaryData.rdkCoh(count, 1) = 1;
-        summaryData.rdkInternalSpeed(count, 1) = 5;
+                % w01, w08, w03, w09
+                if strcmp(plotSub(subPlotN), 'w09')
+                    idxT = find(eyeTrialData.rdkCoh(subN, :)==1 & ...
+                        eyeTrialData.rdkInternalSpeed(subN, :)==5 & ...
+                        abs(eyeTrialData.rdkInternalDir(subN, :))==cons(conN) & ...
+        eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
+                        eyeTrialData.errorStatus(subN, :)==0);
+                    summaryData.rdkInternalDir(count, 1) = cons(conN);
+                else
+                    idxT = find(eyeTrialData.rdkCoh(subN, :)==1 & ...
+                        eyeTrialData.rdkInternalSpeed(subN, :)==5 & ...
+        eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
+                        eyeTrialData.errorStatus(subN, :)==0);
+                    summaryData.rdkInternalDir(count, 1) = cons(subPlotN);
+                    conN = subPlotN;
+                end
+                summaryData.rdkCoh(count, 1) = 1;
+                summaryData.rdkInternalSpeed(count, 1) = 5;
         
         for varN = 1:length(checkVariables)
             if strcmp(checkVariables{varN}, 'latency') % needs to calculate from onset
                 onsetT = eyeTrialData.pursuit.onset(subN, idxT);
                 rdkOnT = eyeTrialData.frameLog.rdkOn(subN, idxT);
                 
-                % w01, w08, w03, w09
-                if strcmp(plotSub(subPlotN), 'w09')
-                    yMeanSub.(checkVariables{varN})(conN, 2) = nanmean(onsetT-rdkOnT);
-                    yStdSub.(checkVariables{varN})(conN, 2) = nanstd(onsetT-rdkOnT);
-                else
-                    yMeanSub.(checkVariables{varN})(conN, 1) = nanmean(onsetT-rdkOnT);
-                    yStdSub.(checkVariables{varN})(conN, 1) = nanstd(onsetT-rdkOnT);
-                end
+                                % w01, w08, w03, w09
+                                if strcmp(plotSub(subPlotN), 'w09')
+                                    yMeanSub.(checkVariables{varN})(conN, 2) = nanmean(onsetT-rdkOnT);
+                                    yStdSub.(checkVariables{varN})(conN, 2) = nanstd(onsetT-rdkOnT);
+                                else
+                                    yMeanSub.(checkVariables{varN})(conN, 1) = nanmean(onsetT-rdkOnT);
+                                    yStdSub.(checkVariables{varN})(conN, 1) = nanstd(onsetT-rdkOnT);
+                                end
                 
-                %                 % w00-w06, w08; w07; w07&w10
-                %                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(onsetT-rdkOnT);
-                %                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(onsetT-rdkOnT);
+%                 % w00-w06, w08; w07; w07&w10; w10
+%                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(onsetT-rdkOnT);
+%                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(onsetT-rdkOnT);
             elseif strcmp(checkVariables{varN}, 'dirClp') % needs to calculate from vectors
                 dir = atan2(eyeTrialData.pursuit.dirClpY(subN, idxT), eyeTrialData.pursuit.dirClpX(subN, idxT))/pi*180;
                 
-                %                 % w00-w06, w08; w07; w07&w10
-                %                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(dir);
-                %                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(dir);
+%                 % w00-w06, w08; w07; w07&w10; w10
+%                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(dir);
+%                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(dir);
                 
-                % w01, w08, w03, w09
-                if strcmp(plotSub(subPlotN), 'w09')
-                    yMeanSub.(checkVariables{varN})(conN, 2) = nanmean(dir);
-                    yStdSub.(checkVariables{varN})(conN, 2) = nanstd(dir);
-                else
-                    yMeanSub.(checkVariables{varN})(conN, 1) = nanmean(dir);
-                    yStdSub.(checkVariables{varN})(conN, 1) = nanstd(dir);
-                end
+                                % w01, w08, w03, w09
+                                if strcmp(plotSub(subPlotN), 'w09')
+                                    yMeanSub.(checkVariables{varN})(conN, 2) = nanmean(dir);
+                                    yStdSub.(checkVariables{varN})(conN, 2) = nanstd(dir);
+                                else
+                                    yMeanSub.(checkVariables{varN})(conN, 1) = nanmean(dir);
+                                    yStdSub.(checkVariables{varN})(conN, 1) = nanstd(dir);
+                                end
             else
-                % w01, w08, w03, w09
-                if strcmp(plotSub(subPlotN), 'w09')
-%                     % saccade parameters
-%                     yMeanSub.(checkVariables{varN})(2, conN) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-%                     yStdSub.(checkVariables{varN})(2, conN) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-                    % pursuit parameters
-                    yMeanSub.(checkVariables{varN})(conN, 2) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
-                    yStdSub.(checkVariables{varN})(conN, 2) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
-                else
-%                     % saccade parameters
-%                     yMeanSub.(checkVariables{varN})(1, conN) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-%                     yStdSub.(checkVariables{varN})(1, conN) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-                    % pursuit parameters
-                    yMeanSub.(checkVariables{varN})(conN, 1) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
-                    yStdSub.(checkVariables{varN})(conN, 1) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
-                end
+                                % w01, w08, w03, w09
+                                if strcmp(plotSub(subPlotN), 'w09')
+                                    % saccade parameters
+                                    yMeanSub.(checkVariables{varN})(conN, 2) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+                                    yStdSub.(checkVariables{varN})(conN, 2) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+%                                     % pursuit parameters
+%                                     yMeanSub.(checkVariables{varN})(conN, 2) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+%                                     yStdSub.(checkVariables{varN})(conN, 2) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+                                else
+                                    % saccade parameters
+                                    yMeanSub.(checkVariables{varN})(conN, 1) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+                                    yStdSub.(checkVariables{varN})(conN, 1) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+%                                     % pursuit parameters
+%                                     yMeanSub.(checkVariables{varN})(conN, 1) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+%                                     yStdSub.(checkVariables{varN})(conN, 1) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+                                end
                 
-                %                 % w00-w06, w08; w07; w07&w10
-                %                 % saccade parameters
-                %                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-                %                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-                %                 %                                 % pursuit parameters
-                %                 %                                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
-                %                 %                                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+%                 % w00-w06, w08; w07; w07&w10; w10
+%                                                 % saccade parameters
+%                                                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+%                                                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+% %                 % pursuit parameters
+% %                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+% %                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
             end
-            %             % w00-w06, w08; w07; w07&w10
-            %             summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(subPlotN, conN);
+%             % w00-w06, w08; w07; w07&w10; w10
+%             summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(subPlotN, conN);
             
-            % w01, w08, w03, w09
-            if strcmp(plotSub(subPlotN), 'w09')
-                 summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(conN, 2);
-            else
-                 summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(conN, 1);
-            end
+                        % w01, w08, w03, w09
+                        if strcmp(plotSub(subPlotN), 'w09')
+                             summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(conN, 2);
+                        else
+                             summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(conN, 1);
+                        end
             
         end
         
@@ -184,10 +197,10 @@ for subPlotN = 1:size(plotSub, 2)
         %                 summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN}){subN}(internalDirN, cohN);
         %             end
         count = count+1;
-        % w01, w08, w03, w09
-        if ~strcmp(plotSub(subPlotN), 'w09')
-            break
-        end
+                % w01, w08, w03, w09
+                if ~strcmp(plotSub(subPlotN), 'w09')
+                    break
+                end
     end
     %     end
 end
@@ -199,11 +212,11 @@ if individualPlots
         % for the pilot data, do a giant plot including all conditions...
         figure
         hold on
-        %         % w07
-        %         b = bar(yMeanSub.(checkVariables{varN})(end, :));
+%         % w07; w10
+%         b = bar(yMeanSub.(checkVariables{varN})(end, :));
         
-        % w00-w06, w08; w07&w10; w01, w08, w03, w09
-        b = bar(yMeanSub.(checkVariables{varN}));
+                % w00-w06, w08; w07&w10; w01, w08, w03, w09
+                b = bar(yMeanSub.(checkVariables{varN}));
         
         for ii = 1:size(yMeanSub.(checkVariables{varN}), 2)
             xtips{ii} = b(ii).XEndPoints;
@@ -213,30 +226,30 @@ if individualPlots
             end
             text(xtips{ii},ytips{ii},labels{ii},'HorizontalAlignment','center',...
                 'VerticalAlignment','bottom')
-            % w00-w06, w08; w07&w10; w01, w08, w03, w09
-            errorbar(xtips{ii},ytips{ii},yStdSub.(checkVariables{varN})(:, ii), 'lineStyle', 'none', 'color', 'k')
+                        % w00-w06, w08; w07&w10; w01, w08, w03, w09
+                        errorbar(xtips{ii},ytips{ii},yStdSub.(checkVariables{varN})(:, ii), 'lineStyle', 'none', 'color', 'k')
             
-            %             % w07
-            %             errorbar(xtips{ii},ytips{ii},yStdSub.(checkVariables{varN})(end, :), 'lineStyle', 'none', 'color', 'k')
+%             % w07; w10
+%             errorbar(xtips{ii},ytips{ii},yStdSub.(checkVariables{varN})(end, :), 'lineStyle', 'none', 'color', 'k')
         end
         %         % w00-w06, w08
         %         xticks(1:length(plotSub))
         %         xticklabels(plotSub)
         %         legend(cohNames, 'box', 'on', 'location', 'best', 'color', 'w') % w00-w06
         
-        % w01, w08, w03, w09
-        xticks(1:3)
-        xticklabels({'45', '90', '135'})
-        legend(legendNames, 'box', 'on', 'location', 'best', 'color', 'w') % w00-w06
+                % w01, w08, w03, w09
+                xticks(1:3)
+                xticklabels({'45', '90', '135'})
+                legend(legendNames, 'box', 'on', 'location', 'best', 'color', 'w') % w00-w06
         
-%         % w07; w07&w10
+%         % w07; w07&w10; w10
 %         xticks(1:length(barNames))
 %         xticklabels(barNames)
         
         ylabel(checkVariables{varN})
         %                 title(names{subN})
-%         saveas(gcf, [saccadeFolder, '\pursuit_sac_', checkVariables{varN}, '_barplot_w09w010308.pdf'])
-                saveas(gcf, [pursuitFolder, '\fixation_', checkVariables{varN}, '_barplot_w09w010308.pdf'])
+                saveas(gcf, [saccadeFolder, '\pursuit_sac_', checkVariables{varN}, '_barplot_w09w010308.pdf'])
+%         saveas(gcf, [pursuitFolder, '\fixation_', checkVariables{varN}, '_barplot_w10.pdf'])
         
         %             figure
         %             hold on
