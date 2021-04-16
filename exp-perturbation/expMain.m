@@ -136,18 +136,17 @@ try
             trialDataNew.tRDKon(:, 1)        = NaN;
             trialDataNew.tPerturbationOn(:, 1) = NaN;
             trialDataNew.tRDKoff(:, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
-            %             trialDataNew.tResponse(:, 1)          = NaN;               % also the end of the trial
+            trialDataNew.tResponse(:, 1)          = NaN;               % also the end of the trial
             trialDataNew.t_start_VBL(:, 1:5)        = NaN;
             trialDataNew.t_rdkOn_VBL(:, 1:5)         = NaN;
             trialDataNew.t_perturbationOn_VBL(:, 1:5)         = NaN;
             trialDataNew.t_rdkOff_VBL(:, 1:5)        = NaN;
-            %             trialDataNew.t_response_VBL(:, 1:5)        = NaN;
+            trialDataNew.t_response_VBL(:, 1:5)        = NaN;
             trialDataNew.iterations(:, 1)        = NaN;
-            %             trialDataNew.choice(:, 1)          = NaN; % -1=up, 1=down
-            %             trialDataNew.choiceCorrect(:, 1)          = NaN; % 0=wrong, 1=correct
+            trialDataNew.choice(:, 1)          = NaN; % -1=up, 1=down
+            trialDataNew.choiceCorrect(:, 1)          = NaN; % 0=wrong, 1=correct
             trialDataNew.repeat(:, 1)          = 0; % if the trial was repeated, mark repeat as 1
             trialDataNew.trialCounter           = [1:size(trialDataNew, 1)]';
-            %             trialDataNew.rdkFrameResponse(:, 1) = NaN;
             trialData = [trialData; trialDataNew]; % fill in trialData with the trial conditions of the current block
         end
         if block==sbj.block
@@ -358,20 +357,19 @@ try
                     % initialize trial information for the added trial
                     trialData.tMainSync(end, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
                     trialData.tRDKon(end, 1)        = NaN;
-                    trialData.tPerturbationOn_VBL(end, 1)         = NaN;
+                    trialData.tPerturbationOn(end, 1)         = NaN;
                     trialData.tRDKoff(end, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
-                    %                     trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
+                    trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
                     trialData.t_start_VBL(end, 1:5)        = NaN;
                     trialData.t_rdkOn_VBL(end, 1:5)         = NaN;
                     trialData.t_perturbationOn_VBL(:, 1:5)         = NaN;
                     trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
-                    %                     trialData.t_response_VBL(end, 1:5)        = NaN;
+                    trialData.t_response_VBL(end, 1:5)        = NaN;
                     trialData.iterations(end, 1)        = NaN;
-                    %                     trialData.choice(end, 1)          = NaN; % -1=up, 1=down
-                    %                     trialData.choiceCorrect(end, 1)          = NaN; % 0=wrong, 1=correct
+                    trialData.choice(end, 1)          = NaN; % -1=up, 1=down
+                    trialData.choiceCorrect(end, 1)          = NaN; % 0=wrong, 1=correct
                     trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
                     trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
-                    %                     trialData.rdkFrameResponse(end, 1) = NaN;
                     
                     WaitSecs(1) % show the information on the screen
                     break
@@ -401,13 +399,33 @@ try
                 end
                 
                 % check key press
-                [bPressed keyPressed] = PTBcheck_key_press([keys.escape, keys.recalibration]);
+                [bPressed keyPressed] = PTBcheck_key_press([keys.up, keys.down, keys.escape, keys.recalibration]);
                 if keyPressed==keys.escape
                     fprintf('EXP: Experiment aborted by pressing esc key \n');
                     control.abort = 1;
                     break;                                                      % BREAK the while loop, if trial was aborted by ESC press
                 elseif keyPressed==keys.recalibration
                     control.forceRecalibEL = 1;
+                elseif bPressed % response
+                    control.mode = 4;
+                    if eyelink.mode
+                        Eyelink('Message', 'respond');
+                    end
+                    trialData.tResponse(currentTrial, 1) = control.data_time;
+                    trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
+                    if keyPressed==keys.up
+                        trialData.choice(control.currentTrial, 1) = 1; % the same sign as the direction mean defined, positive is up
+                    elseif keyPressed==keys.down
+                        trialData.choice(control.currentTrial, 1) = -1;
+                    end
+                                        
+                    if trialData.choice(control.currentTrial, 1)*trialData.rdkApertureDirPerturbation(control.currentTrial, 1)>0
+%                         text = 'correct';
+                        trialData.choiceCorrect(control.currentTrial, 1) = 1; % record if the response is correct
+                    else
+%                         text = 'wrong';
+                        trialData.choiceCorrect(control.currentTrial, 1) = 0;
+                    end
                 end
                 
                 % check forced Recalibration:

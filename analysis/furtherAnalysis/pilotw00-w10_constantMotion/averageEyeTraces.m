@@ -6,8 +6,8 @@ initializeParas;
 individualPlots = 1;
 averagedPlots = 0;
 textFontSize = 8;
-subStart = 1;
-subEnd = 2;
+subStart = 8;
+subEnd = 8;
 
 groupName = {'visualDir'};
 % naming by trial type (could include grouping rules) + group based on which direction (visual or perceived)
@@ -15,8 +15,20 @@ groupN = [1]; % corresponds to the listed rules... can choose multiple, just lis
 % when choosing multiple groupN, will plot each group rule in one figure
 
 % prepare for the grouping...
-allCons = internalDirCons'; % first column is internal dir
-conNames = internalDirNames;
+% % for w00-w06, w08
+% allCons = [-1, 0; -1, 0.5; -1, 1; 1, 0; 1, 0.5; 1, 1]; % first column is internal dir, second column is coh
+% conNames = {'down-0' 'down-0.5' 'down-1' 'up-0' 'up-0.5' 'up-1'};
+% for w07
+allCons = [-1, 5; -1, 10; 1, 5; 1, 10]; % first column is internal dir, second column is internal dot speed
+% coherence ploted in separate figures... need to manually define in the
+% indiMean function, and change the pdfName when plotting
+conNames = {'down-5 deg/s' 'down-10 deg/s' 'up-5 deg/s' 'up-10 deg/s'};
+% % for w09
+% allCons = [-45; -90; -135; 45; 90; 135]; % all different internal directions
+% conNames = {'-45' '-90' '-135' '45' '90' '135'};
+% % for w10
+% allCons = [-1, 0; -1, 1; 1, 0; 1, 1]; % first column is internal dir, second column is coh
+% conNames = {'down-0' 'down-1' 'up-0' 'up-1'};
 
 dimNames = {'Horizontal', 'Vertical'};
 
@@ -25,18 +37,28 @@ frameLength = NaN(size(names, 2), 1);
 for subN = subStart:subEnd
     cd(analysisFolder)
     load(['eyeTrialDataSub_' names{subN} '.mat']);
-
+    if strcmp(names{subN}, 'w03')
+        internalDirCons = [-135; 135];
+    elseif strcmp(names{subN}, 'w08')
+        internalDirCons = [-90; 90];
+    else
+        internalDirCons = [-45; 45];
+    end
     idxT = find(eyeTrialData.errorStatus(subN, :)==0);
     tempL = eyeTrialData.frameLog.rdkOff(subN, idxT)-eyeTrialData.frameLog.rdkOn(subN, idxT);
     tempL(tempL==0) = [];
     frameLength(subN, 1) = min(tempL);
     
-    for internalDirN = 1:length(allCons)
+    % for w00-w06, w08, w10, w07
+    for internalDirN = 1:2
         idxT = find(eyeTrialData.errorStatus(subN, :)==0 & eyeTrialData.rdkInternalDir(subN, :)==internalDirCons(internalDirN));
-
+%         % for w09
+%         for internalDirN = 1:length(allCons)
+%         idxT = find(eyeTrialData.errorStatus(subN, :)==0 & eyeTrialData.rdkInternalDir(subN, :)==allCons(internalDirN));
+        
         lengthT = length(idxT);
-%         frames.onset{subN, internalDirN}.posX = NaN(lengthT, frameLength(subN, 1));
-%         frames.onset{subN, internalDirN}.posY = NaN(lengthT, frameLength(subN, 1));
+        frames.onset{subN, internalDirN}.posX = NaN(lengthT, frameLength(subN, 1));
+        frames.onset{subN, internalDirN}.posY = NaN(lengthT, frameLength(subN, 1));
         frames.onset{subN, internalDirN}.velX = NaN(lengthT, frameLength(subN, 1));
         frames.onset{subN, internalDirN}.velY = NaN(lengthT, frameLength(subN, 1));
         
@@ -44,8 +66,8 @@ for subN = subStart:subEnd
             % align at target onset
             startI = eyeTrialData.frameLog.rdkOn(subN, idxT(trialN));
             endI = startI+frameLength(subN, 1)-1;
-%             frames.onset{subN, internalDirN}.posX(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.X_interpolSac(startI:endI);
-%             frames.onset{subN, internalDirN}.posY(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.Y_interpolSac(startI:endI);
+            frames.onset{subN, internalDirN}.posX(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.X_interpolSac(startI:endI);
+            frames.onset{subN, internalDirN}.posY(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.Y_interpolSac(startI:endI);
             frames.onset{subN, internalDirN}.velX(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.DX_interpolSac(startI:endI);
             frames.onset{subN, internalDirN}.velY(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.DY_interpolSac(startI:endI);
         end
@@ -69,6 +91,28 @@ for ii = 1:length(groupN)
     % plot mean traces for each participant
     if individualPlots
         for subN = subStart:subEnd
+            % align at rdk onset
+%             % position
+%             figure
+%             hold on
+%             for conN = 1:size(allCons, 1)
+%                 internalDirN = floor((conN-1)/3)+1;
+%                 if allCons(conN, 1)>0 % upward internal dir
+%                     lineStyle = '-';
+%                 else % downward internal dir
+%                     lineStyle = '--';
+%                 end
+%                 p{conN} = plot(indiMean{ii}.pos{conN, 1}(subN, :), indiMean{ii}.pos{conN, 2}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(mod(conN, 3)+1, :)); %, 'LineWidth', 1);
+%             end
+%             legend([p{:}], conNames, 'Location', 'best')
+%             title(names{subN})
+%             xlabel('Horizontal eye position (deg)')
+%             ylabel('Vertical eye position (deg)')
+%             %             xlim([-500 700])
+%             %             ylim(yRange)
+%             box off
+%             %             saveas(gcf, [eyeTracesFolder, '\individuals\posTrace_' groupName{groupN(ii)} '_' names{subN} '.pdf'])
+%             
             % velocity
             figure
             for dimN = 1:2
@@ -80,7 +124,7 @@ for ii = 1:length(groupN)
                     else % downward internal dir
                         lineStyle = '--';
                     end
-                    p{conN} = plot(timePointsOnset, indiMean{ii}.vel{conN, dimN}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(mod(conN, 3)+1, :)); %, 'LineWidth', 1);
+                    p{conN} = plot(timePointsOnset, indiMean{ii}.vel{conN, dimN}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(mod(conN, 2)+1, :)); %, 'LineWidth', 1);
                 end
                 if dimN==1
                 legend([p{:}], conNames, 'Location', 'best')
@@ -89,10 +133,10 @@ for ii = 1:length(groupN)
                 xlabel('Time from RDK onset (ms)')
                 ylabel([dimNames{dimN}, ' eye velocity (deg/s)'])
                 %             xlim([-500 700])
-%                             ylim([-0.5, 2.5])
+                            ylim([-0.5, 2.5])
                 box off
             end
-            saveas(gcf, [eyeTracesFolder, 'velTrace_' groupName{groupN(ii)} '_coh1_' names{subN} '.pdf'])
+            saveas(gcf, [eyeTracesFolder, 'velTrace_' groupName{groupN(ii)} '_coh0.5_' names{subN} '.pdf'])
         end
     end
     
@@ -157,7 +201,12 @@ function [indiMean, allMean, trialNumber] = getMeanTraces(eyeTrialData, frames, 
 minFrameLength = nanmin(frameLength);
 for conN = 1:size(allCons, 1) 
     % initialize
-    internalDirN = conN;
+%     % w00-w06, w08
+    %     internalDirN = floor((conN-1)/3)+1;
+%     w10, w07
+        internalDirN = floor((conN-1)/2)+1;
+%     % w09
+%     internalDirN = conN;
 
     indiMean.vel{conN, 1} = NaN(length(names), minFrameLength); % horizontal
     indiMean.vel{conN, 2} = NaN(length(names), minFrameLength); % vertical
@@ -166,12 +215,22 @@ for conN = 1:size(allCons, 1)
 %     indiMean.pos{conN, 2} = NaN(length(names), minFrameLength); % vertical
     
     for subN = subStart:subEnd
-        idxT = find(eyeTrialData.errorStatus(subN, :)==0 & eyeTrialData.rdkInternalDir(subN, :)==allCons(conN, 1));
+        % w00-w06, w08, w10, w07
+                idxT = find(eyeTrialData.errorStatus(subN, :)==0 & eyeTrialData.rdkInternalDir(subN, :)*allCons(conN, 1)>1);
+%         % w09
+%         idxT = find(eyeTrialData.errorStatus(subN, :)==0 & eyeTrialData.rdkInternalDir(subN, :)==allCons(conN, 1));
         
         switch groupN
             case 1 % trials by visual motion
-                leftIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==180);
-                rightIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==0);
+                % w07
+                leftIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==180 & eyeTrialData.rdkInternalSpeed(subN, idxT)==allCons(conN, 2) & eyeTrialData.rdkCoh(subN, idxT)==0.5);
+                rightIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==0 & eyeTrialData.rdkInternalSpeed(subN, idxT)==allCons(conN, 2) & eyeTrialData.rdkCoh(subN, idxT)==0.5);
+%                 % w00-w06, w08, w10
+%                 leftIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==180 & eyeTrialData.rdkCoh(subN, idxT)==allCons(conN, 2));
+%                 rightIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==0 & eyeTrialData.rdkCoh(subN, idxT)==allCons(conN, 2));
+%                 % w09
+%                 leftIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==180);
+%                 rightIdx = find(eyeTrialData.rdkApertureDir(subN, idxT)==0);
                 
                 %                 upIdx = find(eyeTrialData.rdkInternalDir(subN, idxT)>0 & eyeTrialData.rdkCoh(subN, idxT)==allCons(conN, 2));
                 %                 downIdx = find(eyeTrialData.rdkInternalDir(subN, idxT)<0 & eyeTrialData.rdkCoh(subN, idxT)==allCons(conN, 2));

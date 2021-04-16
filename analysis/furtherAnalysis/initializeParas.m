@@ -3,12 +3,16 @@
 
 clear all; close all; clc
 
-names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07' 'w08' 'w09' 'w10'};
+% names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07' 'w08' 'w09' 'w10'};
+% cohCons = [0; 0.5; 1]; % RDK coherence'
+% cohNames = {'coh-0', 'coh-50%', 'coh-100%'};
+% internalDirCons = [-1 1]; % -1:left, 1-right
+% internalDirNames = {'up', 'down'};
 
-internalDirCons = [-1 1]; % -1:left, 1-right
-cohCons = [0; 0.5; 1]; % RDK coherence
-internalDirNames = {'up', 'down'};
-cohNames = {'coh-0', 'coh-50%', 'coh-100%'};
+names = {'xw0' 'dc0' 'ib0'};
+
+internalDirCons = [-45 -90 -135 45 90 135]; % -1:left, 1-right
+internalDirNames = {'-45', '-90', '-135', '45', '90', '135'};
 
 sampleRate = 1000;
 

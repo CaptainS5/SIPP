@@ -19,7 +19,7 @@ if sbj.block == 1 && sbj.trial==1
 %         if const.internalOnsetType==1 % constant internal motion
 %             const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         elseif const.internalOnsetType==2 % perturbation of internal motion
-            const.numTrialsPerBlock    = 48*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+            const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         end
     elseif const.startExp==-1
         const.numTrialsPerBlock    = 32*ones(1, 10);
@@ -42,9 +42,9 @@ if sbj.block == 1 && sbj.trial==1
     [const.fixation.windowRadiusPxl, ] = dva2pxl(const.fixation.windowRadius, const.fixation.windowRadius, screen); % in pixel
     
     % RDK stimulus
-    const.rdk.durationBeforeMin = 1; % minimum display duration of the whole RDK, s
-    const.rdk.durationBeforeMax = 1.5;
-    const.rdk.durationPerturbation = 0.2; % display duration of the perturbation period, s
+    const.rdk.durationBeforeMin = 0.75; % minimum display duration of the whole RDK, s
+    const.rdk.durationBeforeMax = 1.25;
+    const.rdk.durationPerturbation = 0.3; % display duration of the perturbation period, s
     const.rdk.dotDensity = 10; % dot per dva^2
     const.rdk.lifeTime = 10; % s; longer than the whold display duration equals to unlimited lifetime
     % how long before a dot disappears and reappears
@@ -68,7 +68,7 @@ if sbj.block == 1 && sbj.trial==1
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
     const.rdk.internalSpeed = 5; % speed of each internal dot
     % internal dots during perturbation: (coherence is 0 before perturbation)
-    const.rdk.cohPerturbation = [0.5 1]; % coherence during the perturbation    
+    const.rdk.cohPerturbation = [0 1]; % coherence during the perturbation    
     const.rdk.internalDirPerturbation = [-90 90]; % relative to the aperture perturbation direction 
     
     % warning beep for feedback on fixation maintainance

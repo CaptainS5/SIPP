@@ -63,15 +63,15 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.apertureSpeed = 10; % dva per sec
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
-    const.rdk.apertureDir = [0]; % left (180) and right (0)   
+    const.rdk.apertureDir = [180 0]; % left (180) and right (0)   
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
     const.rdk.coh = [1]; % for classical RDKs
 %     if const.apertureType==0
         %% for aperture type 0, simply define the relative retinal motion of the
         % internal dots:
         const.rdk.internalSpeed = 5; % speed of each internal dot
-        const.rdk.internalDir = [-135];
-%         const.rdk.internalDir = [-45 45 -90 90 -135 135]; % 45: above the aperture direction; -45: below the aperture direction
+%         const.rdk.internalDir = [-135];
+        const.rdk.internalDir = [-45 45 -90 90 -135 135]; % 45: above the aperture direction; -45: below the aperture direction
 %     else
 %         %% for aperture type 1, calculate the parameters to reach the same retinal motion as in aperture type 0
 %         retinalMotionSpeed = 5; % the same as const.rdk.internalSpeed for aperture type 0

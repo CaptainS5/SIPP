@@ -152,7 +152,7 @@ switch control.mode
             control.enterPerturbation = 1;
         elseif control.frameRDK == length(rdkControl.dotPos) % if RDK duration passed but participant did not respond, move to next phase
             b_rdk            = 1;
-            control.mode    = 4; % skip response for now
+            control.mode    = 3; % enter response phase
             control.frameRDK = -1;
         else
             b_rdk            = 0;
@@ -160,7 +160,7 @@ switch control.mode
         
 %% (2.3)---------------------------------------------------------------
     case 3                                                                  % PHASE 3: response screen if needed
-%         control.frameRDK = control.frameRDK - 1; % need to keep updating the frame numbers...
+        control.frameRDK = control.frameRDK - 1; % need to keep updating the frame numbers...
 %         % draw target
 %         if control.instruction==0 % fast block
 %             msg = 'TOO SLOW';
@@ -169,7 +169,7 @@ switch control.mode
 %             msg = 'please do not wait for too long';
 %             msgColor = screen.msgfontcolour;
 %         end
-%         PTBwrite_msg(screen, msg, 'center', 'center', msgColor) % coordinate in relation to screen center
+        PTBwrite_msg(screen, '?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
 %         % draw square for photodiode:
 %         if photo.mode                                                       % Photodiode Event 2: Fixation target 2 on
 %             PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.black);
