@@ -5,7 +5,7 @@
 clear all; close all; clc
 
 % names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07' 'w08' 'w09' 'w10'};
-names = {'xw0' 'dc0'};
+names = {'xw0' 'dc0' 'ib0'};
 subStartI = 1;
 
 cd ..

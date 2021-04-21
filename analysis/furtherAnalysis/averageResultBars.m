@@ -9,10 +9,10 @@ averagePlots = 0;
 % so maybe one giant plot with each condition as one group of bars
 
 % input the parameters to plot
-checkVariables = {'initialAccelerationFit2D', 'latency', 'gainXexternal', 'gainXaverage', 'gainYinternal', 'gainYaverage', 'velCovX', 'velCovY', 'velCov2D', 'dirClp', 'dirError', 'dirGain'}; % for generating summaryData and save the mat file
+% checkVariables = {'initialAccelerationFit2D', 'latency', 'gainXexternal', 'gainXaverage', 'gainYinternal', 'gainYaverage', 'velCovX', 'velCovY', 'velCov2D', 'dirClp', 'dirError', 'dirGain'}; % for generating summaryData and save the mat file
 % checkVariables = {'gainXexternal', 'gainYinternal', 'velCovX', 'velCovY', 'velCov2D', 'dirClp', 'dirError', 'dirGain'};
-% % for saccades
-% checkVariables = {'number', 'meanAmp2D', 'sumAmp2D'};
+% for saccades
+checkVariables = {'number', 'meanAmp2D', 'sumAmp2D'};
 
 % plot settings
 textFontSize = 8;
@@ -58,12 +58,12 @@ for subPlotN = 1:size(plotSub, 2)
                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(dir);
                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(dir);
             else
-                %                 % saccade parameters
-                %                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-                %                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
-                % pursuit parameters
-                yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
-                yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+                                % saccade parameters
+                                yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+                                yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(eyeTrialData.saccades.(checkVariables{varN})(subN, idxT));
+%                 % pursuit parameters
+%                 yMeanSub.(checkVariables{varN})(subPlotN, conN) = nanmean(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
+%                 yStdSub.(checkVariables{varN})(subPlotN, conN) = nanstd(eyeTrialData.pursuit.(checkVariables{varN})(subN, idxT));
             end
             summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN})(subPlotN, conN);
             
@@ -97,8 +97,8 @@ if individualPlots
         
         ylabel(checkVariables{varN})
         %                 title(names{subN})
-%         saveas(gcf, [saccadeFolder, '\pursuit_sac_', checkVariables{varN}, '_barplot_xw0dc0.pdf'])
-                saveas(gcf, [pursuitFolder, '\fixation_', checkVariables{varN}, '_barplot_xw0dc0.pdf'])
+        saveas(gcf, [saccadeFolder, '\pursuit_sac_', checkVariables{varN}, '_barplot_xw0dc0ib0.pdf'])
+%                 saveas(gcf, [pursuitFolder, '\pursuit_', checkVariables{varN}, '_barplot_xw0dc0ib0.pdf'])
         
         %             figure
         %             hold on

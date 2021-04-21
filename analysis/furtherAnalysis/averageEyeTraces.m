@@ -6,8 +6,8 @@ initializeParas;
 individualPlots = 1;
 averagedPlots = 0;
 textFontSize = 8;
-subStart = 1;
-subEnd = 2;
+subStart = 3;
+subEnd = 3;
 
 groupName = {'visualDir'};
 % naming by trial type (could include grouping rules) + group based on which direction (visual or perceived)

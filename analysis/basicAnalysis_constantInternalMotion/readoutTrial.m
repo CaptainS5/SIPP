@@ -39,18 +39,25 @@ elseif Experiment.const.startExp==1
     trial.log.eyeType = 1; % pursuit condition
 end
 trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
-trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed;
-
-trial.log.rdkApertureDirBefore = Experiment.trialData.rdkApertureDirBefore(trialIdxInData, 1); % positive is up, negative is down
-trial.log.rdkApertureDirPerturbation = Experiment.trialData.rdkApertureDirPerturbation(trialIdxInData, 1); % positive is up, negative is down
-trial.log.rdkInternalDirPerturbation = Experiment.trialData.rdkInternalDirPerturbation(trialIdxInData, 1); % direction std
-trial.log.rdkCohPerturbation = Experiment.trialData.rdkCohPerturbation(trialIdxInData, 1);
+trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % positive is up, negative is down
+trial.log.rdkInternalDir = Experiment.trialData.rdkInternalDir(trialIdxInData, 1); % direction std
+if strcmp(currentSubject, 'w07')
+    trial.log.rdkInternalSpeed = Experiment.trialData.rdkInternalSpeed(trialIdxInData, 1);
+else
+    trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed;
+end
+trial.log.rdkCoh = Experiment.trialData.rdkCoh(trialIdxInData, 1);
 trial.log.eyeSampleRate = eyeData.sampleRate;
+if trial.log.rdkApertureDir==0 % rightward
+    trial.target.velocityX = Experiment.const.rdk.apertureSpeed;
+else
+    trial.target.velocityX = -Experiment.const.rdk.apertureSpeed;
+end
+trial.target.velocityY = 0;
 
 % frame indices of all events; after comparing eventLog with eyeData.frameIdx
 trial.log.trialStart = 1; % the first frame, fixation onset, decided in readEyeData
 trial.log.targetOnset = find(eyeData.timeStamp==eventLog.rdkOn(currentTrial, 1)); % rdk onset
-trial.log.perturbationOnset = find(eyeData.timeStamp==eventLog.perturbationOn(currentTrial, 1)); % rdk onset
 trial.log.targetOffset = find(eyeData.timeStamp==eventLog.rdkOff(currentTrial, 1)); % rdk offset
 trial.log.trialEnd = find(eyeData.timeStamp==eventLog.trialEnd(currentTrial, 1)); % response given
 end
