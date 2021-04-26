@@ -154,7 +154,7 @@ switch control.mode
         
         if control.frameRDK == length(rdkControl.dotPos) % if RDK duration passed but participant did not respond, move to next phase
             b_rdk            = 1;
-            control.mode    = 4; % skip response for now
+            control.mode    = 3; % skip response for now
             control.frameRDK = -1;
         else
             b_rdk            = 0;
@@ -162,21 +162,39 @@ switch control.mode
         
 %% (2.3)---------------------------------------------------------------
     case 3                                                                  % PHASE 3: response screen if needed
-%         control.frameRDK = control.frameRDK - 1; % need to keep updating the frame numbers...
-%         % draw target
-%         if control.instruction==0 % fast block
-%             msg = 'TOO SLOW';
-%             msgColor = screen.warningColor;
-%         else % accurate block
-%             msg = 'please do not wait for too long';
-%             msgColor = screen.msgfontcolour;
-%         end
-%         PTBwrite_msg(screen, msg, 'center', 'center', msgColor) % coordinate in relation to screen center
+        control.frameRDK = control.frameRDK - 1; % need to keep updating the frame numbers...
+        
+        [ecc, ] = dva2pxl(const.line.length/2, const.line.length/2, screen); % distance of the cursor from center
+        if isempty(control.mouse_x) % the first response frame, show random angle
+            % show the cursor; put it at the start angle everytime
+            control.respAngle = rand*180-90;
+            SetMouse(rdkControl.randCenterX + round(cos(control.respAngle/180*pi)*ecc), ...
+                rdkControl.randCenterY - round(sin(control.respAngle/180*pi)*ecc), ...
+                screen.window);
+            ShowCursor;
+        else
+            % changing the angle of the next loop according to the cursor position
+            control.respAngle = atan2(rdkControl.randCenterY-control.mouse_y, control.mouse_x-rdkControl.randCenterX)/pi*180;
+        end
+        % make the range within [-90, 90]
+        if control.respAngle>90
+            control.respAngle = control.respAngle-180;
+        elseif control.respAngle<-90
+            control.respAngle = control.respAngle+180;
+        end
+        
+        % calculate line coordinates and width in pixel
+        [lineWidth, ] = round(dva2pxl(const.line.width, const.line.width, screen));
+        [lineX, lineY] = dva2pxl(cos(control.respAngle/180*pi)*const.line.length/2, sin(control.respAngle/180*pi)*const.line.length/2, screen);
+        lineXY = round([-lineX, lineX; lineY, -lineY]);
+        
+        % draw response line
+        Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [rdkControl.randCenterX, rdkControl.randCenterY]);
+        
 %         % draw square for photodiode:
 %         if photo.mode                                                       % Photodiode Event 2: Fixation target 2 on
 %             PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.black);
 %         end
-%         control.repeat = 1;
         
 %% (2.4)---------------------------------------------------------------
     case 4                                                                  % PHASE 4: FINISH - WAIT BETWEEN TRIALS

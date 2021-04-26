@@ -1,4 +1,4 @@
-function [lengthPixelX lengthPixelY] = dva2pxl(lengthX, lengthY, screen)
+function [lengthPixelX, lengthPixelY] = dva2pxl(lengthX, lengthY, screen)
 % translate length in dva to in pixels
 % the length is from fixation to one end, not centered at the fixation
 % if want to calculate a length centered at fixation, use length/2 for

@@ -16,11 +16,11 @@ function [const] = constConfig(screen, const, sbj)
 if sbj.block == 1 && sbj.trial==1
     % Some dsign-related things (These will be used in paramConfig):
     if const.startExp==1 || const.startExp==0
-        if const.internalOnsetType==1 % constant internal motion
-            const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
-        elseif const.internalOnsetType==2 % perturbation of internal motion
-            const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
-        end
+%         if const.internalOnsetType==1 % constant internal motion
+            const.numTrialsPerBlock    = 54*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+%         elseif const.internalOnsetType==2 % perturbation of internal motion
+%             const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+%         end
     elseif const.startExp==-1
         const.numTrialsPerBlock    = 32*ones(1, 10);
     end
@@ -40,7 +40,8 @@ if sbj.block == 1 && sbj.trial==1
     [const.fixation.windowRadiusPxl, ] = dva2pxl(const.fixation.windowRadius, const.fixation.windowRadius, screen); % in pixel
     
     % RDK stimulus
-    const.rdk.duration = 1.5; % display duration of the whole RDK, s
+    const.startingPositionJitter = 1; % in deg, randomize the aperture trajectory center within this radius range around the screen center
+    const.rdk.duration = 1; % display duration of the whole RDK, s
     const.rdk.dotDensity = 10; % dot per dva^2
     const.rdk.lifeTime = const.rdk.duration;
     % how long before a dot disappears and reappears
@@ -63,28 +64,36 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.apertureSpeed = 10; % dva per sec
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
-    const.rdk.apertureDir = [180 0]; % left (180) and right (0)   
+    const.rdk.apertureDir = [180, 0]; % left (180) and right (0) 
+    const.rdk.apertureAngle = [-12:3:12];
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
-    const.rdk.coh = [1]; % for classical RDKs
-%     if const.apertureType==0
-        %% for aperture type 0, simply define the relative retinal motion of the
-        % internal dots:
-        const.rdk.internalSpeed = 5; % speed of each internal dot
-%         const.rdk.internalDir = [-135];
-        const.rdk.internalDir = [-45 45 -90 90 -135 135]; % 45: above the aperture direction; -45: below the aperture direction
-%     else
-%         %% for aperture type 1, calculate the parameters to reach the same retinal motion as in aperture type 0
-%         retinalMotionSpeed = 5; % the same as const.rdk.internalSpeed for aperture type 0
-%         retinalMotionDir = [45 -45]; % the same as const.rdk.internalDir for aperture type 0
-%         
-%         retinalVelVec = []; % (x, y) of the end point of the retinal velocity vector, just use the above horizontal one as they are symmetrical
-%         apertureVelVec = []; % (x, y) of the end point of the aperture velocity vector, just consider the horizontal right one
-%         % these two vectors all start from (0,0)
-%         
-%         velVec = ; % assuming the two vectors are always symmetrical around horizontal, here just consider the above horizontal one
-%         const.rdk.internalSpeed = 5; % speed of each internal dot, length of velVec
-%         const.rdk.internalDir = [45 -45]; % relative direction, angle of velVec
-%     end
+%     const.rdk.coh = [1]; % for classical RDKs
+    %     if const.apertureType==0
+    %% for aperture type 0, simply define the relative retinal motion of the
+    % internal dots:
+    const.rdk.internalSpeed = 5; % speed of each internal dot
+    %     const.rdk.internalDir = [-90 90]; % 45: above the aperture direction; -45: below the aperture direction
+    % a combined condition for coh+internal direction... coh0, coh1&-90deg,
+    % coh1&90 deg
+    const.rdk.internalCons = [0; -90; 90];
+    %     else
+    %         %% for aperture type 1, calculate the parameters to reach the same retinal motion as in aperture type 0
+    %         retinalMotionSpeed = 5; % the same as const.rdk.internalSpeed for aperture type 0
+    %         retinalMotionDir = [45 -45]; % the same as const.rdk.internalDir for aperture type 0
+    %
+    %         retinalVelVec = []; % (x, y) of the end point of the retinal velocity vector, just use the above horizontal one as they are symmetrical
+    %         apertureVelVec = []; % (x, y) of the end point of the aperture velocity vector, just consider the horizontal right one
+    %         % these two vectors all start from (0,0)
+    %
+    %         velVec = ; % assuming the two vectors are always symmetrical around horizontal, here just consider the above horizontal one
+    %         const.rdk.internalSpeed = 5; % speed of each internal dot, length of velVec
+    %         const.rdk.internalDir = [45 -45]; % relative direction, angle of velVec
+    %     end
+    
+    % response line
+    const.line.colour = screen.white; %
+    const.line.length = const.rdk.duration*const.rdk.apertureSpeed/2; % in dva
+    const.line.width = 0.05; % in dva
     
     % warning beep for feedback on fixation maintainance
     const.beep.samplingRate = 44100;

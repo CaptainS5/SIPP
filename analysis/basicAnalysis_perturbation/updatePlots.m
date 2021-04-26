@@ -17,12 +17,13 @@
 function [] = updatePlots(trial)
 % define window for which you want to plot your data
 startFrame = max(1, trial.log.targetOnset-200);
-endFrame = trial.log.trialEnd; %length(trial.eyeX_filt); % this is all recorded eye movement data
+endFrame = min(trial.log.targetOffset+200, trial.log.trialEnd); % trial.log.trialEnd; % this is all recorded eye movement data
 % if the interval looking at micro-saccades differs define it here
 % msStart = trial.log.microSaccade.onset;
 % msEnd = trial.log.microSaccade.offset;
-stimOnset = trial.log.trialStart; % this may have to be changed depending on terminology
-stimOffset = trial.log.trialEnd;
+stimOnset = trial.log.targetOnset; % this may have to be changed depending on terminology
+stimOffset = trial.log.targetOffset;
+perturbationOnset = trial.log.perturbationOnset;
 % range of the x axis
 minPosX = -10;
 maxPosX = 10;
@@ -46,9 +47,12 @@ hold on
 xlabel('x-position (deg)', 'fontsize', 12);
 ylabel('y-position (deg)', 'fontsize', 12);
 % plot eye x- versus y-position
-plot(trial.eyeX_filt(startFrame:endFrame), trial.eyeY_filt(startFrame:endFrame) ,'r');
-% % plot target direction
-% plot([0, nanmean(trial.target.velocityX(startFrame:endFrame))], [0, nanmean(trial.target.velocityY(startFrame:endFrame))] ,'k-')
+plot(trial.eyeX_filt(startFrame:stimOnset), trial.eyeY_filt(startFrame:stimOnset), 'k');
+plot(trial.eyeX_filt(stimOnset+1:perturbationOnset), trial.eyeY_filt(stimOnset+1:perturbationOnset), 'b');
+plot(trial.eyeX_filt(perturbationOnset+1:stimOffset), trial.eyeY_filt(perturbationOnset+1:stimOffset), 'r'); % perturbation
+plot(trial.eyeX_filt(stimOffset+1:endFrame), trial.eyeY_filt(stimOffset+1:endFrame), 'k');
+% plot target center position
+plot(trial.target.posX(startFrame:endFrame), trial.target.posY(startFrame:endFrame), 'g');
 
 % eye position plot over time
 subplot(2,2,2,'replace');
@@ -70,6 +74,7 @@ plot(trial.saccades.Y.offsets,trial.eyeY_filt(trial.saccades.Y.offsets),'c*');
 %     'sacOn', 'sacOff'},'Location','NorthWest');%, 'AutoUpdate','off');
 % vertical lines indicate events/target onsets
 line([trial.log.targetOnset trial.log.targetOnset], [minPosX maxPosX],'Color','k','LineStyle','--');
+line([trial.log.perturbationOnset trial.log.perturbationOnset], [minPosX maxPosX],'Color','r','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minPosX maxPosX],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
     line([trial.pursuit.onset trial.pursuit.onset], [minPosX maxPosX],'Color','b','LineStyle','--');
@@ -107,6 +112,7 @@ plot(trial.saccades.Y.onsets,trial.eyeDY_filt(trial.saccades.Y.onsets),'y*');
 plot(trial.saccades.Y.offsets,trial.eyeDY_filt(trial.saccades.Y.offsets),'c*');
 % vertical lines indicate events/target onsets
 line([trial.log.targetOnset trial.log.targetOnset], [minVel maxVel],'Color','k','LineStyle','--');
+line([trial.log.perturbationOnset trial.log.perturbationOnset], [minVel maxVel],'Color','r','LineStyle','--');
 % line([trial.stim_offset-ms2frames(100) trial.stim_offset-ms2frames(100)], [minVel maxVel],'Color','b','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minVel maxVel],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
@@ -157,6 +163,7 @@ plot(trial.saccades.Y.onsets,trial.eyeDDY_filt(trial.saccades.Y.onsets),'y*');
 plot(trial.saccades.Y.offsets,trial.eyeDDY_filt(trial.saccades.Y.offsets),'c*');
 % vertical lines indicate events/target onsets
 line([trial.log.targetOnset trial.log.targetOnset], [minAcc maxAcc],'Color','k','LineStyle','--');
+line([trial.log.perturbationOnset trial.log.perturbationOnset], [minAcc maxAcc],'Color','r','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minAcc maxAcc],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
     line([trial.pursuit.onset trial.pursuit.onset], [minAcc maxAcc],'Color','b','LineStyle','--');

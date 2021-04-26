@@ -197,7 +197,6 @@ try
             
             control.mode            = 1;                                        % different phases of the trial (changes values in runSingleTrials)
             control.break           = 0;                                        % trial completion
-            control.repeat          = 0;
             control.abort           = 0;                                        % trial abortion (ESCAPE key press)
             control.frameFix        = 0;                                        % frame counter, mark current event
             control.frameRDK        = 0;

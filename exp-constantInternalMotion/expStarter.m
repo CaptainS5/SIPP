@@ -34,7 +34,7 @@
 clear all; clear mex; clear functions; close all; home; sca;
 pathConfig;
 
-const.expName              = 'MicroPursuit'; 								% Experiment name
+const.expName              = 'MicroPursuit_constantInternalMotion'; 								% Experiment name
 const.internalOnsetType    = 1;                                             % 1: constant internal motion; 2(not implemented yet): perturbation of internal motion 
 % const.apertureType         = 0;                                             % 0: dots move together with the aperture; 1: aperture translates across the dot field
 const.startExp             = 1;                                             % -1 = baseline condition (fixation); 1 = experiment mode; 0 = debugging mode

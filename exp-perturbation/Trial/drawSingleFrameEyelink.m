@@ -179,7 +179,7 @@ switch control.mode
 %% (2.4)---------------------------------------------------------------
     case 4                                                                  % PHASE 4: FINISH - WAIT BETWEEN TRIALS
         control.frameRDK = control.frameRDK - 1; % need to keep updating so that the rdk off time is not renewed at every frame!
-        tElapse = timePassed - trialData.tRDKoff(curTrial, 1);
+        tElapse = timePassed - trialData.tResponse(curTrial, 1);
         % draw square for photodiode:
         if photo.mode                                                               % Photodiode Event 5: Trial End
             PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.black);

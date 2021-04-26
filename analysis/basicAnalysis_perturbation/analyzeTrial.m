@@ -21,14 +21,14 @@
 eyeFile = [currentSubject 't' num2str(currentTrial, '%03d') '.mat']; % mat file, eye data transformed from edf
 % make sure they are included in the experiment code
 eyeData = readEyeData(eyeFile, dataPath, currentSubject, currentTrial, analysisPath, eventLog, Experiment);
-if length(eyeData.timeStamp)<=10
+if length(eyeData.timeStamp)<=10 || isempty(rdkFrameLog{currentTrial})
     trial.signalLoss = 1;
 else
     eyeData = processEyeData(eyeData);
     
     %% extract all relevant experimental data and store it in trial variable
     trial = readoutTrial(eyeData, currentSubject, analysisPath, Experiment, currentTrial, eventLog);
-%     trial.target = readoutTarget(eyeData, Experiment.const, trial, currentSubjectPath, currentTrial, eventLog, rdkFrameLog);
+    trial.target = readoutTarget(eyeData, Experiment, trial, currentSubjectPath, currentTrial, eventLog, rdkFrameLog);
     trial.stim_onset = trial.log.targetOnset;
     trial.stim_offset = trial.log.targetOffset;
     trial.length = trial.log.trialEnd;
@@ -57,7 +57,7 @@ else
             trial = analyzePursuit(trial, pursuit);
             
             %% analyze saccades
-            trial = analyzeSaccades(trial);
+%             trial = analyzeSaccades(trial);
 %         else
             %% OPTIONAL: find micro saccades
             % % remove saccades
@@ -76,10 +76,15 @@ if trial.signalLoss
     trial.log.subject = currentSubject;
     trial.log.trialNumber = currentTrial;
     trialIdxInData = eventLog.trialIdxInData(currentTrial, 1);
+    if Experiment.const.startExp==-1
+        trial.log.eyeType = 0; % fixation condition
+    elseif Experiment.const.startExp==1
+        trial.log.eyeType = 1; % pursuit condition
+    end
     trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
-    trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % positive is up, negative is down
-    trial.log.rdkInternalDir = Experiment.trialData.rdkInternalDir(trialIdxInData, 1); % direction std
+    trial.log.rdkApertureDirBefore = Experiment.trialData.rdkApertureDirBefore(trialIdxInData, 1); % positive is up, negative is down
+    trial.log.rdkApertureDirPerturbation = Experiment.trialData.rdkApertureDirPerturbation(trialIdxInData, 1); % positive is up, negative is down
+    trial.log.rdkInternalDirPerturbation = Experiment.trialData.rdkInternalDirPerturbation(trialIdxInData, 1); % direction std
+    trial.log.rdkCohPerturbation = Experiment.trialData.rdkCohPerturbation(trialIdxInData, 1);
     trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed; %Experiment.trialData.rdkInternalSpeed(trialIdxInData, 1);
-    trial.log.rdkCoh = Experiment.trialData.rdkCoh(trialIdxInData, 1);
-    trial.stimulus.absoluteVelocity = Experiment.const.rdk.apertureSpeed;
 end

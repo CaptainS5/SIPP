@@ -16,30 +16,38 @@ function [rdkControl seed] = generateTrialRDKpositions(const, screen, control)
 coh = control.rdkCoh;
 rdkInternalSpeed = control.rdkInternalSpeed;
 rdkApertureDir = control.rdkApertureDir;
-% transfer the relative internal motion direction to absolute direction for
-% display
 if rdkApertureDir==0 % moving rightward
-    rdkInternalDir = control.rdkApertureDir-control.rdkInternalDir; % flip since for PTB it is up-negative, down-positive
-else
-    rdkInternalDir = control.rdkApertureDir+control.rdkInternalDir;
+    rdkApertureAngle = control.rdkApertureAngle;
+else % moving leftward
+    rdkApertureAngle = rdkApertureDir-control.rdkApertureAngle;
 end
+rdkInternalDir = control.rdkInternalDir; % now the internal direction is fixed within the RDK, irrelative to the aperture direction
+
+% when internal direction is relative to the aperture direction... not in
+% use
+% % since in PTB it is up-negative, down-positive, and the polar direction is
+% % "circular", need to be careful about the correspondence--eventually, an
+% % internal dir of 45 means 45 degs above the moving direction. To match
+% % this, we need to sort out the values for stimuli display:
+% % transfer the relative internal motion direction to absolute direction for
+% % display
+% if rdkApertureDir==0 % moving rightward
+%     rdkInternalDir = control.rdkApertureDir-control.rdkInternalDir; % flip since for PTB it is up-negative, down-positive
+% else
+%     rdkInternalDir = control.rdkApertureDir+control.rdkInternalDir;
+% end
 
 if const.startExp==1 || const.startExp==0 % actual experiment, translating aperture
-    % since in PTB it is up-negative, down-positive, and the polar direction is
-    % "circular", need to be careful about the correspondence--eventually, an
-    % internal dir of 45 means 45 degs above the moving direction. To match
-    % this, we need to sort out the values for stimuli display:
-    
     % initialize horizontal aperture movement per frame
     [moveDistanceAperture, ] = dva2pxl(const.rdk.apertureSpeed, const.rdk.apertureSpeed, screen)*screen.refreshRate; % pixel per frame
     % initialize the starting center position relative to center of screen
-    [apertureStartDis, ] = dva2pxl(const.rdk.duration*const.rdk.apertureSpeed/2, const.rdk.duration*const.rdk.apertureSpeed/2, screen); % the distance between the starting center point and center of screen
-    if rdkApertureDir==0 % moving rightward
-        rdkControl.apertureCenterPos{1} = [screen.x_mid-apertureStartDis screen.y_mid]; % the initial starting position, depends on moving direction and speed
-    else
-        rdkControl.apertureCenterPos{1} = [screen.x_mid+apertureStartDis screen.y_mid];
-        moveDistanceAperture = -moveDistanceAperture; % adding the negative sign if moving leftward
-    end
+    [apertureStartDisX, apertureStartDisY] = dva2pxl(const.rdk.duration*const.rdk.apertureSpeed/2*cos(rdkApertureAngle/180*pi), ...
+        const.rdk.duration*const.rdk.apertureSpeed/2*sin(rdkApertureAngle/180*pi), screen); % the distance between the starting center point and center of screen
+    % randomize the trajectory center to randomize the starting position
+    [jitterDisX, jitterDisY] = dva2pxl(const.startingPositionJitter, const.startingPositionJitter, screen);
+    rdkControl.randCenterX = round(screen.x_mid+(2*rand-1)*jitterDisX);
+    rdkControl.randCenterY = round(screen.y_mid-(2*rand-1)*jitterDisY);
+    rdkControl.apertureCenterPos{1} = [rdkControl.randCenterX-apertureStartDisX rdkControl.randCenterY+apertureStartDisY]; % the initial starting position, depends on moving direction and speed
 elseif const.startExp==-1 % baseline, static aperture
     rdkControl.apertureCenterPos{1} = screen.center;
 end
@@ -112,17 +120,14 @@ dots.movement{1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanc
 
 % generate the dot matrices of the RDK for the whole trial
 for frameN = 1:rdkFrames-1
+    % update the center position of the translating aperture
     if const.startExp==1 || const.startExp==0
-        % update the center position of the translating aperture
-        rdkControl.apertureCenterPos{frameN+1} = [rdkControl.apertureCenterPos{frameN}(1)+moveDistanceAperture, rdkControl.apertureCenterPos{frameN}(2)];
-%         % if needed (dots translate together with the aperture), update the
-%         % center position and window of the texture as well
-%         if const.apertureType==0
-            rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
-            rdkControl.textureWindow{frameN+1} = [rdkControl.textureCenterPos{frameN+1}(1)-dotFieldRadiusX, ...
-                rdkControl.textureCenterPos{frameN+1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{frameN+1}(1)+dotFieldRadiusX, ...
-                rdkControl.textureCenterPos{frameN+1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
-%         end
+        rdkControl.apertureCenterPos{frameN+1} = [rdkControl.apertureCenterPos{frameN}(1)+moveDistanceAperture*cos(rdkApertureAngle/180*pi), ...
+            rdkControl.apertureCenterPos{frameN}(2)-moveDistanceAperture*sin(rdkApertureAngle/180*pi)];
+        rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
+        rdkControl.textureWindow{frameN+1} = [rdkControl.textureCenterPos{frameN+1}(1)-dotFieldRadiusX, ...
+            rdkControl.textureCenterPos{frameN+1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{frameN+1}(1)+dotFieldRadiusX, ...
+            rdkControl.textureCenterPos{frameN+1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
     elseif const.startExp==-1 % baseline, static aperture
         rdkControl.apertureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN};
         rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};

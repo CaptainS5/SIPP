@@ -44,7 +44,7 @@ if sbj.block == 1 && sbj.trial==1
     % RDK stimulus
     const.rdk.durationBeforeMin = 0.75; % minimum display duration of the whole RDK, s
     const.rdk.durationBeforeMax = 1.25;
-    const.rdk.durationPerturbation = 0.3; % display duration of the perturbation period, s
+    const.rdk.durationPerturbation = 0.2; % display duration of the perturbation period, s
     const.rdk.dotDensity = 10; % dot per dva^2
     const.rdk.lifeTime = 10; % s; longer than the whold display duration equals to unlimited lifetime
     % how long before a dot disappears and reappears
@@ -64,7 +64,7 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
     const.rdk.apertureDirBefore = [0 180]; % left and right  
-    const.rdk.apertureDirPerturbation = [-5 5]; % relative to the before perturbation aperture direction  
+    const.rdk.apertureDirPerturbation = [-10 10]; % relative to the before perturbation aperture direction  
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
     const.rdk.internalSpeed = 5; % speed of each internal dot
     % internal dots during perturbation: (coherence is 0 before perturbation)
