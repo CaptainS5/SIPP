@@ -17,12 +17,12 @@
 function [] = updatePlots(trial)
 % define window for which you want to plot your data
 startFrame = max(1, trial.log.targetOnset-200);
-endFrame = trial.log.trialEnd; %length(trial.eyeX_filt); % this is all recorded eye movement data
+endFrame = min(trial.log.targetOffset+200, trial.log.trialEnd); % trial.log.trialEnd; % this is all recorded eye movement data
 % if the interval looking at micro-saccades differs define it here
 % msStart = trial.log.microSaccade.onset;
 % msEnd = trial.log.microSaccade.offset;
-stimOnset = trial.log.trialStart; % this may have to be changed depending on terminology
-stimOffset = trial.log.trialEnd;
+stimOnset = trial.log.targetOnset; % this may have to be changed depending on terminology
+stimOffset = trial.log.targetOffset;
 % range of the x axis
 minPosX = -10;
 maxPosX = 10;
@@ -46,9 +46,11 @@ hold on
 xlabel('x-position (deg)', 'fontsize', 12);
 ylabel('y-position (deg)', 'fontsize', 12);
 % plot eye x- versus y-position
-plot(trial.eyeX_filt(startFrame:endFrame), trial.eyeY_filt(startFrame:endFrame) ,'r');
-% % plot target direction
-% plot([0, nanmean(trial.target.velocityX(startFrame:endFrame))], [0, nanmean(trial.target.velocityY(startFrame:endFrame))] ,'k-')
+plot(trial.eyeX_filt(startFrame:stimOnset), trial.eyeY_filt(startFrame:stimOnset), 'k');
+plot(trial.eyeX_filt(stimOnset+1:stimOffset), trial.eyeY_filt(stimOnset+1:stimOffset), 'b');
+plot(trial.eyeX_filt(stimOffset+1:endFrame), trial.eyeY_filt(stimOffset+1:endFrame), 'k');
+% plot target center position
+plot(trial.target.posX(startFrame:endFrame), trial.target.posY(startFrame:endFrame), 'g');
 
 % eye position plot over time
 subplot(2,2,2,'replace');

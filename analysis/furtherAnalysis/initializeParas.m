@@ -9,10 +9,15 @@ clear all; close all; clc
 % internalDirCons = [-1 1]; % -1:left, 1-right
 % internalDirNames = {'up', 'down'};
 
-names = {'xw0' 'dc0' 'ib0'};
+% names = {'xw0' 'dc0' 'ib0'};
+% internalDirCons = [-45 -90 -135 45 90 135]; % -1:left, 1-right
+% internalDirNames = {'-45', '-90', '-135', '45', '90', '135'};
 
-internalDirCons = [-45 -90 -135 45 90 135]; % -1:left, 1-right
-internalDirNames = {'-45', '-90', '-135', '45', '90', '135'};
+names = {'500'};
+apertureAngles = [-12 -9 -6 -3 0 3 6 9 12];
+apertureAngleNames = {'-12', '-9', '-6', '-3', '0', '3', '6', '9', '12'};
+internalCons = [0, -90, 90];
+internalConNames = {'coh 0', 'dir down', 'dir up'};
 
 sampleRate = 1000;
 
@@ -23,6 +28,7 @@ eyeTracesFolder = ['..\eyeTraces\'];
 pursuitFolder = ['..\pursuitPlots\'];
 saccadeFolder = ['..\saccadePlots\'];
 correlationFolder = ['..\corrPlots\'];
+perceptFolder = ['..\perceptualPlots\'];
 % RFolder = pwd;
 
 % for plotting
@@ -39,6 +45,7 @@ for t = 1:size(names, 2) % individual color for scatter plots, can do 10 people
         markerC(t, :) = (t-6)/4*[255 90 255]/255;
     end
 end
+colorCons = [0 0 0; 1 0 0; 0 0 1];
 % colorProb = [8,48,107;198,219,239;8,48,107]/255; % all blue hues
 % colorProb = [8,48,107;66,146,198;198,219,239;66,146,198;8,48,107]/255; % all blue hues
-colorPlot = [232 113 240; 15 204 255; 255 182 135; 137 126 255; 113 204 100]/255; % each row is one colour for one probability
+% colorPlot = [232 113 240; 15 204 255; 255 182 135; 137 126 255; 113 204 100]/255; % each row is one colour for one probability

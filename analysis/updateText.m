@@ -55,8 +55,10 @@ trialNoText = uicontrol(fig,'Style','text',...
 
 if trial.log.rdkApertureDir==0
     rdkDir = 'right';
+    angle = trial.log.rdkApertureAngle;
 else
     rdkDir = 'left';
+    angle = 180-trial.log.rdkApertureAngle;
 end
 % if trial.log.rdkInternalDir>0
 %     sdText = 'up';
@@ -65,27 +67,31 @@ end
 % end
 textblock = textblock+1;
 trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['RDK: ' rdkDir ',', num2str(trial.log.rdkCoh), ',', num2str(trial.log.rdkInternalDir)],...
+    'String', ['Aperture: ', rdkDir, ' ',  num2str(angle)],...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
 
+% if trial.log.rdkInternalDir>0
+%     sdText = 'up';
+% else
+%     sdText = 'down';
+% end
 textblock = textblock+1;
 trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['RDK dot speed: ', num2str(trial.log.rdkInternalSpeed)],...
+    'String', ['Internal: coh ', num2str(trial.log.rdkCoh), ',', num2str(trial.log.rdkInternalDir)],...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
-
 
 % if trial.log.choice>0
 %     choice = 'up';
 % else
 %     choice = 'down';
 % end
-% textblock = textblock+1;
-% trialNoText = uicontrol(fig,'Style','text',...
-%     'String', ['Choice: ', choice],...
-%     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
-%     'HorizontalAlignment','left');
+textblock = textblock+1;
+trialNoText = uicontrol(fig,'Style','text',...
+    'String', ['Response: ', num2str(trial.log.response)],...
+    'Position',[xPosition yPosition-textblock*verticalDistance width height],...
+    'HorizontalAlignment','left');
 
 end
 

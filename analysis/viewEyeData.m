@@ -15,9 +15,9 @@
 clear all; %clc
 
 %% Define these parameters
-currentTrial = 50; % chose trial you want to look at here; default = 1;
-%
-saccadeThreshold = 300; % acceleration
+currentTrial = 252; % chose trial you want to look at here; default = 1;
+% for 500;
+saccadeThreshold = 400; % acceleration
 microSaccadeThreshold = 200;
 % saccade algorithm threshold --> depends on your stimulus speed and
 % expected saccade size

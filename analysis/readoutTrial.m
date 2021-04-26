@@ -39,21 +39,23 @@ elseif Experiment.const.startExp==1
     trial.log.eyeType = 1; % pursuit condition
 end
 trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
-trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % positive is up, negative is down
-trial.log.rdkInternalDir = Experiment.trialData.rdkInternalDir(trialIdxInData, 1); % direction std
-if strcmp(currentSubject, 'w07')
-    trial.log.rdkInternalSpeed = Experiment.trialData.rdkInternalSpeed(trialIdxInData, 1);
-else
-    trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed;
+trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % either left or right, the "base" direction
+if trial.log.rdkApertureDir==0 % moving rightward
+    trial.log.rdkApertureAngle = Experiment.trialData.rdkApertureAngle(trialIdxInData, 1); % positive is up, negative is down
+    trial.log.response = Experiment.trialData.reportAngle(trialIdxInData, 1);
+else % moving leftward
+    trial.log.rdkApertureAngle = trial.log.rdkApertureDir - Experiment.trialData.rdkApertureAngle(trialIdxInData, 1); % positive is up, negative is down, relative to the aperture direction
+    trial.log.response = -Experiment.trialData.reportAngle(trialIdxInData, 1);
 end
-trial.log.rdkCoh = Experiment.trialData.rdkCoh(trialIdxInData, 1);
+trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed;
+if Experiment.trialData.rdkInternalCons(trialIdxInData, 1)==0
+    trial.log.rdkInternalDir = 0;
+    trial.log.rdkCoh = 0;
+else
+    trial.log.rdkInternalDir = Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
+    trial.log.rdkCoh = 1;
+end
 trial.log.eyeSampleRate = eyeData.sampleRate;
-if trial.log.rdkApertureDir==0 % rightward
-    trial.target.velocityX = Experiment.const.rdk.apertureSpeed;
-else
-    trial.target.velocityX = -Experiment.const.rdk.apertureSpeed;
-end
-trial.target.velocityY = 0;
 
 % frame indices of all events; after comparing eventLog with eyeData.frameIdx
 trial.log.trialStart = 1; % the first frame, fixation onset, decided in readEyeData
