@@ -150,6 +150,8 @@ switch control.mode
         
         if control.frameRDK == rdkControl.durationFramesBefore + 1
             control.enterPerturbation = 1;
+        elseif control.frameRDK == rdkControl.durationFramesBefore + rdkControl.durationFramesPerturbation + 1
+            control.enterPerturbation = -1; % end of perturbation
         elseif control.frameRDK == length(rdkControl.dotPos) % if RDK duration passed but participant did not respond, move to next phase
             b_rdk            = 1;
             control.mode    = 3; % enter response phase

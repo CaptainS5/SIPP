@@ -14,10 +14,25 @@ function [rdkControl seed] = generateTrialRDKpositions(const, screen, control)
 
 % set up RDK
 cohPerturbation = control.rdkCohPerturbation;
+rdkInternalDirPerturbation = -control.rdkInternalDirPerturbation; % flip for PTB, upside down
 rdkInternalSpeed = control.rdkInternalSpeed;
 rdkApertureDirBefore = control.rdkApertureDirBefore;
+
 rdkDurationBefore = control.rdkDurationBefore;
 rdkDurationPerturbation = const.rdk.durationPerturbation;
+rdkDurationWhole = const.rdk.durationWhole;
+
+% initialize timing parameters
+rdkFramesBefore = ceil(sec2frm(control.rdkDurationBefore, screen));
+rdkFramesPerturbation = ceil(sec2frm(const.rdk.durationPerturbation, screen));
+if mod(rdkFramesPerturbation, 2)==1 % needs to be the multiply of 2
+    rdkFramesPerturbation = rdkFramesPerturbation-1;
+end
+rdkFramesAll = ceil(sec2frm(const.rdk.durationWhole, screen));
+
+rdkLifeTime = round(sec2frm(const.rdk.lifeTime, screen));
+rdkControl.durationFramesBefore = rdkFramesBefore;
+rdkControl.durationFramesPerturbation = rdkFramesPerturbation;
 
 % since in PTB it is up-negative, down-positive, and the polar direction is
 % "circular", need to be careful about the correspondence--eventually, an
@@ -27,20 +42,27 @@ rdkDurationPerturbation = const.rdk.durationPerturbation;
 % internal motion direction to absolute direction for display
 if rdkApertureDirBefore==0 % moving rightward
     rdkApertureDirPerturbation = rdkApertureDirBefore-control.rdkApertureDirPerturbation; % the absolute direction; flip since for PTB it is up-negative, down-positive
-    rdkInternalDirPerturbation = rdkApertureDirPerturbation-control.rdkInternalDirPerturbation;  
 else
     rdkApertureDirPerturbation = rdkApertureDirBefore+control.rdkApertureDirPerturbation;
-    rdkInternalDirPerturbation = rdkApertureDirPerturbation+control.rdkInternalDirPerturbation;
 end
 
-% initialize aperture center location
-mediumDurationBefore = (const.rdk.durationBeforeMin+const.rdk.durationBeforeMax)/2; % in s
+% initialize aperture center location and movement per frame
 if const.startExp==1 || const.startExp==0 % actual experiment, translating aperture
-    % initialize horizontal aperture movement per frame
-    [moveDistanceAperture, ] = dva2pxl(const.rdk.apertureSpeed, const.rdk.apertureSpeed, screen)*screen.refreshRate; % pixel per frame, absolute difference
+    % initialize horizontal aperture movement per frame, when outside of
+    % the perturbation phase
+    [moveDistanceApertureBefore, ] = dva2pxl(const.rdk.apertureSpeed, const.rdk.apertureSpeed, screen)*screen.refreshRate; % pixel per frame, absolute difference
+    
+    % initialize horizontal aperture movement per frame, when within the
+    % perturbation phase
+    % then calculate the speed needed to reach the distance of one slope
+    % during perturbation; the horizontal distance covered always equals to
+    % half of the original trajectory during perturbation
+    perturbationSpeed = abs(const.rdk.apertureSpeed/cos(rdkApertureDirPerturbation/180*pi)); % use the absolute speed value here for the distance
+    [moveDistanceAperturePerturbation, ] = dva2pxl(perturbationSpeed, perturbationSpeed, screen)*screen.refreshRate; % pixel per frame, absolute difference
+    
     % initialize the starting center position relative to center of screen;
-    % constant fixation location (so that the random before duration works)
-    [apertureStartDis, ] = dva2pxl((const.rdk.durationPerturbation+mediumDurationBefore)*const.rdk.apertureSpeed/2, (rdkDurationBefore+mediumDurationBefore)*const.rdk.apertureSpeed/2, screen); % the distance between the starting center point and center of screen
+    % constant fixation location 
+    [apertureStartDis, ] = dva2pxl(rdkDurationWhole*const.rdk.apertureSpeed/2, rdkDurationWhole*const.rdk.apertureSpeed/2, screen); % the distance between the starting center point and center of screen
     if rdkApertureDirBefore==0 % moving rightward
         rdkControl.apertureCenterPos{1} = [screen.x_mid-apertureStartDis screen.y_mid]; % the initial starting position, depends on moving direction and speed
     else
@@ -57,13 +79,6 @@ rdkControl.textureCenterPos{1} = rdkControl.apertureCenterPos{1};
 rdkControl.textureWindow{1} = [rdkControl.textureCenterPos{1}(1)-dotFieldRadiusX, ...
     rdkControl.textureCenterPos{1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{1}(1)+dotFieldRadiusX, ...
     rdkControl.textureCenterPos{1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
-
-% initialize timing parameters
-rdkFramesBefore = ceil(sec2frm(control.rdkDurationBefore, screen));
-rdkControl.durationFramesBefore = rdkFramesBefore;
-rdkFramesPerturbation = ceil(sec2frm(const.rdk.durationPerturbation, screen));
-rdkFramesAll = rdkFramesBefore+rdkFramesPerturbation;
-rdkLifeTime = round(sec2frm(const.rdk.lifeTime, screen));
 
 % initialize RDK dot parameters
 [dots.radiusX, ] = dva2pxl(const.rdk.dotRadius, const.rdk.dotRadius, screen);
@@ -119,12 +134,30 @@ for frameN = 1:rdkFramesAll-1
     rdkControl.dotDir(frameN+1, :) = rdkControl.dotDir(frameN, :);
     
     % movement depends on which phase it is, before/during the perturbation
-    if frameN<=rdkFramesBefore
+    if frameN<=rdkFramesBefore || frameN>rdkFramesBefore+rdkFramesPerturbation
         apertureDir = rdkApertureDirBefore;
-    else % during perturbation
-        apertureDir = rdkApertureDirPerturbation;
+        apertureMoveDis = moveDistanceApertureBefore;
         
-        if frameN == rdkFramesBefore+1 % when first enter perturbation
+        if frameN == rdkFramesBefore+rdkFramesPerturbation+1 % end of perturbation, renew labels again
+            % renew label time
+            dots.labelTime(frameN+1)=round(sec2frm(const.rdk.labelUpdateTime, screen));
+            % assign target labels
+            dots.label{frameN+1} = zeros(const.rdk.dotNumber, 1); % target = 1, noise = 0
+            % update new random directions
+            moveTheta = 2 * pi * rand(const.rdk.dotNumber, 1);
+            rdkControl.dotDir(frameN+1, :) = -moveTheta; % in radians, for this up is positive, down is negative
+            % movement of each dot from frame N+1 to frame N+2
+            dots.movement{frameN+1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanceDot*screen.pixelRatioWidthPerHeight];
+        end
+    else % during perturbation
+        if frameN <= rdkFramesBefore + rdkFramesPerturbation/2 % the first half of the perturbation
+            apertureDir = rdkApertureDirPerturbation;
+        else % the second half of the perturbation, "return" journey
+            apertureDir = -rdkApertureDirPerturbation;
+        end
+        apertureMoveDis = moveDistanceAperturePerturbation;
+        
+        if frameN == rdkFramesBefore+1 % when first enter perturbation, renew with target dot labels
             % renew label time
             dots.labelTime(frameN+1)=round(sec2frm(const.rdk.labelUpdateTime, screen));
             % assign target labels
@@ -142,7 +175,9 @@ for frameN = 1:rdkFramesAll-1
     
     % update the center position of the translating aperture
     if const.startExp==1 || const.startExp==0
-        rdkControl.apertureCenterPos{frameN+1} = [rdkControl.apertureCenterPos{frameN}(1)+moveDistanceAperture*cos(apertureDir/180*pi), rdkControl.apertureCenterPos{frameN}(2)+moveDistanceAperture*sin(apertureDir/180*pi)];
+        rdkControl.apertureCenterPos{frameN+1} = ...
+            [rdkControl.apertureCenterPos{frameN}(1) + apertureMoveDis*cos(apertureDir/180*pi), ...
+            rdkControl.apertureCenterPos{frameN}(2) + apertureMoveDis*sin(apertureDir/180*pi)];
         rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
         rdkControl.textureWindow{frameN+1} = [rdkControl.textureCenterPos{frameN+1}(1)-dotFieldRadiusX, ...
             rdkControl.textureCenterPos{frameN+1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{frameN+1}(1)+dotFieldRadiusX, ...

@@ -31,7 +31,7 @@ nHeader = 10; % this number depends on data collection; lines to skip when readi
 % cd(currentFolder);
 
 % or Loop over all subjects and convert
-for ii = 13:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
+for ii = 7:7%:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
     % define current subject/folder
     currentSubject{ii-2} = folderNames(ii).name;
     currentFolder = [dataPath currentSubject{ii-2}];
@@ -72,8 +72,6 @@ for ii = 13:length(folderNames) % we are starting at 3 because matlab always has
                         % initialize for the frame log
                         rdkFrameLog{trialCounter} = table;
                         frameCounter = 1;
-%                         % only for w00...
-%                         eventLog.trialIDFrame(trialCounter, 1) = str2num(entries{2}{lineN});
                     end
                 elseif strcmp(entries{3}{lineN}, 'SYNCTIME') && valid==1
                     eventLog.trialStart(trialCounter, 1) = str2num(entries{2}{lineN});
@@ -82,6 +80,16 @@ for ii = 13:length(folderNames) % we are starting at 3 because matlab always has
                     eventLog.fixationOn(trialCounter, 1) = str2num(entries{2}{lineN}); % read frame idx in original data
                 elseif strcmp(entries{3}{lineN}, 'rdkOn') && valid==1
                     eventLog.rdkOn(trialCounter, 1) = str2num(entries{2}{lineN});
+                elseif strcmp(entries{3}{lineN}, 'perturbationOn') && valid==1
+                    eventLog.perturbationOn(trialCounter, 1) = str2num(entries{2}{lineN});
+% %                     only for x02... the approximate time...
+%                     eventLog.perturbationOff(trialCounter, 1) = str2num(entries{2}{lineN});
+%                     eventLog.perturbationOn(trialCounter, 1) = str2num(entries{2}{lineN})-188+1;
+                    
+% for other than x02: use the following elseif...
+                elseif strcmp(entries{3}{lineN}, 'perturbationOff') && valid==1
+                    eventLog.perturbationOff(trialCounter, 1) = str2num(entries{2}{lineN});
+
                 elseif strcmp(entries{3}{lineN}, 'frameRDK') && valid==1
                     frameN = str2num(entries{4}{lineN});
                     if frameN > 0
@@ -93,8 +101,8 @@ for ii = 13:length(folderNames) % we are starting at 3 because matlab always has
                     frameCounter = frameCounter + 1;
                 elseif strcmp(entries{3}{lineN}, 'rdkOff') && valid==1
                     eventLog.rdkOff(trialCounter, 1) = str2num(entries{2}{lineN});
-%                 elseif strcmp(entries{3}{lineN}, 'respond') && valid==1
-%                     eventLog.respond(trialCounter, 1) = str2num(entries{2}{lineN});
+                elseif strcmp(entries{3}{lineN}, 'respond') && valid==1
+                    eventLog.respond(trialCounter, 1) = str2num(entries{2}{lineN});
                 elseif strcmp(entries{3}{lineN}, 'TRIALEND') && valid==1
                     eventLog.trialEnd(trialCounter, 1) = str2num(entries{2}{lineN});
                 end
