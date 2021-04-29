@@ -53,43 +53,46 @@ trialNoText = uicontrol(fig,'Style','text',...
 %     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
 %     'HorizontalAlignment','left');
 
-if trial.log.rdkApertureDirBefore==0
+if trial.log.rdkApertureDir==0
     rdkDir = 'right';
+    angle = trial.log.rdkApertureAngle;
 else
     rdkDir = 'left';
+    angle = 180-trial.log.rdkApertureAngle;
 end
+% if trial.log.rdkInternalDir>0
+%     sdText = 'up';
+% else
+%     sdText = 'down';
+% end
 textblock = textblock+1;
 trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['Aperture: ' rdkDir],...
-    'Position',[xPosition yPosition-textblock*verticalDistance width height],...
-    'HorizontalAlignment','left');
-textblock = textblock+1;
-trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['perturbation first ', num2str(trial.log.rdkApertureDirPerturbation)],...
+    'String', ['Aperture: ', rdkDir, ' ',  num2str(angle)],...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
 
-if trial.log.rdkInternalDirPerturbation>0
-    sdText = 'up';
-else
-    sdText = 'down';
-end
+% if trial.log.rdkInternalDir>0
+%     sdText = 'up';
+% else
+%     sdText = 'down';
+% end
 textblock = textblock+1;
 trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['RDK coh ', num2str(trial.log.rdkCohPerturbation), ', dir ', sdText],...
+    'String', ['Internal: coh ', num2str(trial.log.rdkCoh), ',', num2str(trial.log.rdkInternalDir)],...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
 
-if trial.log.choice>0
-    choice = 'up';
-else
-    choice = 'down';
-end
+% if trial.log.choice>0
+%     choice = 'up';
+% else
+%     choice = 'down';
+% end
 textblock = textblock+1;
 trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['Choice: ', choice],...
+    'String', ['Response: ', num2str(trial.log.response)],...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
+
 end
 
 

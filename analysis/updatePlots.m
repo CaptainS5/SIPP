@@ -23,8 +23,6 @@ endFrame = min(trial.log.targetOffset+200, trial.log.trialEnd); % trial.log.tria
 % msEnd = trial.log.microSaccade.offset;
 stimOnset = trial.log.targetOnset; % this may have to be changed depending on terminology
 stimOffset = trial.log.targetOffset;
-perturbationOnset = trial.log.perturbationOnset;
-perturbationOffset = trial.log.perturbationOffset;
 % range of the x axis
 minPosX = -10;
 maxPosX = 10;
@@ -49,9 +47,7 @@ xlabel('x-position (deg)', 'fontsize', 12);
 ylabel('y-position (deg)', 'fontsize', 12);
 % plot eye x- versus y-position
 plot(trial.eyeX_filt(startFrame:stimOnset), trial.eyeY_filt(startFrame:stimOnset), 'k');
-plot(trial.eyeX_filt(stimOnset+1:perturbationOnset), trial.eyeY_filt(stimOnset+1:perturbationOnset), 'b');
-plot(trial.eyeX_filt(perturbationOnset+1:perturbationOffset), trial.eyeY_filt(perturbationOnset+1:perturbationOffset), 'r'); % perturbation
-plot(trial.eyeX_filt(perturbationOffset+1:stimOffset), trial.eyeY_filt(perturbationOffset+1:stimOffset), 'b'); % perturbation
+plot(trial.eyeX_filt(stimOnset+1:stimOffset), trial.eyeY_filt(stimOnset+1:stimOffset), 'b');
 plot(trial.eyeX_filt(stimOffset+1:endFrame), trial.eyeY_filt(stimOffset+1:endFrame), 'k');
 % plot target center position
 plot(trial.target.posX(startFrame:endFrame), trial.target.posY(startFrame:endFrame), 'g');
@@ -76,8 +72,6 @@ plot(trial.saccades.Y.offsets,trial.eyeY_filt(trial.saccades.Y.offsets),'c*');
 %     'sacOn', 'sacOff'},'Location','NorthWest');%, 'AutoUpdate','off');
 % vertical lines indicate events/target onsets
 line([trial.log.targetOnset trial.log.targetOnset], [minPosX maxPosX],'Color','k','LineStyle','--');
-line([trial.log.perturbationOnset trial.log.perturbationOnset], [minPosX maxPosX],'Color','r','LineStyle','--');
-line([trial.log.perturbationOffset trial.log.perturbationOffset], [minPosX maxPosX],'Color','r','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minPosX maxPosX],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
     line([trial.pursuit.onset trial.pursuit.onset], [minPosX maxPosX],'Color','b','LineStyle','--');
@@ -115,9 +109,7 @@ plot(trial.saccades.Y.onsets,trial.eyeDY_filt(trial.saccades.Y.onsets),'y*');
 plot(trial.saccades.Y.offsets,trial.eyeDY_filt(trial.saccades.Y.offsets),'c*');
 % vertical lines indicate events/target onsets
 line([trial.log.targetOnset trial.log.targetOnset], [minVel maxVel],'Color','k','LineStyle','--');
-line([trial.log.perturbationOnset trial.log.perturbationOnset], [minVel maxVel],'Color','r','LineStyle','--');
-line([trial.log.perturbationOffset trial.log.perturbationOffset], [minVel maxVel],'Color','r','LineStyle','--');
-line([trial.stim_offset-ms2frames(100) trial.stim_offset-ms2frames(100)], [minVel maxVel],'Color','b','LineStyle','--');
+% line([trial.stim_offset-ms2frames(100) trial.stim_offset-ms2frames(100)], [minVel maxVel],'Color','b','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minVel maxVel],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
     line([trial.pursuit.onset trial.pursuit.onset], [minVel maxVel],'Color','b','LineStyle','-');
@@ -167,8 +159,6 @@ plot(trial.saccades.Y.onsets,trial.eyeDDY_filt(trial.saccades.Y.onsets),'y*');
 plot(trial.saccades.Y.offsets,trial.eyeDDY_filt(trial.saccades.Y.offsets),'c*');
 % vertical lines indicate events/target onsets
 line([trial.log.targetOnset trial.log.targetOnset], [minAcc maxAcc],'Color','k','LineStyle','--');
-line([trial.log.perturbationOnset trial.log.perturbationOnset], [minAcc maxAcc],'Color','r','LineStyle','--');
-line([trial.log.perturbationOffset trial.log.perturbationOffset], [minAcc maxAcc],'Color','r','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minAcc maxAcc],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
     line([trial.pursuit.onset trial.pursuit.onset], [minAcc maxAcc],'Color','b','LineStyle','--');

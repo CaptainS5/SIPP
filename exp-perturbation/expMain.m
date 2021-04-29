@@ -135,13 +135,11 @@ try
             trialDataNew.tMainSync(:, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
             trialDataNew.tRDKon(:, 1)        = NaN;
             trialDataNew.tPerturbationOn(:, 1) = NaN;
-            trialDataNew.tPerturbationOff(:, 1) = NaN;
             trialDataNew.tRDKoff(:, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
             trialDataNew.tResponse(:, 1)          = NaN;               % also the end of the trial
             trialDataNew.t_start_VBL(:, 1:5)        = NaN;
             trialDataNew.t_rdkOn_VBL(:, 1:5)         = NaN;
             trialDataNew.t_perturbationOn_VBL(:, 1:5)         = NaN;
-            trialDataNew.t_perturbationOff_VBL(:, 1:5)         = NaN;
             trialDataNew.t_rdkOff_VBL(:, 1:5)        = NaN;
             trialDataNew.t_response_VBL(:, 1:5)        = NaN;
             trialDataNew.iterations(:, 1)        = NaN;
@@ -192,13 +190,8 @@ try
             control.rdkDurationBefore           = trialData.rdkDurationBefore(currentTrial);
             control.rdkApertureDirBefore        = trialData.rdkApertureDirBefore(currentTrial);
             control.rdkApertureDirPerturbation  = trialData.rdkApertureDirPerturbation(currentTrial);
-            if trialData.rdkInternalPerturbationCons(currentTrial)==0
-                control.rdkCohPerturbation          = 0;
-                control.rdkInternalDirPerturbation  = 0;
-            else
-                control.rdkCohPerturbation          = 1;
-                control.rdkInternalDirPerturbation  = trialData.rdkInternalPerturbationCons(currentTrial);
-            end
+            control.rdkCohPerturbation          = trialData.rdkCohPerturbation(currentTrial);
+            control.rdkInternalDirPerturbation  = trialData.rdkInternalDirPerturbation(currentTrial);
             control.rdkInternalSpeed            = const.rdk.internalSpeed;
             control.fixationFrames              = ceil(sec2frm(trialData.fixationDuration(currentTrial), screen));
             
@@ -334,20 +327,12 @@ try
                             Eyelink('Message', 'rdkOn');
                             Eyelink('Message', ['frameRDK ', num2str(control.frameRDK)]);
                         end
-                    elseif control.enterPerturbation==1
+                    elseif control.enterPerturbation
                         control.enterPerturbation = 0; % reset
                         trialData.tPerturbationOn(currentTrial, 1) = control.data_time;
                         trialData.t_perturbationOn_VBL(currentTrial,:)  = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
                         if eyelink.mode
                             Eyelink('Message', 'perturbationOn');
-                            Eyelink('Message', ['frameRDK ', num2str(control.frameRDK)]);
-                        end
-                    elseif control.enterPerturbation==-1
-                        control.enterPerturbation = 0; % reset
-                        trialData.tPerturbationOff(currentTrial, 1) = control.data_time;
-                        trialData.t_perturbationOff_VBL(currentTrial,:)  = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
-                        if eyelink.mode
-                            Eyelink('Message', 'perturbationOff');
                             Eyelink('Message', ['frameRDK ', num2str(control.frameRDK)]);
                         end
                     else % just record frame number
@@ -372,13 +357,11 @@ try
                     trialData.tMainSync(end, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
                     trialData.tRDKon(end, 1)        = NaN;
                     trialData.tPerturbationOn(end, 1)         = NaN;
-                    trialData.tPerturbationOff(end, 1)         = NaN;
                     trialData.tRDKoff(end, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
                     trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
                     trialData.t_start_VBL(end, 1:5)        = NaN;
                     trialData.t_rdkOn_VBL(end, 1:5)         = NaN;
                     trialData.t_perturbationOn_VBL(:, 1:5)         = NaN;
-                    trialData.t_perturbationOff_VBL(:, 1:5)         = NaN;
                     trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
                     trialData.t_response_VBL(end, 1:5)        = NaN;
                     trialData.iterations(end, 1)        = NaN;

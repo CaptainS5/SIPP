@@ -50,9 +50,8 @@ if sbj.block == 1 && sbj.trial==1 % ~exist([sbj.sbjFolder ,'/trialData.mat'],'fi
     
     randVar.trial.rdkApertureDirBefore = const.rdk.apertureDirBefore;
     randVar.trial.rdkApertureDirPerturbation = const.rdk.apertureDirPerturbation;
-    randVar.trial.rdkInternalPerturbationCons = const.rdk.internalPerturbationCons;
-%     randVar.trial.rdkCohPerturbation = const.rdk.cohPerturbation;
-%     randVar.trial.rdkInternalDirPerturbation = const.rdk.internalDirPerturbation; % upwards is minus, and downwards is plus
+    randVar.trial.rdkCohPerturbation = const.rdk.cohPerturbation;
+    randVar.trial.rdkInternalDirPerturbation = const.rdk.internalDirPerturbation; % upwards is minus, and downwards is plus
     
 %     if const.startExp~=-1 % make accurate blocks first, and then fast, just so that it's easier to learn
 %         randVar.blockPartial.instruction = [0 1]; % 0-fast, 1-accurate;

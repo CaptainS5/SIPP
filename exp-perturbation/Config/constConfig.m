@@ -19,7 +19,7 @@ if sbj.block == 1 && sbj.trial==1
 %         if const.internalOnsetType==1 % constant internal motion
 %             const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         elseif const.internalOnsetType==2 % perturbation of internal motion
-            const.numTrialsPerBlock    = 42*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+            const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         end
     elseif const.startExp==-1
         const.numTrialsPerBlock    = 32*ones(1, 10);
@@ -42,11 +42,9 @@ if sbj.block == 1 && sbj.trial==1
     [const.fixation.windowRadiusPxl, ] = dva2pxl(const.fixation.windowRadius, const.fixation.windowRadius, screen); % in pixel
     
     % RDK stimulus
-    const.rdk.durationBeforeMin = 0.5; % minimum display duration of the whole RDK, s
-    const.rdk.durationBeforeMax = 0.7;
-    const.rdk.durationWhole = 1.2;
+    const.rdk.durationBeforeMin = 0.75; % minimum display duration of the whole RDK, s
+    const.rdk.durationBeforeMax = 1.25;
     const.rdk.durationPerturbation = 0.2; % display duration of the perturbation period, s
-    
     const.rdk.dotDensity = 10; % dot per dva^2
     const.rdk.lifeTime = 10; % s; longer than the whold display duration equals to unlimited lifetime
     % how long before a dot disappears and reappears
@@ -61,25 +59,17 @@ if sbj.block == 1 && sbj.trial==1
     % ========================================================================
     const.rdk.dotRadius = 0.05;
     const.rdk.apertureRadius = 1;
-    const.rdk.dotFieldRadius = const.rdk.apertureRadius;
+        const.rdk.dotFieldRadius = const.rdk.apertureRadius;
     const.rdk.apertureSpeed = 10; % dva per sec
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
-    const.rdk.apertureDirBefore = [0]; % left (180) and right (0) 
-    const.rdk.apertureDirPerturbation = [-21 -14 -7 0 7 14 21]; % relative to the before perturbation aperture direction  
+    const.rdk.apertureDirBefore = [0 180]; % left and right  
+    const.rdk.apertureDirPerturbation = [-10 10]; % relative to the before perturbation aperture direction  
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
-    % this is the initial angle of the perturbation; the second half of the
-    % perturbation the RDK will return to the original horizontal level
-    % before perturbation
     const.rdk.internalSpeed = 5; % speed of each internal dot
     % internal dots during perturbation: (coherence is 0 before perturbation)
-    %     const.rdk.cohPerturbation = [1]; % coherence during the perturbation
-    %     const.rdk.internalDirPerturbation = [-90 90]; % relative to the aperture perturbation direction
-        const.rdk.internalPerturbationCons = [0, -90, 90]; % coh 0, or conherently vertical down/up
-    
-%     % for debugging...
-%     const.rdk.apertureDirPerturbation = [21];
-%     const.rdk.internalPerturbationCons = [-90 90];
+    const.rdk.cohPerturbation = [0 1]; % coherence during the perturbation    
+    const.rdk.internalDirPerturbation = [-90 90]; % relative to the aperture perturbation direction 
     
     % warning beep for feedback on fixation maintainance
     const.beep.samplingRate = 44100;

@@ -41,7 +41,7 @@ if sbj.block == 1 && sbj.trial==1
     
     % RDK stimulus
     const.startingPositionJitter = 1; % in deg, randomize the aperture trajectory center within this radius range around the screen center
-    const.rdk.duration = 0.6; % display duration of the whole RDK, s
+    const.rdk.duration = 1; % display duration of the whole RDK, s
     const.rdk.dotDensity = 10; % dot per dva^2
     const.rdk.lifeTime = const.rdk.duration;
     % how long before a dot disappears and reappears
@@ -64,7 +64,7 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.apertureSpeed = 10; % dva per sec
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
-    const.rdk.apertureDir = [0]; % left (180) and right (0) 
+    const.rdk.apertureDir = [180, 0]; % left (180) and right (0) 
     const.rdk.apertureAngle = [-12:3:12];
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
 %     const.rdk.coh = [1]; % for classical RDKs
