@@ -13,17 +13,17 @@ clear all; close all; clc
 % internalDirCons = [-45 -90 -135 45 90 135]; % -1:left, 1-right
 % internalDirNames = {'-45', '-90', '-135', '45', '90', '135'};
 
-names = {'501'}; % also for 500
-apertureAngles = [-12 -9 -6 -3 0 3 6 9 12];
-apertureAngleNames = {'-12', '-9', '-6', '-3', '0', '3', '6', '9', '12'};
-internalCons = [0, -90, 90];
-internalConNames = {'coh 0', 'dir down', 'dir up'};
-
-% names = {'x02'};
-% allCons.internalCons = [0, -90, 90];
+% names = {'500'};
+% apertureAngles = [-12 -9 -6 -3 0 3 6 9 12];
+% apertureAngleNames = {'-12', '-9', '-6', '-3', '0', '3', '6', '9', '12'};
+% internalCons = [0, -90, 90];
 % internalConNames = {'coh 0', 'dir down', 'dir up'};
-% allCons.apertureAngles = [-21 -14 -7 0 7 14 21];
-% apertureAngleNames = {'-21', '-14', '-7', '0', '7', '14', '21'};
+
+names = {'x02'};
+allCons.internalCons = [0, -90, 90];
+internalConNames = {'coh 0', 'dir down', 'dir up'};
+allCons.apertureAngles = [-21 -14 -7 0 7 14 21];
+apertureAngleNames = {'-21', '-14', '-7', '0', '7', '14', '21'};
 
 sampleRate = 1000;
 

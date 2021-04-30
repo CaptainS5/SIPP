@@ -21,7 +21,8 @@ if rdkApertureDir==0 % moving rightward
 else % moving leftward
     rdkApertureAngle = rdkApertureDir-control.rdkApertureAngle;
 end
-rdkInternalDir = control.rdkInternalDir; % now the internal direction is fixed within the RDK, irrelative to the aperture direction
+rdkInternalDir = -control.rdkInternalDir; % now the internal direction is fixed within the RDK, irrelative to the aperture direction
+% flip for PTB...
 
 % when internal direction is relative to the aperture direction... not in
 % use

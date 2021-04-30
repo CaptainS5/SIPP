@@ -19,7 +19,7 @@ if sbj.block == 1 && sbj.trial==1
 %         if const.internalOnsetType==1 % constant internal motion
 %             const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         elseif const.internalOnsetType==2 % perturbation of internal motion
-            const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+            const.numTrialsPerBlock    = 30*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         end
     elseif const.startExp==-1
         const.numTrialsPerBlock    = 32*ones(1, 10);
@@ -42,9 +42,9 @@ if sbj.block == 1 && sbj.trial==1
     [const.fixation.windowRadiusPxl, ] = dva2pxl(const.fixation.windowRadius, const.fixation.windowRadius, screen); % in pixel
     
     % RDK stimulus
-    const.rdk.durationBeforeMin = 0.75; % minimum display duration of the whole RDK, s
-    const.rdk.durationBeforeMax = 1.25;
-    const.rdk.durationPerturbation = 0.2; % display duration of the perturbation period, s
+    const.rdk.durationBeforeMin = 0.5; % minimum display duration of the whole RDK, s
+    const.rdk.durationBeforeMax = 0.7;
+    const.rdk.durationPerturbation = 0.4; % display duration of the perturbation period, s
     const.rdk.dotDensity = 10; % dot per dva^2
     const.rdk.lifeTime = 10; % s; longer than the whold display duration equals to unlimited lifetime
     % how long before a dot disappears and reappears
@@ -63,13 +63,14 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.apertureSpeed = 10; % dva per sec
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
-    const.rdk.apertureDirBefore = [0 180]; % left and right  
-    const.rdk.apertureDirPerturbation = [-10 10]; % relative to the before perturbation aperture direction  
-    % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
+    const.rdk.apertureDirBefore = [0]; % left and right  
+    const.rdk.apertureDirPerturbation = [-6 -3 0 3 6]; % relative to the before perturbation aperture direction  
+    % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right;
     const.rdk.internalSpeed = 5; % speed of each internal dot
     % internal dots during perturbation: (coherence is 0 before perturbation)
-    const.rdk.cohPerturbation = [0 1]; % coherence during the perturbation    
-    const.rdk.internalDirPerturbation = [-90 90]; % direction within the aperture
+    %     const.rdk.cohPerturbation = [1]; % coherence during the perturbation
+    %     const.rdk.internalDirPerturbation = [-90 90]; % direction within the aperture
+    const.rdk.internalPerturbationCons = [0, -90, 90];
     
     % warning beep for feedback on fixation maintainance
     const.beep.samplingRate = 44100;

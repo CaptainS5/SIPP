@@ -190,8 +190,13 @@ try
             control.rdkDurationBefore           = trialData.rdkDurationBefore(currentTrial);
             control.rdkApertureDirBefore        = trialData.rdkApertureDirBefore(currentTrial);
             control.rdkApertureDirPerturbation  = trialData.rdkApertureDirPerturbation(currentTrial);
-            control.rdkCohPerturbation          = trialData.rdkCohPerturbation(currentTrial);
-            control.rdkInternalDirPerturbation  = trialData.rdkInternalDirPerturbation(currentTrial);
+            if trialData.rdkInternalPerturbationCons(currentTrial)==0
+                control.rdkCohPerturbation          = 0;
+                control.rdkInternalDirPerturbation  = 0;
+            else
+                control.rdkCohPerturbation          = 1;
+                control.rdkInternalDirPerturbation  = trialData.rdkInternalPerturbationCons(currentTrial);
+            end
             control.rdkInternalSpeed            = const.rdk.internalSpeed;
             control.fixationFrames              = ceil(sec2frm(trialData.fixationDuration(currentTrial), screen));
             

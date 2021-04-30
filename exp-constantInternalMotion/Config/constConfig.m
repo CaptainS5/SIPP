@@ -75,7 +75,7 @@ if sbj.block == 1 && sbj.trial==1
     %     const.rdk.internalDir = [-90 90]; % 45: above the aperture direction; -45: below the aperture direction
     % a combined condition for coh+internal direction... coh0, coh1&-90deg,
     % coh1&90 deg
-    const.rdk.internalCons = [0; -90; 90];
+    const.rdk.internalCons = [90];
     %     else
     %         %% for aperture type 1, calculate the parameters to reach the same retinal motion as in aperture type 0
     %         retinalMotionSpeed = 5; % the same as const.rdk.internalSpeed for aperture type 0
