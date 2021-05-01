@@ -41,7 +41,7 @@ if sbj.block == 1 && sbj.trial==1
     
     % RDK stimulus
     const.startingPositionJitter = 1; % in deg, randomize the aperture trajectory center within this radius range around the screen center
-    const.rdk.duration = 0.6; % display duration of the whole RDK, s
+    const.rdk.duration = 1; % display duration of the whole RDK, s
     const.rdk.dotDensity = 10; % dot per dva^2
     const.rdk.lifeTime = const.rdk.duration;
     % how long before a dot disappears and reappears
@@ -75,7 +75,7 @@ if sbj.block == 1 && sbj.trial==1
     %     const.rdk.internalDir = [-90 90]; % 45: above the aperture direction; -45: below the aperture direction
     % a combined condition for coh+internal direction... coh0, coh1&-90deg,
     % coh1&90 deg
-    const.rdk.internalCons = [90];
+    const.rdk.internalCons = [0, -90, 90];
     %     else
     %         %% for aperture type 1, calculate the parameters to reach the same retinal motion as in aperture type 0
     %         retinalMotionSpeed = 5; % the same as const.rdk.internalSpeed for aperture type 0
@@ -92,8 +92,11 @@ if sbj.block == 1 && sbj.trial==1
     
     % response line
     const.line.colour = screen.white; %
-    const.line.length = const.rdk.duration*const.rdk.apertureSpeed/2; % in dva
+    const.line.length = const.rdk.duration*const.rdk.apertureSpeed/4; % in dva
     const.line.width = 0.05; % in dva
+    const.arrowAngle = 30; % relative to the line
+    const.arrowLength = 0.25; % in dva
+    % generate the arrow texture... set at horizontal right
     
     % warning beep for feedback on fixation maintainance
     const.beep.samplingRate = 44100;

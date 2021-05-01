@@ -226,13 +226,13 @@ try
             %         control.targetFID       = fopen(control.targetFile, 'w');
             [rdkControl seed] = generateTrialRDKpositions(const, screen, control); % generate the position of dots in each frame in the whole trial
             % generate aperture for rdk
-%             if const.apertureType==1 % aperture translates across the dot field
-%                 for frameN = 1:size(rdkControl.apertureCenterPos, 2)
-%                     rdkControl.apertureTexture{frameN} = PTBmakeAperture(const, screen, rdkControl.apertureCenterPos{frameN});
-%                 end
-%             else % dots move together with the aperture
-                rdkControl.apertureTexture = PTBmakeAperture(const, screen, 0);
-%             end
+            %             if const.apertureType==1 % aperture translates across the dot field
+            %                 for frameN = 1:size(rdkControl.apertureCenterPos, 2)
+            %                     rdkControl.apertureTexture{frameN} = PTBmakeAperture(const, screen, rdkControl.apertureCenterPos{frameN});
+            %                 end
+            %             else % dots move together with the aperture
+            rdkControl.apertureTexture = PTBmakeAperture(const, screen, 0);
+            %             end
             
             fprintf('EXP: begin Block %d Trial %d \n', block, trialData.trialCounter(currentTrial, 1));
             

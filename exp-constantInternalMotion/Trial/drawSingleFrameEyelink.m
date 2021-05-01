@@ -167,7 +167,13 @@ switch control.mode
         [ecc, ] = dva2pxl(const.line.length/2, const.line.length/2, screen); % distance of the cursor from center
         if isempty(control.mouse_x) % the first response frame, show random angle
             % show the cursor; put it at the start angle everytime
+            %%% this is for only drawing the line, or only having rightward
+            %%% directions
             control.respAngle = rand*180-90;
+            %%%
+%             %%% this is for drawing the arrow, range from -180 to 180
+%             control.respAngle = rand*360-180;
+%             %%%
             SetMouse(rdkControl.randCenterX + round(cos(control.respAngle/180*pi)*ecc), ...
                 rdkControl.randCenterY - round(sin(control.respAngle/180*pi)*ecc), ...
                 screen.window);
@@ -176,20 +182,42 @@ switch control.mode
             % changing the angle of the next loop according to the cursor position
             control.respAngle = atan2(rdkControl.randCenterY-control.mouse_y, control.mouse_x-rdkControl.randCenterX)/pi*180;
         end
-        % make the range within [-90, 90]
-        if control.respAngle>90
-            control.respAngle = control.respAngle-180;
-        elseif control.respAngle<-90
-            control.respAngle = control.respAngle+180;
-        end
-        
+        %%%%%%%%%% show an arrow for the response... currently just show at
         % calculate line coordinates and width in pixel
         [lineWidth, ] = round(dva2pxl(const.line.width, const.line.width, screen));
         [lineX, lineY] = dva2pxl(cos(control.respAngle/180*pi)*const.line.length/2, sin(control.respAngle/180*pi)*const.line.length/2, screen);
-        lineXY = round([-lineX, lineX; lineY, -lineY]);
+        lineXY = round([-lineX, lineX; lineY, -lineY]); % this is the main line
+        
+        % now calculate coordinates for the two stroke arrow--make line end
+        % as the center (0, 0)
+        [arrow1X, arrow1Y] = dva2pxl(cos((180-control.respAngle-const.arrowAngle)/180*pi)*const.arrowLength, ...
+            sin((180-control.respAngle-const.arrowAngle)/180*pi)*const.arrowLength, screen);
+        arrow1XY = round([0, arrow1X; 0, arrow1Y]); 
+        [arrow2X, arrow2Y] = dva2pxl(cos((180-control.respAngle+const.arrowAngle)/180*pi)*const.arrowLength, ...
+            sin((180-control.respAngle+const.arrowAngle)/180*pi)*const.arrowLength, screen);
+        arrow2XY = round([0, arrow2X; 0, arrow2Y]); 
         
         % draw response line
         Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [rdkControl.randCenterX, rdkControl.randCenterY]);
+        Screen('DrawLines', screen.window, [arrow1XY arrow2XY], lineWidth, const.line.colour, [lineX+rdkControl.randCenterX, rdkControl.randCenterY-lineY]);
+        %%%%%%%%%%
+        
+        %%%%%%%%%% this is without the arrow, just a line
+%         % make the range within [-90, 90]
+%         if control.respAngle>90
+%             control.respAngle = control.respAngle-180;
+%         elseif control.respAngle<-90
+%             control.respAngle = control.respAngle+180;
+%         end
+%         
+%         % calculate line coordinates and width in pixel
+%         [lineWidth, ] = round(dva2pxl(const.line.width, const.line.width, screen));
+%         [lineX, lineY] = dva2pxl(cos(control.respAngle/180*pi)*const.line.length/2, sin(control.respAngle/180*pi)*const.line.length/2, screen);
+%         lineXY = round([-lineX, lineX; lineY, -lineY]);
+%         
+%         % draw response line
+%         Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [rdkControl.randCenterX, rdkControl.randCenterY]);
+        %%%%%%%%%%
         
 %         % draw square for photodiode:
 %         if photo.mode                                                       % Photodiode Event 2: Fixation target 2 on

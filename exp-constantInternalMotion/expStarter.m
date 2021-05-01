@@ -37,7 +37,7 @@ pathConfig;
 const.expName              = 'MicroPursuit_constantInternalMotion'; 								% Experiment name
 const.internalOnsetType    = 1;                                             % 1: constant internal motion; 2(not implemented yet): perturbation of internal motion 
 % const.apertureType         = 0;                                             % 0: dots move together with the aperture; 1: aperture translates across the dot field
-const.startExp             = 0;                                             % -1 = baseline condition (fixation); 1 = experiment mode; 0 = debugging mode
+const.startExp             = 1;                                             % -1 = baseline condition (fixation); 1 = experiment mode; 0 = debugging mode
 const.expType              = 1;                                             % 1: experiment; --not implemented...-1: practice; 0: baseline
 const.checkEyeFix          = 1;                                             % 1 = checks gaze fixation (this needs to be 1 also when in dummy mode)
 % const.feedback             = 1;												% 1 = show task feedback (defined in runSingleTrial); 0 = off
@@ -46,7 +46,7 @@ const.runScreenCalib       = 0;                                             % 1 
 const.showGaze             = 0;
 
 % Eyelink Setup:
-eyelink.mode               = 0;                                             % 1 = use eyelink; 0 = off
+eyelink.mode               = 1;                                             % 1 = use eyelink; 0 = off
 eyelink.dummy              = 0;                                             % 1 = eyelink in dummy mode; 0 = eyelink dummy off
 eyelink.recalib            = true;                                          % true = recalibrate between blocks (recommanded); false = no calibration between blocks
 eyelink.dummyEye           = [0,0];                                         % dummy start pos

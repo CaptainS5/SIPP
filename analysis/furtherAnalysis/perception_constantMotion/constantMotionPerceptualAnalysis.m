@@ -7,7 +7,7 @@ averagedPlots = 0;
 
 % plot settings
 textFontSize = 8;
-plotSub = {'500'};
+plotSub = {'501'};
 
 % make rdkApertureAngle left/right flipped--only the up/down values
 % relative to the aperture direction

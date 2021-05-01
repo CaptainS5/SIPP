@@ -52,7 +52,10 @@ if Experiment.trialData.rdkInternalCons(trialIdxInData, 1)==0
     trial.log.rdkInternalDir = 0;
     trial.log.rdkCoh = 0;
 else
-    trial.log.rdkInternalDir = Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
+    %%%%%%%%%% the negative sign is only for 500 and 501...
+    trial.log.rdkInternalDir = -Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
+    %%%%%%%%%%
+%     trial.log.rdkInternalDir = Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
     trial.log.rdkCoh = 1;
 end
 trial.log.eyeSampleRate = eyeData.sampleRate;
