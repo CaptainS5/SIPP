@@ -198,8 +198,13 @@ switch control.mode
         arrow2XY = round([0, arrow2X; 0, arrow2Y]); 
         
         % draw response line
-        Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [rdkControl.randCenterX, rdkControl.randCenterY]);
-        Screen('DrawLines', screen.window, [arrow1XY arrow2XY], lineWidth, const.line.colour, [lineX+rdkControl.randCenterX, rdkControl.randCenterY-lineY]);
+        % centered at the screen center
+        Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [screen.x_mid, screen.y_mid]);
+        Screen('DrawLines', screen.window, [arrow1XY arrow2XY], lineWidth, const.line.colour, [lineX+screen.x_mid, screen.y_mid-lineY]);
+        
+        % centered at the trajectory center
+%         Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [rdkControl.randCenterX, rdkControl.randCenterY]);
+%         Screen('DrawLines', screen.window, [arrow1XY arrow2XY], lineWidth, const.line.colour, [lineX+rdkControl.randCenterX, rdkControl.randCenterY-lineY]);
         %%%%%%%%%%
         
         %%%%%%%%%% this is without the arrow, just a line

@@ -134,64 +134,69 @@ for frameN = 1:rdkFrames-1
         rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
         rdkControl.textureWindow{frameN+1} = rdkControl.textureWindow{frameN};
     end
-
-    % update dot position
-    rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN} + dots.movement{frameN}; % without aperture movement
-    % update lifetime and labels 
-    dots.showTime{frameN+1} = dots.showTime{frameN}-1;
-    dots.labelTime(frameN+1) = dots.labelTime(frameN)-1;
     
-    % initialize for use in the next loop, from frame N+1 to N+2
-    dots.movement{frameN+1} = dots.movement{frameN};
-    dots.label{frameN+1} = dots.label{frameN};
-    rdkControl.dotDir(frameN+1, :) = rdkControl.dotDir(frameN, :);
-    
-    % renew labels
-    if dots.labelTime(frameN+1)<=0 
-        dots.labelTime(frameN+1)=round(sec2frm(const.rdk.labelUpdateTime, screen));
-        % generate new labels
-        labelOrder = randperm(size(dots.label{frameN}, 1));
-        dots.label{frameN+1}(:, 1) = dots.label{frameN}(labelOrder, 1); % randomly assign new labels
-        % update directions
-        moveTheta = 2 * pi * rand(const.rdk.dotNumber, 1); 
-        moveTheta(dots.label{frameN+1}==1, :) = 0; % signal dots moving horizontally to the right
-        moveTheta = moveTheta+rdkInternalDir/180*pi; % rotate the signal direction to the defined direction
-        rdkControl.dotDir(frameN+1, :) = -moveTheta; % in radians, for this up is positive, down is negative
-        % movement of each dot from frame N+1 to frame N+2
-        dots.movement{frameN+1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanceDot*screen.pixelRatioWidthPerHeight];
+    if coh==0 % static pattern; if want to use noise pattern, just comment out this "if"
+        % no need to update dot position, just copy...
+        rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN};
+    else
+        % update dot position
+        rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN} + dots.movement{frameN}; % without aperture movement
+        % update lifetime and labels
+        dots.showTime{frameN+1} = dots.showTime{frameN}-1;
+        dots.labelTime(frameN+1) = dots.labelTime(frameN)-1;
+        
+        % initialize for use in the next loop, from frame N+1 to N+2
+        dots.movement{frameN+1} = dots.movement{frameN};
+        dots.label{frameN+1} = dots.label{frameN};
+        rdkControl.dotDir(frameN+1, :) = rdkControl.dotDir(frameN, :);
+        
+        % renew labels
+        if dots.labelTime(frameN+1)<=0
+            dots.labelTime(frameN+1)=round(sec2frm(const.rdk.labelUpdateTime, screen));
+            % generate new labels
+            labelOrder = randperm(size(dots.label{frameN}, 1));
+            dots.label{frameN+1}(:, 1) = dots.label{frameN}(labelOrder, 1); % randomly assign new labels
+            % update directions
+            moveTheta = 2 * pi * rand(const.rdk.dotNumber, 1);
+            moveTheta(dots.label{frameN+1}==1, :) = 0; % signal dots moving horizontally to the right
+            moveTheta = moveTheta+rdkInternalDir/180*pi; % rotate the signal direction to the defined direction
+            rdkControl.dotDir(frameN+1, :) = -moveTheta; % in radians, for this up is positive, down is negative
+            % movement of each dot from frame N+1 to frame N+2
+            dots.movement{frameN+1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanceDot*screen.pixelRatioWidthPerHeight];
+        end
+        
+        % still needs to replace expired dots and move dots out of the aperture into the aperture again, from the opposite edge
+        % 1. Replace dots with expired lifetime
+        expiredDots = find(dots.showTime{frameN+1}' <= 0);
+        if expiredDots
+            dotsN = length(expiredDots);
+            dis2CenterX = dotFieldRadiusX * sqrt((rand(dotsN,1)));
+            theta = 2 * pi * rand(dotsN,1);
+            % generate new positions and update lifetime
+            rdkControl.dotDir(frameN+1, expiredDots) = -theta; % in radians, for this up is positive and down is negative
+            rdkControl.dotPos{frameN+1}(expiredDots, :) = [cos(theta) sin(theta)] .* [dis2CenterX dis2CenterX*screen.pixelRatioWidthPerHeight];
+            dots.showTime{frameN+1}(expiredDots) = rdkLifeTime;
+        end
+        % 2. Relocate dots out of the aperture
+        dotDist = rdkControl.dotPos{frameN+1}(:, 1).^2 + ...
+            ((rdkControl.dotPos{frameN+1}(:, 2)/screen.pixelRatioWidthPerHeight)).^2;
+        outDots = find(dotDist>dotFieldRadiusX^2); % all dots out of the aperture
+        %     % simply generate new random positions for these dots--to avoid
+        %     % opposite direction at the edge of a small aperture (for example,
+        %     % signal direction is up, a dot is at the left edge of a 1deg-RDK, two
+        %     % steps it will move out of the aperture, then it could look like moving
+        %     % downward constantly...)
+        %     if outDots
+        %         dotsN = length(outDots);
+        %         dis2CenterX = dotFieldRadiusX * sqrt((rand(dotsN,1)));
+        %         theta = 2 * pi * rand(dotsN,1);
+        %         % generate new positions
+        %         rdkControl.dotDir(frameN+1, outDots) = -theta; % in radians, for this up is positive and down is negative
+        %         rdkControl.dotPos{frameN+1}(outDots, :) = [cos(theta) sin(theta)] .* [dis2CenterX dis2CenterX*screen.pixelRatioWidthPerHeight];
+        %         dots.showTime{frameN+1}(outDots) = rdkLifeTime;
+        %     end
+        %
+        % move dots in the aperture from the opposite edge, continue the assigned motion
+        rdkControl.dotPos{frameN+1}(outDots, :) = -rdkControl.dotPos{frameN+1}(outDots, :)+dots.movement{frameN}(outDots, :);
     end
-    
-    % still needs to replace expired dots and move dots out of the aperture into the aperture again, from the opposite edge
-    % 1. Replace dots with expired lifetime
-    expiredDots = find(dots.showTime{frameN+1}' <= 0);
-    if expiredDots
-        dotsN = length(expiredDots);
-        dis2CenterX = dotFieldRadiusX * sqrt((rand(dotsN,1)));
-        theta = 2 * pi * rand(dotsN,1);
-        % generate new positions and update lifetime
-        rdkControl.dotDir(frameN+1, expiredDots) = -theta; % in radians, for this up is positive and down is negative
-        rdkControl.dotPos{frameN+1}(expiredDots, :) = [cos(theta) sin(theta)] .* [dis2CenterX dis2CenterX*screen.pixelRatioWidthPerHeight];
-        dots.showTime{frameN+1}(expiredDots) = rdkLifeTime;
-    end
-    % 2. Relocate dots out of the aperture
-    dotDist = rdkControl.dotPos{frameN+1}(:, 1).^2 + ...
-       ((rdkControl.dotPos{frameN+1}(:, 2)/screen.pixelRatioWidthPerHeight)).^2;
-    outDots = find(dotDist>dotFieldRadiusX^2); % all dots out of the aperture
-%     % simply generate new random positions for these dots--to avoid
-%     % opposite direction at the edge of a small aperture (for example, 
-%     % signal direction is up, a dot is at the left edge of a 1deg-RDK, two
-%     % steps it will move out of the aperture, then it could look like moving
-%     % downward constantly...)
-%     if outDots
-%         dotsN = length(outDots);
-%         dis2CenterX = dotFieldRadiusX * sqrt((rand(dotsN,1)));
-%         theta = 2 * pi * rand(dotsN,1);
-%         % generate new positions
-%         rdkControl.dotDir(frameN+1, outDots) = -theta; % in radians, for this up is positive and down is negative
-%         rdkControl.dotPos{frameN+1}(outDots, :) = [cos(theta) sin(theta)] .* [dis2CenterX dis2CenterX*screen.pixelRatioWidthPerHeight];
-%         dots.showTime{frameN+1}(outDots) = rdkLifeTime;
-%     end
-%     
-    % move dots in the aperture from the opposite edge, continue the assigned motion
-    rdkControl.dotPos{frameN+1}(outDots, :) = -rdkControl.dotPos{frameN+1}(outDots, :)+dots.movement{frameN}(outDots, :);
 end
