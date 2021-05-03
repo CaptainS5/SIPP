@@ -46,7 +46,8 @@ const.runScreenCalib       = 0;                                             % 1 
 const.showGaze             = 0;
 
 % Eyelink Setup:
-eyelink.mode               = 1;                                             % 1 = use eyelink; 0 = off
+eyelink.mode               = 1;     
+% 1 = use eyelink; 0 = off
 eyelink.dummy              = 0;                                             % 1 = eyelink in dummy mode; 0 = eyelink dummy off
 eyelink.recalib            = true;                                          % true = recalibrate between blocks (recommanded); false = no calibration between blocks
 eyelink.dummyEye           = [0,0];                                         % dummy start pos
