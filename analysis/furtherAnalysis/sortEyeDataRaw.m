@@ -4,11 +4,11 @@
 
 clear all; close all; clc
 
-names = {'502'};
+names = {'d00'};
 subStartI = 1;
 
 cd ..
-analysisPath = pwd; % folder for the eye movement pre-processing codes
+analysisPath = pwd; % folder for the eye movement preprocessing codes
 dataPath = ['..\data\']; % still need to go into specific folders
 
 %% All trials
@@ -48,13 +48,12 @@ for subN = subStartI:length(names)
         if errorStatus(currentTrial, 1)==0
             analyzeTrial;
             % to get target info
-            eyeTrialData.rdkApertureDirBefore(subN, currentTrial) = trial.log.rdkApertureDirBefore; % positive is up, negative is down
-            eyeTrialData.rdkApertureDirPerturbation(subN, currentTrial) = trial.log.rdkApertureDirPerturbation;
+            eyeTrialData.rdkApertureDir(subN, currentTrial) = trial.log.rdkApertureDir; % positive is up, negative is down
+            eyeTrialData.rdkApertureAngle(subN, currentTrial) = trial.log.rdkApertureAngle;
             eyeTrialData.rdkInternalSpeed(subN, currentTrial) = trial.log.rdkInternalSpeed; %
-            eyeTrialData.rdkInternalPerturbationCons(subN, currentTrial) = trial.log.rdkInternalPerturbationCons;
-            eyeTrialData.rdkInternalDirPerturbation(subN, currentTrial) = trial.log.rdkInternalDirPerturbation; % direction std
-            eyeTrialData.rdkCohPerturbation(subN, currentTrial) = trial.log.rdkCohPerturbation;
-            eyeTrialData.choice(subN, currentTrial) = trial.log.choice;
+            eyeTrialData.rdkInternalDir(subN, currentTrial) = trial.log.rdkInternalDir; % direction std
+            eyeTrialData.rdkCoh(subN, currentTrial) = trial.log.rdkCoh;
+            eyeTrialData.response(subN, currentTrial) = trial.log.response;
             
             eyeTrialData.frameLog.fixationOn(subN, currentTrial) = trial.log.trialStart;
             eyeTrialData.frameLog.rdkOn(subN, currentTrial) = trial.log.targetOnset;
@@ -97,13 +96,12 @@ for subN = subStartI:length(names)
             %             eyeTrialData.frameLog.respond(subN, currentTrial) = NaN;
             %             eyeTrialData.target{subN, currentTrial} = trial.target;
             
-            eyeTrialData.rdkApertureDirBefore(subN, currentTrial) = NaN; % positive is up, negative is down
-            eyeTrialData.rdkApertureDirPerturbation(subN, currentTrial) = NaN;
-            eyeTrialData.rdkInternalSpeed(subN, currentTrial) = NaN; 
-            eyeTrialData.rdkInternalPerturbationCons(subN, currentTrial) = NaN;
-            eyeTrialData.rdkInternalDirPerturbation(subN, currentTrial) = NaN; 
-            eyeTrialData.rdkCohPerturbation(subN, currentTrial) = NaN;
-            eyeTrialData.choice(subN, currentTrial) = NaN;
+            eyeTrialData.rdkApertureDir(subN, currentTrial) = NaN; % positive is up, negative is down
+            eyeTrialData.rdkApertureAngle(subN, currentTrial) = NaN;
+            eyeTrialData.rdkInternalDir(subN, currentTrial) = NaN; % direction std
+            eyeTrialData.rdkInternalSpeed(subN, currentTrial) = NaN; %
+            eyeTrialData.rdkCoh(subN, currentTrial) = NaN;
+            eyeTrialData.response(subN, currentTrial) = NaN;
             
 %             fields = fieldnames(trial.pursuit);
 %             for ii = 1:length(fields)

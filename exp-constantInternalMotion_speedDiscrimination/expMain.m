@@ -141,8 +141,8 @@ try
             trialDataNew.t_rdkOff_VBL(:, 1:5)        = NaN;
             trialDataNew.t_response_VBL(:, 1:5)        = NaN;
             trialDataNew.iterations(:, 1)        = NaN;
-            trialDataNew.reportAngle(:, 1)          = NaN; % -1=up, 1=down
-            %             trialDataNew.choiceCorrect(:, 1)          = NaN; % 0=wrong, 1=correct
+            trialDataNew.response(:, 1)          = NaN; % -1=slower, 1=faster
+            trialDataNew.responseCorrect(:, 1)          = NaN; % 0=wrong, 1=correct
             trialDataNew.repeat(:, 1)          = 0; % if the trial was repeated, mark repeat as 1
             trialDataNew.trialCounter          = [1:size(trialDataNew, 1)]';
             trialData = [trialData; trialDataNew]; % fill in trialData with the trial conditions of the current block
@@ -188,7 +188,7 @@ try
             control.currentTrial    = currentTrial;                                 % current trial
             control.trialName       = sprintf('%.3d', currentTrial);
             
-            if trialData.rdkInternalCons(currentTrial)==0
+            if trialData.rdkInternalCons(currentTrial)==-1
                 control.rdkCoh          = 0;
                 control.rdkInternalDir  = 0;
             else
@@ -196,14 +196,16 @@ try
                 control.rdkInternalDir  = trialData.rdkInternalCons(currentTrial);
             end
             control.rdkApertureDir  = trialData.rdkApertureDir(currentTrial);
-            control.rdkApertureAngle  = trialData.rdkApertureAngle(currentTrial);
+            control.rdkApertureSpeed  = trialData.rdkApertureSpeed(currentTrial);
             control.rdkInternalSpeed = const.rdk.internalSpeed;
             control.fixationFrames = ceil(sec2frm(trialData.fixationDuration(currentTrial), screen));
+            control.rdkDuration = trialData.rdkDuration(currentTrial);
+            control.rdkFrames = ceil(sec2frm(trialData.rdkDuration(currentTrial), screen));
             
-            % initialize for mouse response
-            control.mouse_x = [];
-            control.mouse_y = [];
-            control.mouse_buttons = [];
+%             % initialize for mouse response
+%             control.mouse_x = [];
+%             control.mouse_y = [];
+%             control.mouse_buttons = [];
             
             control.mode            = 1;                                        % different phases of the trial (changes values in runSingleTrials)
             control.break           = 0;                                        % trial completion
@@ -343,22 +345,22 @@ try
                     end
                 end
                 
-                % mouse response
-                if control.mode==3 && control.frameRDK<-1 % response phase
-                    % get new mouse position
-                    [control.mouse_x, control.mouse_y, control.mouse_buttons, focus, valuators, valinfo] = GetMouse(screen.window);
-                    
-                    if any(control.mouse_buttons) % record the last mouse position
-                        control.mode = 4;
-                        HideCursor;
-                        if eyelink.mode
-                            Eyelink('Message', 'respond');
-                        end
-                        trialData.tResponse(currentTrial, 1) = control.data_time;
-                        trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
-                        trialData.reportAngle(currentTrial, 1) = control.respAngle;
-                    end
-                end
+%                 % mouse response
+%                 if control.mode==3 && control.frameRDK<-1 % response phase
+%                     % get new mouse position
+%                     [control.mouse_x, control.mouse_y, control.mouse_buttons, focus, valuators, valinfo] = GetMouse(screen.window);
+%                     
+%                     if any(control.mouse_buttons) % record the last mouse position
+%                         control.mode = 4;
+%                         HideCursor;
+%                         if eyelink.mode
+%                             Eyelink('Message', 'respond');
+%                         end
+%                         trialData.tResponse(currentTrial, 1) = control.data_time;
+%                         trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
+%                         trialData.reportAngle(currentTrial, 1) = control.respAngle;
+%                     end
+%                 end
                                 
 %                 % if need to repeat the trial, set up
 %                 if control.repeat==1
@@ -407,13 +409,45 @@ try
                 end
                 
                 % check key press
-                [bPressed keyPressed] = PTBcheck_key_press([keys.escape, keys.recalibration]);
+                [bPressed keyPressed] = PTBcheck_key_press([keys.right, keys.up, keys.down, keys.escape, keys.recalibration]);
                 if keyPressed==keys.escape
                     fprintf('EXP: Experiment aborted by pressing esc key \n');
                     control.abort = 1;
                     break;                                                      % BREAK the while loop, if trial was aborted by ESC press
                 elseif keyPressed==keys.recalibration
                     control.forceRecalibEL = 1;
+                elseif control.rdkApertureSpeed == const.rdk.apertureStandardSpeed && keyPressed==keys.right
+                    control.mode = 4;
+                    if eyelink.mode
+                        Eyelink('Message', 'respond');
+                    end
+                    trialData.tResponse(currentTrial, 1) = control.data_time;
+                    trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
+                    trialData.response(control.currentTrial, 1) = NaN;
+                    trialData.responseCorrect(control.currentTrial, 1) = NaN;
+                elseif control.rdkApertureSpeed ~= const.rdk.apertureStandardSpeed && (keyPressed==keys.up || keyPressed==keys.down)
+                    control.mode = 4;
+                    if eyelink.mode
+                        Eyelink('Message', 'respond');
+                    end
+                    trialData.tResponse(currentTrial, 1) = control.data_time;
+                    trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
+                    if keyPressed==keys.up
+                        trialData.response(control.currentTrial, 1) = 1; % faster
+                    elseif keyPressed==keys.down
+                        trialData.response(control.currentTrial, 1) = -1; % slower
+                    end
+                    
+                    if (trialData.response(control.currentTrial, 1)==1 ...
+                            && trialData.rdkApertureSpeed(control.currentTrial, 1)>const.rdk.apertureStandardSpeed) || ...
+                            (trialData.response(control.currentTrial, 1)==-1 ...
+                            && trialData.rdkApertureSpeed(control.currentTrial, 1)<const.rdk.apertureStandardSpeed)
+                        %                         text = 'correct';
+                        trialData.responseCorrect(control.currentTrial, 1) = 1; % record if the response is correct
+                    else
+                        %                         text = 'wrong';
+                        trialData.responseCorrect(control.currentTrial, 1) = 0;
+                    end
                 end
                 
                 % check forced Recalibration:
@@ -432,7 +466,8 @@ try
                     trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
                     trialData.t_response_VBL(end, 1:5)        = NaN;
                     trialData.iterations(end, 1)        = NaN;
-                    trialData.reportAngle(end, 1)          = NaN; % -1=up, 1=down
+                    trialData.response(end, 1)          = NaN; % -1=up, 1=down
+                    trialData.responseCorrect(end, 1)          = NaN; % -1=up, 1=down
                     trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
                     trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
                     

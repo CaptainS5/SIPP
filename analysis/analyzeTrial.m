@@ -21,7 +21,7 @@
 eyeFile = [currentSubject 't' num2str(currentTrial, '%03d') '.mat']; % mat file, eye data transformed from edf
 % make sure they are included in the experiment code
 eyeData = readEyeData(eyeFile, dataPath, currentSubject, currentTrial, analysisPath, eventLog, Experiment);
-if length(eyeData.timeStamp)<=10 || isempty(rdkFrameLog{currentTrial}) 
+if length(eyeData.timeStamp)<=10 || isempty(rdkFrameLog{currentTrial}) || eventLog.respond(currentTrial, 1)==0
     trial.signalLoss = 1;
 else
     eyeData = processEyeData(eyeData);
@@ -96,4 +96,5 @@ if trial.signalLoss
         trial.log.rdkInternalDir = Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
         trial.log.rdkCoh = 1;
     end
+    trial.log.response = NaN;
 end
