@@ -55,16 +55,12 @@ switch control.mode
         % calculate the step-ramp distance, then place fixation relatively
         % closer to the screen center
         stepTime = 0.15; % how many secs it takes for the aperture center to move from the step to the fixation
-        [stepDis, ] = dva2pxl(const.rdk.apertureSpeed*stepTime, const.rdk.apertureSpeed*stepTime, screen);
+        [stepDis, ] = dva2pxl(control.rdkApertureSpeed*stepTime, control.rdkApertureSpeed*stepTime, screen);
         
-        if const.startExp==1 || const.startExp==0
-            if control.rdkApertureDirBefore==0 % moving rightward
-                fixationCenter = [rdkControl.apertureCenterPos{1}(1)+stepDis, rdkControl.apertureCenterPos{1}(2)];
-            else % moving leftward
-                fixationCenter = [rdkControl.apertureCenterPos{1}(1)-stepDis, rdkControl.apertureCenterPos{1}(2)];
-            end
-        elseif const.startExp==-1
-            fixationCenter = screen.center;
+        if control.rdkApertureDir==0 % moving rightward
+            fixationCenter = [rdkControl.apertureCenterPos{1}(1)+stepDis, rdkControl.apertureCenterPos{1}(2)];
+        else % moving leftward
+            fixationCenter = [rdkControl.apertureCenterPos{1}(1)-stepDis, rdkControl.apertureCenterPos{1}(2)];
         end
         
         % draw target
@@ -81,18 +77,30 @@ switch control.mode
                     diffFix = sqrt((xeye-fixationCenter(1))^2+((yeye-fixationCenter(2))/screen.pixelRatioWidthPerHeight)^2);
 
                     if diffFix <= const.fixation.windowRadiusPxl % fixation ok
-                        PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
+                        if control.rdkApertureSpeed ==10 % standard trial
+                            PTBdraw_cross(screen, fixationCenter, const.fixation.dotRadiusPxl*2, screen.green)
+                        else
+                            PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
+                        end
                         control.frameFix = control.frameFix+1;
                     elseif diffFix > const.fixation.windowRadiusPxl % fixation out of range, show warning
 %                         Snd('Play', const.beep.sound, const.beep.samplingRate, 16);
                         % Plays the sound in case of wrong fixation
                         % show white fixation
-                        PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
+                        if control.rdkApertureSpeed ==10 % standard trial
+                            PTBdraw_cross(screen, fixationCenter, const.fixation.dotRadiusPxl*2, screen.warningColor)
+                        else
+                            PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
+                        end
                     end
                 else
                     % if data is invalid (e.g. during a blink), show white
                     % fixation
-                    PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
+                    if control.rdkApertureSpeed ==10 % standard trial
+                        PTBdraw_cross(screen, fixationCenter, const.fixation.dotRadiusPxl*2, screen.warningColor)
+                    else
+                        PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
+                    end
                     disp('Eyelink data invalid')
                 end
             else
@@ -105,7 +113,11 @@ switch control.mode
                 control.repeat = 1;
             end
         else
-            PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
+            if control.rdkApertureSpeed ==10 % standard trial
+                PTBdraw_cross(screen, fixationCenter, const.fixation.dotRadiusPxl*2, screen.green)
+            else
+                PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
+            end
             control.frameFix = control.frameFix+1;
         end
         
@@ -129,10 +141,16 @@ switch control.mode
 %% (2.2) --------------------------------------------------------------
     case 2                                                                  % PHASE 2: RDK display
         control.frameRDK = control.frameRDK + 1;   % start counting frames for RDK display
+        
         % draw target:
-        % dots move together with the aperture
-        PTBdraw_target_RDK(screen, const, rdkControl.dotPos{control.frameRDK}, rdkControl.apertureTexture, ...
-            rdkControl.textureCenterPos{control.frameRDK}, rdkControl.textureWindow{control.frameRDK});
+        if control.frameRDK <= control.rdkFramesBefore || control.frameRDK > control.rdkFramesBefore + control.rdkFramesDuring % only draw target when it is not during occlusion
+            PTBdraw_target_RDK(screen, const, rdkControl.dotPos{control.frameRDK}, rdkControl.apertureTexture, ...
+                rdkControl.textureCenterPos{control.frameRDK}, rdkControl.textureWindow{control.frameRDK});
+        end
+        
+        if control.occlusionStart~=0
+            control.occlusionStart = 0; % reset
+        end
         
         % draw square for photodiode:
         if photo.mode                                                       % Photodiode Event 2: Fixation target 2 on
@@ -148,12 +166,14 @@ switch control.mode
 %             Screen('DrawLine', screen.window, screen.black, screen.center(1), screen.center(2), toH, toV, 5);
 %         end
         
-        if control.frameRDK == rdkControl.durationFramesBefore + 1
-            control.enterPerturbation = 1;
-        elseif control.frameRDK == length(rdkControl.dotPos) % if RDK duration passed but participant did not respond, move to next phase
+        if control.frameRDK == length(rdkControl.dotPos) % if RDK duration passed but participant did not respond, move to next phase
             b_rdk            = 1;
-            control.mode    = 3; % enter response phase
+            control.mode    = 3; % skip response for now
             control.frameRDK = -1;
+        elseif control.frameRDK == control.rdkFramesBefore + 1
+            control.occlusionStart = 1;
+        elseif control.frameRDK == control.rdkFramesBefore + control.rdkFramesDuring + 1
+            control.occlusionStart = -1;
         else
             b_rdk            = 0;
         end
@@ -161,25 +181,81 @@ switch control.mode
 %% (2.3)---------------------------------------------------------------
     case 3                                                                  % PHASE 3: response screen if needed
         control.frameRDK = control.frameRDK - 1; % need to keep updating the frame numbers...
-%         % draw target
-%         if control.instruction==0 % fast block
-%             msg = 'TOO SLOW';
-%             msgColor = screen.warningColor;
-%         else % accurate block
-%             msg = 'please do not wait for too long';
-%             msgColor = screen.msgfontcolour;
+        
+        % keyboard response message
+        PTBwrite_msg(screen, 'ahead of behind?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
+%         PTBwrite_msg(screen, 'above or below?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
+        
+%         % mouse response
+%         [ecc, ] = dva2pxl(const.line.length/2, const.line.length/2, screen); % distance of the cursor from center
+%         if isempty(control.mouse_x) % the first response frame, show random angle
+%             % show the cursor; put it at the start angle everytime
+%             %%% this is for only drawing the line, or only having rightward
+%             %%% directions
+%             control.respAngle = rand*180-90;
+%             %%%
+% %             %%% this is for drawing the arrow, range from -180 to 180
+% %             control.respAngle = rand*360-180;
+% %             %%%
+%             SetMouse(screen.x_mid + round(cos(control.respAngle/180*pi)*ecc*2), ...
+%                 screen.y_mid - round(sin(control.respAngle/180*pi)*ecc*2), ...
+%                 screen.window);
+%             ShowCursor;
+%         else
+%             % changing the angle of the next loop according to the cursor position
+%             control.respAngle = atan2(rdkControl.randCenterY-control.mouse_y, control.mouse_x-rdkControl.randCenterX)/pi*180;
 %         end
-        PTBwrite_msg(screen, '?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
+%         %%%%%%%%%% show an arrow for the response... currently just show at
+%         % calculate line coordinates and width in pixel
+%         [lineWidth, ] = round(dva2pxl(const.line.width, const.line.width, screen));
+%         [lineX, lineY] = dva2pxl(cos(control.respAngle/180*pi)*const.line.length/2, sin(control.respAngle/180*pi)*const.line.length/2, screen);
+%         lineXY = round([-lineX, lineX; lineY, -lineY]); % this is the main line
+%         
+%         % now calculate coordinates for the two stroke arrow--make line end
+%         % as the center (0, 0)
+%         [arrow1X, arrow1Y] = dva2pxl(cos((180-control.respAngle-const.arrowAngle)/180*pi)*const.arrowLength, ...
+%             sin((180-control.respAngle-const.arrowAngle)/180*pi)*const.arrowLength, screen);
+%         arrow1XY = round([0, arrow1X; 0, arrow1Y]); 
+%         [arrow2X, arrow2Y] = dva2pxl(cos((180-control.respAngle+const.arrowAngle)/180*pi)*const.arrowLength, ...
+%             sin((180-control.respAngle+const.arrowAngle)/180*pi)*const.arrowLength, screen);
+%         arrow2XY = round([0, arrow2X; 0, arrow2Y]); 
+%         
+%         % draw response line
+%         % centered at the screen center
+%         Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [screen.x_mid, screen.y_mid]);
+%         Screen('DrawLines', screen.window, [arrow1XY arrow2XY], lineWidth, const.line.colour, [lineX+screen.x_mid, screen.y_mid-lineY]);
+        
+        % centered at the trajectory center
+%         Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [rdkControl.randCenterX, rdkControl.randCenterY]);
+%         Screen('DrawLines', screen.window, [arrow1XY arrow2XY], lineWidth, const.line.colour, [lineX+rdkControl.randCenterX, rdkControl.randCenterY-lineY]);
+        %%%%%%%%%%
+        
+        %%%%%%%%%% this is without the arrow, just a line
+%         % make the range within [-90, 90]
+%         if control.respAngle>90
+%             control.respAngle = control.respAngle-180;
+%         elseif control.respAngle<-90
+%             control.respAngle = control.respAngle+180;
+%         end
+%         
+%         % calculate line coordinates and width in pixel
+%         [lineWidth, ] = round(dva2pxl(const.line.width, const.line.width, screen));
+%         [lineX, lineY] = dva2pxl(cos(control.respAngle/180*pi)*const.line.length/2, sin(control.respAngle/180*pi)*const.line.length/2, screen);
+%         lineXY = round([-lineX, lineX; lineY, -lineY]);
+%         
+%         % draw response line
+%         Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [rdkControl.randCenterX, rdkControl.randCenterY]);
+        %%%%%%%%%%
+        
 %         % draw square for photodiode:
 %         if photo.mode                                                       % Photodiode Event 2: Fixation target 2 on
 %             PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.black);
 %         end
-%         control.repeat = 1;
         
 %% (2.4)---------------------------------------------------------------
     case 4                                                                  % PHASE 4: FINISH - WAIT BETWEEN TRIALS
         control.frameRDK = control.frameRDK - 1; % need to keep updating so that the rdk off time is not renewed at every frame!
-        tElapse = timePassed - trialData.tResponse(curTrial, 1);
+        tElapse = timePassed - trialData.tRDKoff(curTrial, 1);
         % draw square for photodiode:
         if photo.mode                                                               % Photodiode Event 5: Trial End
             PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.black);

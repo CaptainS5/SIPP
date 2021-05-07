@@ -16,14 +16,15 @@ function [const] = constConfig(screen, const, sbj)
 if sbj.block == 1 && sbj.trial==1
     % Some dsign-related things (These will be used in paramConfig):
     if const.startExp==1 || const.startExp==0
-%         if const.internalOnsetType==1 % constant internal motion
-%             const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
-%         elseif const.internalOnsetType==2 % perturbation of internal motion
-            const.numTrialsPerBlock    = 30*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
-%         end
+        %         if const.internalOnsetType==1 % constant internal motion
+        const.numTrialsPerBlock    = 36*ones(1, 8);                                % Each column = number of trials in one block; number of columns = number of blocks
+        %         elseif const.internalOnsetType==2 % perturbation of internal motion
+        %             const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+        %         end
     elseif const.startExp==-1
-        const.numTrialsPerBlock    = 32*ones(1, 10);
+        const.numTrialsPerBlock    = [10]; % 32*ones(1, 10);
     end
+    const.standardInterval = 9; % one standard trial once every x trials indicated by this number
     if const.makeVideo; const.numTrialsPerBlock = 1; end
     const.numTrials            = sum(const.numTrialsPerBlock);                  % total number of trials
     
@@ -33,8 +34,6 @@ if sbj.block == 1 && sbj.trial==1
     
     %% Stimuli and Timing:
     % fixation
-    const.fixation.durationMin = 1;
-    const.fixation.durationMax = 1.5;
     const.fixation.dotRadius = 0.15; % in dva
     [const.fixation.dotRadiusPxl, ] = dva2pxl(const.fixation.dotRadius, const.fixation.dotRadius, screen); % in pixel
     const.fixation.colour = [255 255 255]; % fixation colour for fast trials
@@ -42,11 +41,9 @@ if sbj.block == 1 && sbj.trial==1
     [const.fixation.windowRadiusPxl, ] = dva2pxl(const.fixation.windowRadius, const.fixation.windowRadius, screen); % in pixel
     
     % RDK stimulus
-    const.rdk.durationBeforeMin = 0.5; % minimum display duration of the whole RDK, s
-    const.rdk.durationBeforeMax = 0.7;
-    const.rdk.durationPerturbation = 0.4; % display duration of the perturbation period, s
+    const.startingPositionJitter = 1; % in deg, randomize the aperture trajectory center within this range away from the screen center
     const.rdk.dotDensity = 10; % dot per dva^2
-    const.rdk.lifeTime = 10; % s; longer than the whold display duration equals to unlimited lifetime
+    const.rdk.lifeTime = 0.1;
     % how long before a dot disappears and reappears
     const.rdk.labelUpdateTime = 0.050; % change labels and assign new directions for all
     % for Transparent motion, label update time >= the whole rdk duration;
@@ -60,17 +57,40 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.dotRadius = 0.05;
     const.rdk.apertureRadius = 1;
     const.rdk.dotFieldRadius = const.rdk.apertureRadius;
-    const.rdk.apertureSpeed = 10; % dva per sec
+    const.rdk.apertureSpeed = 10;
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
-    const.rdk.apertureDirBefore = [0]; % left and right  
-    const.rdk.apertureDirPerturbation = [-6 -3 0 3 6]; % relative to the before perturbation aperture direction  
-    % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right;
+    
+    %% for aperture type 0, simply define the relative retinal motion of the
+    % internal dots:
     const.rdk.internalSpeed = 5; % speed of each internal dot
-    % internal dots during perturbation: (coherence is 0 before perturbation)
-    %     const.rdk.cohPerturbation = [1]; % coherence during the perturbation
-    %     const.rdk.internalDirPerturbation = [-90 90]; % direction within the aperture
-    const.rdk.internalPerturbationCons = [0, -90, 90];
+    %     const.rdk.coh = [0 1];
+    %     const.rdk.internalDir = [0 180 90]; % 45: above the aperture direction; -45: below the aperture direction
+    
+    % parameters to manipulate
+    const.trajectoryTilted = 0; % mainly about whether the perception is about speed (horizontal trajectory), or spatial (tilted trajectory)
+    % matters for the jitter location, no jitter vertically if not tilted
+    % trajectory (set to 0); the value should be 0 or 1 here
+    const.rdk.durationBefore = [0.6 0.8]; % display duration of the whole RDK, s; min and max
+    const.rdk.durationDuring = 0.7; % display duration of the whole RDK, s; occlusion
+    const.rdk.distanceDuring = NaN; % either fix durating during or distance during; the other one should be NaN
+    const.rdk.durationAfter = 0.2; % display duration of the whole RDK, s; min and max
+    const.rdk.apertureDir = [0]; % left (180) and right (0)
+    const.rdk.apertureSpeed = [8 9 10 11 12];
+    const.rdk.apertureAngle = [0]; % [-5 -3 -1 1 3 5]; % degs relative to the general horizontal direction
+    const.rdk.shiftDis = [1]; % dva; distance shifted at reappearance
+    const.rdk.shiftDir = [-90 90]; % angle; horizontal right is 0, then counterclockwise is positive
+    const.rdk.shiftTime = NaN; % in secs; similar to durationDuring vs. distanceDuring, shiftDis&shiftDir vs. shiftTime, one of them should be NaN depending on the task
+    % a combined condition for coh+internal direction... coh0, coh1&-90deg,
+    % coh1&90 deg
+    const.rdk.internalCons = [0, 180, -1];
+    % -1 refers to the baseline condition (static), others are internal motion directions (coh1)
+    
+%     % for debugging
+%     const.rdk.apertureSpeed = [6]; % dva per sec; not including the standard speed
+%     % a combined condition for coh+internal direction... coh0, coh1&-90deg,
+%     % coh1&90 deg
+%     const.rdk.internalCons = [0];
     
     % warning beep for feedback on fixation maintainance
     const.beep.samplingRate = 44100;
@@ -123,7 +143,7 @@ if sbj.block == 1 && sbj.trial==1
         const.calibPositionsHalfBottom, const.calibPositionsBottom,    const.calibPositionsCenter};
 else % just load from info_Experiment
     load([sbj.sbjFolder ,'/info_Experiment.mat'])
-    const = Experiment.const;    
+    const = Experiment.const;
 end
 end
 

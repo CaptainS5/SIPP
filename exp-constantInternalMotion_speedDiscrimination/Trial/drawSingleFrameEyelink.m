@@ -54,7 +54,7 @@ switch control.mode
     case 1                                                                  % PHASE 1: Fixation
         % calculate the step-ramp distance, then place fixation relatively
         % closer to the screen center
-        stepTime = 0.2; % how many secs it takes for the aperture center to move from the step to the fixation
+        stepTime = 0.15; % how many secs it takes for the aperture center to move from the step to the fixation
         [stepDis, ] = dva2pxl(control.rdkApertureSpeed*stepTime, control.rdkApertureSpeed*stepTime, screen);
         
         if control.rdkApertureDir==0 % moving rightward

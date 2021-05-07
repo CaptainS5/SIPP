@@ -31,7 +31,7 @@ nHeader = 10; % this number depends on data collection; lines to skip when readi
 % cd(currentFolder);
 
 % or Loop over all subjects and convert
-for ii = 4:4%:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
+for ii = 6:6 %:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
     % define current subject/folder
     currentSubject{ii-2} = folderNames(ii).name;
     currentFolder = [dataPath currentSubject{ii-2}];
@@ -93,8 +93,8 @@ for ii = 4:4%:length(folderNames) % we are starting at 3 because matlab always h
                     frameCounter = frameCounter + 1;
                 elseif strcmp(entries{3}{lineN}, 'rdkOff') && valid==1
                     eventLog.rdkOff(trialCounter, 1) = str2num(entries{2}{lineN});
-%                 elseif strcmp(entries{3}{lineN}, 'respond') && valid==1
-%                     eventLog.respond(trialCounter, 1) = str2num(entries{2}{lineN});
+                elseif strcmp(entries{3}{lineN}, 'respond') && valid==1
+                    eventLog.respond(trialCounter, 1) = str2num(entries{2}{lineN});
                 elseif strcmp(entries{3}{lineN}, 'TRIALEND') && valid==1
                     eventLog.trialEnd(trialCounter, 1) = str2num(entries{2}{lineN});
                 end
@@ -120,18 +120,8 @@ for ii = 4:4%:length(folderNames) % we are starting at 3 because matlab always h
             currentTrial = trialInLog(trialN, 1);
             startI = find(rawAsc(:, 1)==eventLog.trialStart(currentTrial, 1));
             endI = find(rawAsc(:, 1)==eventLog.trialEnd(currentTrial, 1));
-%             % only for w00:
-%             if trialN<size(trialInLog, 1)
-%                 endI = find(rawAsc(:, 1)==eventLog.trialIDFrame(currentTrial+1, 1))-1;
-%             else % the last trial in the block
-%                 endI = length(rawAsc);
-%             end
-%             eventLog.trialEnd(currentTrial, 1) = rawAsc(endI, 1);
-            %%%%%
             allData = rawAsc(startI:endI, :);
             save([currentSubject{ii-2}, 't', num2str(currentTrial, '%03d'), '.mat'], 'allData') % if you have over 1000 trials, make it "04d"
         end
     end
 end
-% % only for w00
-% save('eventLog.mat', 'eventLog')

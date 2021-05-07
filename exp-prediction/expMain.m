@@ -134,19 +134,21 @@ try
             % add the temporal measures to be recorded
             trialDataNew.tMainSync(:, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
             trialDataNew.tRDKon(:, 1)        = NaN;
-            trialDataNew.tPerturbationOn(:, 1) = NaN;
+            trialDataNew.tOcclusionOn(:, 1)        = NaN;
+            trialDataNew.tOcclusionOff(:, 1)  = NaN; 
             trialDataNew.tRDKoff(:, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
             trialDataNew.tResponse(:, 1)          = NaN;               % also the end of the trial
             trialDataNew.t_start_VBL(:, 1:5)        = NaN;
             trialDataNew.t_rdkOn_VBL(:, 1:5)         = NaN;
-            trialDataNew.t_perturbationOn_VBL(:, 1:5)         = NaN;
+            trialDataNew.t_occlusionOn_VBL(:, 1:5)         = NaN;
+            trialDataNew.t_occlusionOff_VBL(:, 1:5)        = NaN;
             trialDataNew.t_rdkOff_VBL(:, 1:5)        = NaN;
             trialDataNew.t_response_VBL(:, 1:5)        = NaN;
             trialDataNew.iterations(:, 1)        = NaN;
-            trialDataNew.choice(:, 1)          = NaN; % -1=up, 1=down
-            trialDataNew.choiceCorrect(:, 1)          = NaN; % 0=wrong, 1=correct
+            trialDataNew.response(:, 1)          = NaN; % -1=slower, 1=faster
+            trialDataNew.responseCorrect(:, 1)          = NaN; % 0=wrong, 1=correct
             trialDataNew.repeat(:, 1)          = 0; % if the trial was repeated, mark repeat as 1
-            trialDataNew.trialCounter           = [1:size(trialDataNew, 1)]';
+            trialDataNew.trialCounter          = [1:size(trialDataNew, 1)]';
             trialData = [trialData; trialDataNew]; % fill in trialData with the trial conditions of the current block
         end
         if block==sbj.block
@@ -154,6 +156,9 @@ try
         else
             currentTrial = find(trialData.blockN==block & trialData.trialCounter==1);
         end
+        
+        % generate response texture
+        
         
         %% (2.5) Show Block Instrustion (before block starts):
         Screen('FillRect', screen.window, screen.background);                % Draw background
@@ -187,25 +192,42 @@ try
             control.currentTrial    = currentTrial;                                 % current trial
             control.trialName       = sprintf('%.3d', currentTrial);
             
-            control.rdkDurationBefore           = trialData.rdkDurationBefore(currentTrial);
-            control.rdkApertureDirBefore        = trialData.rdkApertureDirBefore(currentTrial);
-            control.rdkApertureDirPerturbation  = trialData.rdkApertureDirPerturbation(currentTrial);
-            if trialData.rdkInternalPerturbationCons(currentTrial)==0
-                control.rdkCohPerturbation          = 0;
-                control.rdkInternalDirPerturbation  = 0;
+            if trialData.rdkInternalCons(currentTrial)==-1
+                control.rdkCoh          = 0;
+                control.rdkInternalDir  = 0;
             else
-                control.rdkCohPerturbation          = 1;
-                control.rdkInternalDirPerturbation  = trialData.rdkInternalPerturbationCons(currentTrial);
+                control.rdkCoh          = 1;
+                control.rdkInternalDir  = trialData.rdkInternalCons(currentTrial);
             end
-            control.rdkInternalSpeed            = const.rdk.internalSpeed;
-            control.fixationFrames              = ceil(sec2frm(trialData.fixationDuration(currentTrial), screen));
+            control.rdkApertureDir  = trialData.rdkApertureDir(currentTrial);
+            control.rdkApertureSpeed  = trialData.rdkApertureSpeed(currentTrial);
+            control.rdkInternalSpeed = const.rdk.internalSpeed;
+            control.shiftDis = trialData.shiftDis(currentTrial);
+            control.shiftDir = trialData.shiftDir(currentTrial);
+            control.shiftTime = trialData.shiftTime(currentTrial);
+            
+            control.fixationFrames = ceil(sec2frm(trialData.fixationDuration(currentTrial), screen));
+            control.rdkDurationWhole = trialData.rdkDurationBefore(currentTrial)+trialData.rdkDurationDuring(currentTrial)+trialData.rdkDurationAfter(currentTrial);
+            control.rdkFramesBefore = ceil(sec2frm(trialData.rdkDurationBefore(currentTrial), screen));
+            if isnan(const.rdk.distanceDuring) % fixed occlusion duration
+                control.rdkFramesDuring = ceil(sec2frm(const.rdk.durationDuring, screen));
+            else
+                durationDuring = const.rdk.distanceDuring/control.rdkApertureSpeed;
+                control.rdkFramesDuring = ceil(sec2frm(durationDuring, screen));
+            end
+            control.rdkFramesAfter = ceil(sec2frm(const.rdk.durationAfter(currentTrial), screen));
+            
+%             % initialize for mouse response
+%             control.mouse_x = [];
+%             control.mouse_y = [];
+%             control.mouse_buttons = [];
             
             control.mode            = 1;                                        % different phases of the trial (changes values in runSingleTrials)
             control.break           = 0;                                        % trial completion
             control.abort           = 0;                                        % trial abortion (ESCAPE key press)
             control.frameFix        = 0;                                        % frame counter, mark current event
             control.frameRDK        = 0;
-            control.enterPerturbation = 0;                                      % change to 1 when first enter perturbation phase
+            control.occlusionStart  = 0;
             iterations              = 0;                                        % counts iterations of while-loop
             control.repeat          = 0;                                        % if the trial should be repeated at the end of the block
             
@@ -222,13 +244,13 @@ try
             %         control.targetFID       = fopen(control.targetFile, 'w');
             [rdkControl seed] = generateTrialRDKpositions(const, screen, control); % generate the position of dots in each frame in the whole trial
             % generate aperture for rdk
-%             if const.apertureType==1 % aperture translates across the dot field
-%                 for frameN = 1:size(rdkControl.apertureCenterPos, 2)
-%                     rdkControl.apertureTexture{frameN} = PTBmakeAperture(const, screen, rdkControl.apertureCenterPos{frameN});
-%                 end
-%             else % dots move together with the aperture
-                rdkControl.apertureTexture = PTBmakeAperture(const, screen, 0);
-%             end
+            %             if const.apertureType==1 % aperture translates across the dot field
+            %                 for frameN = 1:size(rdkControl.apertureCenterPos, 2)
+            %                     rdkControl.apertureTexture{frameN} = PTBmakeAperture(const, screen, rdkControl.apertureCenterPos{frameN});
+            %                 end
+            %             else % dots move together with the aperture
+            rdkControl.apertureTexture = PTBmakeAperture(const, screen, 0);
+            %             end
             
             fprintf('EXP: begin Block %d Trial %d \n', block, trialData.trialCounter(currentTrial, 1));
             
@@ -310,14 +332,7 @@ try
                 % =============================================================
                 [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos] = Screen('Flip', screen.window);
                 % =============================================================
-                %                 % for debugging:
-                %                 if  ~const.startExp && control.frameElapse == control.tFlash
-                %                     control.PursuitDir
-                %                     control.FlashDir
-                %                     control.tFlashPosition
-                %                     control.eyeTarget
-                %                 end
-                
+                % record important time points and send eyelink messages                
                 if iterations == 1 % mark start of the trial
                     trialData.t_start_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
                     trialData.tMainSync(currentTrial, 1)            = GetSecs;                 % Get the current time as time when the trial started (used for the trial timer)
@@ -332,15 +347,21 @@ try
                             Eyelink('Message', 'rdkOn');
                             Eyelink('Message', ['frameRDK ', num2str(control.frameRDK)]);
                         end
-                    elseif control.enterPerturbation
-                        control.enterPerturbation = 0; % reset
-                        trialData.tPerturbationOn(currentTrial, 1) = control.data_time;
-                        trialData.t_perturbationOn_VBL(currentTrial,:)  = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
+                    elseif control.occlusionStart==1
+                        trialData.tOcclusionOn(currentTrial, 1) = control.data_time;
+                        trialData.t_occlusionOn_VBL(currentTrial,:)  = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
                         if eyelink.mode
-                            Eyelink('Message', 'perturbationOn');
+                            Eyelink('Message', 'occlusionOn');
                             Eyelink('Message', ['frameRDK ', num2str(control.frameRDK)]);
                         end
-                    else % just record frame number
+                    elseif control.occlusionStart==-1
+                        trialData.tOcclusionOff(currentTrial, 1) = control.data_time;
+                        trialData.t_occlusionOff_VBL(currentTrial,:)  = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
+                        if eyelink.mode
+                            Eyelink('Message', 'occlusionOff');
+                            Eyelink('Message', ['frameRDK ', num2str(control.frameRDK)]);
+                        end
+                    else% just record frame number
                         if eyelink.mode
                             Eyelink('Message', ['frameRDK ', num2str(control.frameRDK)]);
                         end
@@ -354,30 +375,45 @@ try
                     end
                 end
                 
-                if control.repeat==1
-                    trialData.repeat(currentTrial, 1) = 1;
-                    % add the current trial to the end of the block...
-                    trialData = [trialData; trialData(currentTrial, :)];
-                    % initialize trial information for the added trial
-                    trialData.tMainSync(end, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
-                    trialData.tRDKon(end, 1)        = NaN;
-                    trialData.tPerturbationOn(end, 1)         = NaN;
-                    trialData.tRDKoff(end, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
-                    trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
-                    trialData.t_start_VBL(end, 1:5)        = NaN;
-                    trialData.t_rdkOn_VBL(end, 1:5)         = NaN;
-                    trialData.t_perturbationOn_VBL(:, 1:5)         = NaN;
-                    trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
-                    trialData.t_response_VBL(end, 1:5)        = NaN;
-                    trialData.iterations(end, 1)        = NaN;
-                    trialData.choice(end, 1)          = NaN; % -1=up, 1=down
-                    trialData.choiceCorrect(end, 1)          = NaN; % 0=wrong, 1=correct
-                    trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
-                    trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
-                    
-                    WaitSecs(1) % show the information on the screen
-                    break
-                end
+%                 % mouse response
+%                 if control.mode==3 && control.frameRDK<-1 % response phase
+%                     % get new mouse position
+%                     [control.mouse_x, control.mouse_y, control.mouse_buttons, focus, valuators, valinfo] = GetMouse(screen.window);
+%                     
+%                     if any(control.mouse_buttons) % record the last mouse position
+%                         control.mode = 4;
+%                         HideCursor;
+%                         if eyelink.mode
+%                             Eyelink('Message', 'respond');
+%                         end
+%                         trialData.tResponse(currentTrial, 1) = control.data_time;
+%                         trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
+%                         trialData.reportAngle(currentTrial, 1) = control.respAngle;
+%                     end
+%                 end
+                                
+%                 % if need to repeat the trial, set up
+%                 if control.repeat==1
+%                     trialData.repeat(currentTrial, 1) = 1;
+%                     % add the current trial to the end of the block...
+%                     trialData = [trialData; trialData(currentTrial, :)];
+%                     % initialize trial information for the added trial
+%                     trialData.tMainSync(end, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
+%                     trialData.tRDKon(end, 1)        = NaN;
+%                     trialData.tRDKoff(end, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
+%                     trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
+%                     trialData.t_start_VBL(end, 1:5)        = NaN;
+%                     trialData.t_rdkOn_VBL(end, 1:5)         = NaN;
+%                     trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
+%                     trialData.t_response_VBL(end, 1:5)        = NaN;
+%                     trialData.iterations(end, 1)        = NaN;
+%                     trialData.reportAngle(end, 1)          = NaN; % -1=up, 1=down
+%                     trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
+%                     trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
+%                     
+%                     WaitSecs(1) % show the information on the screen
+%                     break
+%                 end
                 
                 % Trial Video:
                 if const.makeVideo == 1                                         % if making video, here images are taken of each frame
@@ -403,37 +439,64 @@ try
                 end
                 
                 % check key press
-                [bPressed keyPressed] = PTBcheck_key_press([keys.up, keys.down, keys.escape, keys.recalibration]);
+                [bPressed keyPressed] = PTBcheck_key_press([keys.right, keys.left, keys.escape, keys.recalibration]);
                 if keyPressed==keys.escape
                     fprintf('EXP: Experiment aborted by pressing esc key \n');
                     control.abort = 1;
                     break;                                                      % BREAK the while loop, if trial was aborted by ESC press
                 elseif keyPressed==keys.recalibration
                     control.forceRecalibEL = 1;
-                elseif bPressed % response
+                elseif bPressed
                     control.mode = 4;
                     if eyelink.mode
                         Eyelink('Message', 'respond');
                     end
                     trialData.tResponse(currentTrial, 1) = control.data_time;
                     trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
-                    if keyPressed==keys.up
-                        trialData.choice(control.currentTrial, 1) = 1; % the same sign as the direction mean defined, positive is up
-                    elseif keyPressed==keys.down
-                        trialData.choice(control.currentTrial, 1) = -1;
+                    if keyPressed==keys.right
+                        trialData.response(control.currentTrial, 1) = 1; % ahead
+                    elseif keyPressed==keys.left
+                        trialData.response(control.currentTrial, 1) = -1; % behind
                     end
-                                        
-                    if trialData.choice(control.currentTrial, 1)*trialData.rdkApertureDirPerturbation(control.currentTrial, 1)>0
-%                         text = 'correct';
-                        trialData.choiceCorrect(control.currentTrial, 1) = 1; % record if the response is correct
+                    
+                    if (trialData.response(control.currentTrial, 1)==1 ...
+                            && trialData.rdkApertureSpeed(control.currentTrial, 1)>const.rdk.apertureStandardSpeed) || ...
+                            (trialData.response(control.currentTrial, 1)==-1 ...
+                            && trialData.rdkApertureSpeed(control.currentTrial, 1)<const.rdk.apertureStandardSpeed)
+                        %                         text = 'correct';
+                        trialData.responseCorrect(control.currentTrial, 1) = 1; % record if the response is correct
                     else
-%                         text = 'wrong';
-                        trialData.choiceCorrect(control.currentTrial, 1) = 0;
+                        %                         text = 'wrong';
+                        trialData.responseCorrect(control.currentTrial, 1) = 0;
                     end
                 end
                 
                 % check forced Recalibration:
                 if control.forceRecalibEL
+                    control.repeat = 1;
+                    trialData.repeat(currentTrial, 1) = 1;
+                    % add the current trial to the end of the block...
+                    trialData = [trialData; trialData(currentTrial, :)];
+                    % initialize trial information for the added trial
+                    trialData.tMainSync(end, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
+                    trialData.tRDKon(end, 1)        = NaN;
+                    trialData.tOcclusionOn(end, 1) = NaN;
+                    trialData.tOcclusionOff(end, 1) = NaN;
+                    trialData.tRDKoff(end, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
+                    trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
+                    trialData.t_start_VBL(end, 1:5)        = NaN;
+                    trialData.t_rdkOn_VBL(end, 1:5)         = NaN;
+                    trialData.t_occlusionOn_VBL(end, 1:5)         = NaN;
+                    trialData.t_occlusionOff_VBL(end, 1:5)        = NaN;
+                    trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
+                    trialData.t_response_VBL(end, 1:5)        = NaN;
+                    trialData.iterations(end, 1)        = NaN;
+                    trialData.response(end, 1)          = NaN; % -1=up, 1=down
+                    trialData.responseCorrect(end, 1)          = NaN; % -1=up, 1=down
+                    trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
+                    trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
+                    
+                    WaitSecs(0.5) % show the information on the screen
                     break;
                 end
                 
@@ -467,8 +530,9 @@ try
             %         end
             rdkAperturePos = rdkControl.apertureCenterPos;
             rdkDirFrames = rdkControl.dotDir; % position matrices take too much space
+            rdkTrajectoryRandCenter = [rdkControl.randCenterX; rdkControl.randCenterY];
             
-            save([sbj.rdkFolder, '/', control.targetFile, '_', sbj.date, '.mat'], 'seed', 'rdkDirFrames', 'rdkAperturePos')
+            save([sbj.rdkFolder, '/', control.targetFile, '_', sbj.date, '.mat'], 'seed', 'rdkDirFrames', 'rdkAperturePos', 'rdkTrajectoryRandCenter')
             fprintf('EXP: Target data is saved in %s %s\n\n', sbj.rdkFolder, control.targetFile);
             clear rdkControl seed
             

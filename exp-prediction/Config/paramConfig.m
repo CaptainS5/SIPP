@@ -4,13 +4,13 @@ function [trialCondition, trialData] = paramConfig(const,sbj)
 % =========================================================================
 % Function created to set up all Experimental Parameters (constants and
 % randomized variables). Performs permutation for all randomized variables.
-% 
+%
 % -------------------------------------------------------------------------
 % Input:
 % const:     structure containing different constant settings
 % sbj:       structure containing subject information
 % -------------------------------------------------------------------------
-% Output: 
+% Output:
 % trialCondition: structure containing all experimental parameters for all trials.
 %   should be used as a look-up table during the experiment
 % -------------------------------------------------------------------------
@@ -20,21 +20,21 @@ if sbj.block == 1 && sbj.trial==1 % ~exist([sbj.sbjFolder ,'/trialData.mat'],'fi
     
     trialCondition = table;
     % (1) SET UP MEASURE VARIABLES                                              % These will be filled in during the experiment
-% now just write into trialData directly during the experiment
-%     trialCondition.tMainSync          = zeros(const.numTrials, 1);                   % Time (GetSecs) at trial start, also fixation on.
-%     trialCondition.tRDKon        = NaN(const.numTrials, 1);
-%     trialCondition.tRDKoff  = NaN(const.numTrials, 1);                     % actual measured time that the target appeared/disappeared
-%     trialCondition.tResponse          = NaN(const.numTrials, 1);               % also the end of the trial
-%     %     trialData.t_start_VBL        = NaN(const.numTrials, 5);
-%     %     trialData.t_rdkOn_VBL         = NaN(const.numTrials, 5);
-%     %     trialData.t_rdkOff_VBL        = NaN(const.numTrials, 5);
-%     %     trialData.t_response_VBL        = NaN(const.numTrials, 5);
-%     trialCondition.choice          = NaN(const.numTrials, 1); % -1=up, 1=down
+    % now just write into trialData directly during the experiment
+    trialCondition.tMainSync          = zeros(const.numTrials, 1);                   % Time (GetSecs) at trial start, also fixation on.
+    trialCondition.tRDKon        = NaN(const.numTrials, 1);
+    trialCondition.tRDKoff  = NaN(const.numTrials, 1);                     % actual measured time that the target appeared/disappeared
+    %     trialCondition.tResponse          = NaN(const.numTrials, 1);               % also the end of the trial
+    %     %     trialData.t_start_VBL        = NaN(const.numTrials, 5);
+    %     %     trialData.t_rdkOn_VBL         = NaN(const.numTrials, 5);
+    %     %     trialData.t_rdkOff_VBL        = NaN(const.numTrials, 5);
+    %     %     trialData.t_response_VBL        = NaN(const.numTrials, 5);
+    %     trialCondition.choice          = NaN(const.numTrials, 1); % -1=up, 1=down
     % Sync Times Setup:
     
-            
+    
     % (2) RANDOMIZED VARIABLES
-    % randVar.continuous: pick from the given range uniformly for each trial; 
+    % randVar.continuous: pick from the given range uniformly for each trial;
     % such as fixation duration
     % randVar.trial: condition in each trial, discrete numbers
     % randVar.block: blocked condition, randomize the order of all blocks, discrete
@@ -45,26 +45,31 @@ if sbj.block == 1 && sbj.trial==1 % ~exist([sbj.sbjFolder ,'/trialData.mat'],'fi
     % if both blockPartial and block exist, "block" should be randomized
     % within "blockPartial"; all blockPartial will have the same "block"
     % conditions in total
-    randVar.continuous.fixationDuration = [const.fixation.durationMin const.fixation.durationMax]; % Intial fixation time (random between 1000 and 1500 ms)
-    randVar.continuous.rdkDurationBefore = [const.rdk.durationBeforeMin const.rdk.durationBeforeMax]; % Intial fixation time (random between 1000 and 1500 ms)
-    
-    randVar.trial.rdkApertureDirBefore = const.rdk.apertureDirBefore;
-    randVar.trial.rdkApertureDirPerturbation = const.rdk.apertureDirPerturbation;
-    randVar.trial.rdkInternalPerturbationCons = const.rdk.internalPerturbationCons;
-%     randVar.trial.rdkCohPerturbation = const.rdk.cohPerturbation;
-%     randVar.trial.rdkInternalDirPerturbation = const.rdk.internalDirPerturbation; % upwards is minus, and downwards is plus
-%     
-%     if const.startExp~=-1 % make accurate blocks first, and then fast, just so that it's easier to learn
-%         randVar.blockPartial.instruction = [0 1]; % 0-fast, 1-accurate;
-%         randVar.blockPartial.eyeCondition = [0 1]; % 0-fixation, 1-pursuit        
-%         % if simply want to randomly interleave all blocks,
-%         % comment the above lines under "if" and uncomment below
-%         % % ============================================================
-%         % randVar.block.instruction = [0 1]; % 0-fast, 1-accurate; if no blocked conditions, set to []
-%         % randVar.block.eyeCondition = [0 1]; % 0-fixation, 1-pursuit
-%         % % ============================================================
-%     end
+    randVar.continuous.fixationDuration = [1 1.5]; % Intial fixation time (random between 300 and 700 ms)
+    randVar.continuous.rdkDurationBefore = const.rdk.durationBefore;
 
+    %     randVar.trial.dotDirSD = const.rdk.dotDirSD;
+    %     randVar.trial.rdkCoh = const.rdk.coh;
+    randVar.trial.rdkApertureDir = const.rdk.apertureDir;
+    randVar.trial.rdkApertureSpeed = const.rdk.apertureSpeed;
+    randVar.trial.rdkApertureAngle = const.rdk.apertureAngle;
+    randVar.trial.rdkInternalCons = const.rdk.internalCons;
+    randVar.trial.shiftDis = const.rdk.shiftDis;
+    randVar.trial.shiftDir = const.rdk.shiftDir;
+    randVar.trial.shiftTime = const.rdk.shiftTime;
+    %     randVar.trial.rdkInternalDir = const.rdk.internalDir; % upwards is minus, and downwards is plus
+    
+    %     if const.startExp~=-1 % make accurate blocks first, and then fast, just so that it's easier to learn
+    %         randVar.blockPartial.instruction = [0 1]; % 0-fast, 1-accurate;
+    %         randVar.blockPartial.eyeCondition = [0 1]; % 0-fixation, 1-pursuit
+    %         % if simply want to randomly interleave all blocks,
+    %         % comment the above lines under "if" and uncomment below
+    %         % % ============================================================
+    %         % randVar.block.instruction = [0 1]; % 0-fast, 1-accurate; if no blocked conditions, set to []
+    %         % randVar.block.eyeCondition = [0 1]; % 0-fixation, 1-pursuit
+    %         % % ============================================================
+    %     end
+    
     % perform randomization:
     trialCondition = [trialCondition pick_paramsAll(randVar, const.numTrialsPerBlock)];
     

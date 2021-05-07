@@ -99,7 +99,7 @@ rdkControl.dotPos{1} = [cos(theta) sin(theta)] .* [dots.distanceToCenterX{1} dot
 moveDistanceDot = repmat(moveDistanceDot, const.rdk.dotNumber, 1);
 
 % initialize dot life time and label time
-dots.showTime{1} = ones(1, const.rdk.dotNumber)*rdkLifeTime; % in frames
+dots.showTime{1} = rand(1, const.rdk.dotNumber).*ones(1, const.rdk.dotNumber)*rdkLifeTime; % in frames
 dots.labelTime(1) = round(sec2frm(const.rdk.labelUpdateTime, screen)); % in frames
 
 % assign dot labels
@@ -138,6 +138,7 @@ for frameN = 1:rdkFrames-1
     if coh==0 % static pattern; if want to use noise pattern, just comment out this "if"
         % no need to update dot position, just copy...
         rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN};
+        dots.showTime{frameN+1} = dots.showTime{frameN}-1;
     else
         % update dot position
         rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN} + dots.movement{frameN}; % without aperture movement
@@ -166,17 +167,17 @@ for frameN = 1:rdkFrames-1
         end
         
         % still needs to replace expired dots and move dots out of the aperture into the aperture again, from the opposite edge
-        % 1. Replace dots with expired lifetime
-        expiredDots = find(dots.showTime{frameN+1}' <= 0);
-        if expiredDots
-            dotsN = length(expiredDots);
-            dis2CenterX = dotFieldRadiusX * sqrt((rand(dotsN,1)));
-            theta = 2 * pi * rand(dotsN,1);
-            % generate new positions and update lifetime
-            rdkControl.dotDir(frameN+1, expiredDots) = -theta; % in radians, for this up is positive and down is negative
-            rdkControl.dotPos{frameN+1}(expiredDots, :) = [cos(theta) sin(theta)] .* [dis2CenterX dis2CenterX*screen.pixelRatioWidthPerHeight];
-            dots.showTime{frameN+1}(expiredDots) = rdkLifeTime;
-        end
+%         % 1. Replace dots with expired lifetime
+%         expiredDots = find(dots.showTime{frameN+1}' <= 0);
+%         if expiredDots
+%             dotsN = length(expiredDots);
+%             dis2CenterX = dotFieldRadiusX * sqrt((rand(dotsN,1)));
+%             theta = 2 * pi * rand(dotsN,1);
+%             % generate new positions and update lifetime
+%             rdkControl.dotDir(frameN+1, expiredDots) = -theta; % in radians, for this up is positive and down is negative
+%             rdkControl.dotPos{frameN+1}(expiredDots, :) = [cos(theta) sin(theta)] .* [dis2CenterX dis2CenterX*screen.pixelRatioWidthPerHeight];
+%             dots.showTime{frameN+1}(expiredDots) = rdkLifeTime;
+%         end
         % 2. Relocate dots out of the aperture
         dotDist = rdkControl.dotPos{frameN+1}(:, 1).^2 + ...
             ((rdkControl.dotPos{frameN+1}(:, 2)/screen.pixelRatioWidthPerHeight)).^2;
@@ -198,5 +199,16 @@ for frameN = 1:rdkFrames-1
         %
         % move dots in the aperture from the opposite edge, continue the assigned motion
         rdkControl.dotPos{frameN+1}(outDots, :) = -rdkControl.dotPos{frameN+1}(outDots, :)+dots.movement{frameN}(outDots, :);
+    end
+    % Replace dots with expired lifetime
+    expiredDots = find(dots.showTime{frameN+1}' <= 0);
+    if expiredDots
+        dotsN = length(expiredDots);
+        dis2CenterX = dotFieldRadiusX * sqrt((rand(dotsN,1)));
+        theta = 2 * pi * rand(dotsN,1);
+        % generate new positions and update lifetime
+        rdkControl.dotDir(frameN+1, expiredDots) = -theta; % in radians, for this up is positive and down is negative
+        rdkControl.dotPos{frameN+1}(expiredDots, :) = [cos(theta) sin(theta)] .* [dis2CenterX dis2CenterX*screen.pixelRatioWidthPerHeight];
+        dots.showTime{frameN+1}(expiredDots) = rdkLifeTime;
     end
 end
