@@ -17,7 +17,7 @@ if sbj.block == 1 && sbj.trial==1
     % Some dsign-related things (These will be used in paramConfig):
     if const.startExp==1 || const.startExp==0
         %         if const.internalOnsetType==1 % constant internal motion
-        const.numTrialsPerBlock    = 36*ones(1, 8);                                % Each column = number of trials in one block; number of columns = number of blocks
+        const.numTrialsPerBlock    = 24*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
         %         elseif const.internalOnsetType==2 % perturbation of internal motion
         %             const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
         %         end
@@ -73,17 +73,18 @@ if sbj.block == 1 && sbj.trial==1
     % trajectory (set to 0); the value should be 0 or 1 here
     const.rdk.durationBefore = [0.6 0.8]; % display duration of the whole RDK, s; min and max
     const.rdk.durationDuring = 0.7; % display duration of the whole RDK, s; occlusion
-    const.rdk.distanceDuring = NaN; % either fix durating during or distance during; the other one should be NaN
+    const.rdk.distanceDuring = NaN; 
+    % either fix durating during or distance during; the other one should be NaN
     const.rdk.durationAfter = 0.2; % display duration of the whole RDK, s; min and max
     const.rdk.apertureDir = [0]; % left (180) and right (0)
-    const.rdk.apertureSpeed = [8 9 10 11 12];
-    const.rdk.apertureAngle = [0]; % [-5 -3 -1 1 3 5]; % degs relative to the general horizontal direction
-    const.rdk.shiftDis = [1]; % dva; distance shifted at reappearance
+    const.rdk.apertureSpeed = [10];
+    const.rdk.apertureAngle = [-20 -10 10 20]; % degs relative to the general horizontal direction
+    const.rdk.shiftDis = [0.25]; % dva; distance shifted at reappearance
     const.rdk.shiftDir = [-90 90]; % angle; horizontal right is 0, then counterclockwise is positive
     const.rdk.shiftTime = NaN; % in secs; similar to durationDuring vs. distanceDuring, shiftDis&shiftDir vs. shiftTime, one of them should be NaN depending on the task
     % a combined condition for coh+internal direction... coh0, coh1&-90deg,
     % coh1&90 deg
-    const.rdk.internalCons = [0, 180, -1];
+    const.rdk.internalCons = [90, -90, -1];
     % -1 refers to the baseline condition (static), others are internal motion directions (coh1)
     
 %     % for debugging

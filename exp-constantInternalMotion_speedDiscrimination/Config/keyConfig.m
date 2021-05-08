@@ -7,7 +7,6 @@ keys.space         = KbName('Space');
 keys.delete         = KbName('Backspace');
 keys.up         = KbName('UpArrow');
 keys.down         = KbName('DownArrow');
-keys.left         = KbName('LeftArrow');
 keys.right         = KbName('RightArrow');
 keys.continue         = KbName('X');
 keys.recalibration         = KbName('R');

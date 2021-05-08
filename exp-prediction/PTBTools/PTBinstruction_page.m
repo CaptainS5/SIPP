@@ -1,4 +1,4 @@
-function keyPressed = PTBinstruction_page(msg,screen,const)
+function keyPressed = PTBinstruction_page(msg,screen,const, keys)
 % Function draws blank screen, presents instruciton message and waits for
 % keypress.
 % INPUT: screen-Structure (backgroundcolour & window) and a message
@@ -72,7 +72,7 @@ switch msg
         calibScreen_l14  = '';
         calibScreen_l15  = '';
         calibScreen_l16  = '';
-        calibScreen_b1   = '---------------  PRESS [SPACE] TO CONTINUE  --------------- ';
+        calibScreen_b1   = '-------------  PRESS [right arrow] TO CONTINUE  ------------';
         
         text = {calibScreen_l1;calibScreen_l2;calibScreen_l3;calibScreen_l4;calibScreen_l5;...
                         calibScreen_l6;calibScreen_l7;calibScreen_l8;calibScreen_l9;calibScreen_l10;calibScreen_l11; ...
@@ -110,8 +110,15 @@ end
 
     
 Screen('Flip',  screen.window, [], 1);
-PTBwait_anykey_press;
-Screen('FillRect', screen.window, screen.background);
-PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.black);
-Screen('Flip',  screen.window, [], 1);
+% PTBwait_anykey_press;
+% keyPressed = 0;
+bPressed = 0;
+while ~bPressed
+    [bPressed, keyPressed] = PTBcheck_key_press([keys.right, keys.escape]);
+    if bPressed
+        Screen('FillRect', screen.window, screen.background);
+        PTBdraw_photodiodeStimulus(screen, const.photoStimSizePX2, screen.black);
+        Screen('Flip',  screen.window, [], 1);
+    end
+end
 end

@@ -75,32 +75,20 @@ switch control.mode
                 if xeye~=eyelink.el.MISSING_DATA && yeye~=eyelink.el.MISSING_DATA && evt.pa(eyelink.eye_used+1)>0
                     % if data is valid, compare gaze position with the limits of the tolerance window
                     diffFix = sqrt((xeye-fixationCenter(1))^2+((yeye-fixationCenter(2))/screen.pixelRatioWidthPerHeight)^2);
-
+                    
                     if diffFix <= const.fixation.windowRadiusPxl % fixation ok
-                        if control.rdkApertureSpeed ==10 % standard trial
-                            PTBdraw_cross(screen, fixationCenter, const.fixation.dotRadiusPxl*2, screen.green)
-                        else
-                            PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
-                        end
+                        PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
                         control.frameFix = control.frameFix+1;
                     elseif diffFix > const.fixation.windowRadiusPxl % fixation out of range, show warning
-%                         Snd('Play', const.beep.sound, const.beep.samplingRate, 16);
+                        %                         Snd('Play', const.beep.sound, const.beep.samplingRate, 16);
                         % Plays the sound in case of wrong fixation
                         % show white fixation
-                        if control.rdkApertureSpeed ==10 % standard trial
-                            PTBdraw_cross(screen, fixationCenter, const.fixation.dotRadiusPxl*2, screen.warningColor)
-                        else
-                            PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
-                        end
+                        PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
                     end
                 else
                     % if data is invalid (e.g. during a blink), show white
                     % fixation
-                    if control.rdkApertureSpeed ==10 % standard trial
-                        PTBdraw_cross(screen, fixationCenter, const.fixation.dotRadiusPxl*2, screen.warningColor)
-                    else
-                        PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
-                    end
+                    PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, screen.warningColor);
                     disp('Eyelink data invalid')
                 end
             else
@@ -113,11 +101,7 @@ switch control.mode
                 control.repeat = 1;
             end
         else
-            if control.rdkApertureSpeed ==10 % standard trial
-                PTBdraw_cross(screen, fixationCenter, const.fixation.dotRadiusPxl*2, screen.green)
-            else
-                PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
-            end
+            PTBdraw_circles(screen, fixationCenter, const.fixation.dotRadiusPxl, const.fixation.colour);
             control.frameFix = control.frameFix+1;
         end
         
@@ -183,8 +167,8 @@ switch control.mode
         control.frameRDK = control.frameRDK - 1; % need to keep updating the frame numbers...
         
         % keyboard response message
-        PTBwrite_msg(screen, 'ahead of behind?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
-%         PTBwrite_msg(screen, 'above or below?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
+%         PTBwrite_msg(screen, 'ahead of behind?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
+        PTBwrite_msg(screen, 'above or below?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
         
 %         % mouse response
 %         [ecc, ] = dva2pxl(const.line.length/2, const.line.length/2, screen); % distance of the cursor from center

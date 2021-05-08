@@ -24,6 +24,9 @@ end
 rdkApertureSpeed = control.rdkApertureSpeed;
 rdkInternalDir = -control.rdkInternalDir; % now the internal direction is fixed within the RDK, irrelative to the aperture direction
 % flip for PTB...
+[shiftDisPxlX, shiftDisPxlY] = dva2pxl(control.shiftDis, control.shiftDis, screen);
+shiftDir = control.shiftDir;
+shiftFrames = round(sec2frm(control.shiftTime, screen));
 
 % when internal direction is relative to the aperture direction... not in
 % use
@@ -42,8 +45,8 @@ rdkInternalDir = -control.rdkInternalDir; % now the internal direction is fixed 
 % initialize horizontal aperture movement per frame
 [moveDistanceAperture, ] = dva2pxl(rdkApertureSpeed, rdkApertureSpeed, screen)*screen.refreshRate; % pixel per frame
 % initialize the starting center position relative to center of screen
-[apertureStartDisX, apertureStartDisY] = dva2pxl(const.rdk.duration*const.rdk.apertureSpeed/2*cos(rdkApertureAngle/180*pi), ...
-    const.rdk.duration*const.rdk.apertureSpeed/2*sin(rdkApertureAngle/180*pi), screen); % the distance between the starting center point and center of screen
+[apertureStartDisX, apertureStartDisY] = dva2pxl(control.rdkDurationWhole*rdkApertureSpeed/2*cos(rdkApertureAngle/180*pi), ...
+    control.rdkDurationWhole*rdkApertureSpeed/2*sin(rdkApertureAngle/180*pi), screen); % the distance between the starting center point and center of screen
 % randomize the trajectory center to randomize the starting position
 [jitterDisX, jitterDisY] = dva2pxl(const.startingPositionJitter, const.startingPositionJitter*const.trajectoryTilted, screen);
 rdkControl.randCenterX = round(screen.x_mid+(2*rand-1)*jitterDisX);
@@ -119,18 +122,36 @@ dots.movement{1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanc
 % generate the dot matrices of the RDK for the whole trial
 for frameN = 1:rdkFrames-1
     % update the center position of the translating aperture
-    rdkControl.apertureCenterPos{frameN+1} = [rdkControl.apertureCenterPos{frameN}(1)+moveDistanceAperture*cos(rdkApertureAngle/180*pi), ...
-            rdkControl.apertureCenterPos{frameN}(2)-moveDistanceAperture*sin(rdkApertureAngle/180*pi)];
+    rdkControl.apertureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN} + ...
+        [moveDistanceAperture*cos(rdkApertureAngle/180*pi), ...
+            -moveDistanceAperture*sin(rdkApertureAngle/180*pi)];
+    % the above is the veridical location
+    if frameN+1==control.rdkFramesBefore+control.rdkFramesDuring+1 % first frame of reappearance
+        if isnan(const.rdk.shiftTime) % add a spatial shift
+            rdkControl.apertureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1} + ...
+                [shiftDisPxlX*cos(shiftDir/180*pi), ...
+            -shiftDisPxlY*sin(shiftDir/180*pi)];
+        else % temporal shift, keep the location and simply substract/add the shift of time frames
+            tempFrame = frameN;
+            tempPos = rdkControl.apertureCenterPos{frameN+1};
+            frameN = frameN+shiftFrames;
+            rdkControl.apertureCenterPos{frameN+1} = tempPos;
+            if shiftFrames>0 % fill in the gaps if shifted later
+                % update to fix the gap
+                rdkControl.dotPos{frameN} = rdkControl.dotPos{tempFrame};
+                dots.showTime{frameN} = dots.showTime{tempFrame};
+                dots.labelTime(frameN) = dots.labelTime(tempFrame);
+                dots.movement{frameN} = dots.movement{tempFrame};
+                dots.label{frameN} = dots.label{tempFrame};
+                rdkControl.dotDir(frameN, :) = rdkControl.dotDir(tempFrame, :);
+%                 rdkControl.apertureCenterPos{tempFrame+1:frameN} = tempPos;
+            end
+        end
+    end
     rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
     rdkControl.textureWindow{frameN+1} = [rdkControl.textureCenterPos{frameN+1}(1)-dotFieldRadiusX, ...
         rdkControl.textureCenterPos{frameN+1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{frameN+1}(1)+dotFieldRadiusX, ...
         rdkControl.textureCenterPos{frameN+1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
-    % the above is the veridical location!
-    if frameN==control.rdkFramesBefore+control.rdkFramesDuring+1 % first frame of reappearance
-        if % add a spatial shift
-        else % temporal shift, keep the location and simply substract/add the shift of time frames
-        end
-    end
     
     if coh==0 % static pattern; if want to use noise pattern, just comment out this "if"
         % no need to update dot position, just copy...

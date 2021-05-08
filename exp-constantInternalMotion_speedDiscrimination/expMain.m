@@ -57,7 +57,12 @@ try
     for block = sbj.block:size(const.numTrialsPerBlock,2)                  % begin block FOR-LOOP
         
         %% (2.1) Show Calibration Instructions
-        PTBinstruction_page(2,screen,const);
+        keyPressed = PTBinstruction_page(2,screen,const, keys);
+        if keyPressed==keys.escape
+            fprintf('EXP: Experiment aborted by pressing esc key \n');
+            currentTrial = NaN;
+            throw(MException('EXP: MainLoop','Experiment aborted'));
+        end
         
         %% (2.2) Initialize and (2.3) Calibrate DPI
         if dpi_set.mode
@@ -163,12 +168,17 @@ try
         end
         
         PTBwrite_msg(screen, ['Block ', num2str(block)], 'center', 15, screen.black)
-        PTBwrite_msg(screen, 'press [space] to continue', 'center', -15, screen.black)
+        PTBwrite_msg(screen, 'press [right arrow] to continue', 'center', -15, screen.black)
         %         Screen('Flip', screen.window,screen.refreshRate);
         Screen('Flip', screen.window, screen.refreshRate, 0, 0, 2);
-          keyPressed = 0;
-        while keyPressed==0
-            keyPressed = PTBcheck_key_press(keys.space);
+        bPressed = 0;
+        while bPressed==0
+            [bPressed keyPressed] = PTBcheck_key_press([keys.right, keys.escape]);
+            if keyPressed==keys.escape
+                fprintf('EXP: Experiment aborted by pressing esc key \n');
+                currentTrial = NaN;
+                throw(MException('EXP: MainLoop','Experiment aborted'));
+            end
         end
         %             PTBwait_anykey_press
         
@@ -416,7 +426,7 @@ try
                     break;                                                      % BREAK the while loop, if trial was aborted by ESC press
                 elseif keyPressed==keys.recalibration
                     control.forceRecalibEL = 1;
-                elseif control.rdkApertureSpeed == const.rdk.apertureStandardSpeed && keyPressed==keys.right
+                elseif control.mode==3 && control.rdkApertureSpeed == const.rdk.apertureStandardSpeed && keyPressed==keys.right
                     control.mode = 4;
                     if eyelink.mode
                         Eyelink('Message', 'respond');
@@ -425,7 +435,7 @@ try
                     trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
                     trialData.response(control.currentTrial, 1) = NaN;
                     trialData.responseCorrect(control.currentTrial, 1) = NaN;
-                elseif control.rdkApertureSpeed ~= const.rdk.apertureStandardSpeed && (keyPressed==keys.up || keyPressed==keys.down)
+                elseif control.mode==3 && control.rdkApertureSpeed ~= const.rdk.apertureStandardSpeed && (keyPressed==keys.up || keyPressed==keys.down)
                     control.mode = 4;
                     if eyelink.mode
                         Eyelink('Message', 'respond');
@@ -623,42 +633,44 @@ try
     
     
     %% MY ERR
-catch myerr                                                                 % this "catch" section executes in case of an error in the "try" section
-    if eyelink.mode && (trialData.trialCounter(currentTrial, 1)>1)
-        % eye recording output
-        %             Eyelink('Command','clear_screen 0'); % clears the box from the Eyelink-operator screen
-        %             Eyelink('Command', 'set_idle_mode');
-        WaitSecs(0.5);
-        Eyelink('CloseFile');
-        try
-            fprintf('Receiving data file ''%s''\n', eyelink.edfName);
-            status=Eyelink('ReceiveFile');
-            if status > 0
-                fprintf('ReceiveFile status %d\n', status);
+catch myerr        
+    % this "catch" section executes in case of an error in the "try" section
+    if ~isnan(currentTrial)
+        if eyelink.mode && (trialData.trialCounter(currentTrial, 1)>1)
+            % eye recording output
+            %             Eyelink('Command','clear_screen 0'); % clears the box from the Eyelink-operator screen
+            %             Eyelink('Command', 'set_idle_mode');
+            WaitSecs(0.5);
+            Eyelink('CloseFile');
+            try
+                fprintf('Receiving data file ''%s''\n', eyelink.edfName);
+                status=Eyelink('ReceiveFile');
+                if status > 0
+                    fprintf('ReceiveFile status %d\n', status);
+                end
+                if 2==exist(eyelink.edfName, 'file')
+                    fprintf('Data file ''%s'' can be found in ''%s''\n', eyelink.edfName, sbj.sbjFolder);
+                end
+            catch
+                fprintf('Problem receiving data file ''%s''\n', eyelink.edfName, sbj.sbjFolder);
             end
-            if 2==exist(eyelink.edfName, 'file')
-                fprintf('Data file ''%s'' can be found in ''%s''\n', eyelink.edfName, sbj.sbjFolder);
-            end
-        catch
-            fprintf('Problem receiving data file ''%s''\n', eyelink.edfName, sbj.sbjFolder);
+            % rename the edf file so it doesn't replace the "normal" one
+            oldName = [sbj.sbjFolder '\' eyelink.edfName];
+            currentTime = clock;
+            currentDate = sprintf('%d-%d-%d_%d%d', currentTime(1:5));
+            newName = [sbj.sbjFolder '\' eyelink.edfName(1:end-4) '_' currentDate '.edf'];
+            copyfile(oldName, newName)
         end
-        % rename the edf file so it doesn't replace the "normal" one
-        oldName = [sbj.sbjFolder '\' eyelink.edfName];
-        currentTime = clock;
-        currentDate = sprintf('%d-%d-%d_%d%d', currentTime(1:5));
-        newName = [sbj.sbjFolder '\' eyelink.edfName(1:end-4) '_' currentDate '.edf'];
-        copyfile(oldName, newName)
+        save([sbj.sbjFolder, '/trialData.mat'], 'trialData');                    % save data in subjectFolder
+        
+        Experiment.const       = const;
+        Experiment.dpi_set     = dpi_set;
+        Experiment.eyelink     = eyelink;
+        Experiment.trialData   = trialData;
+        Experiment.sbj         = sbj;
+        Experiment.screen      = screen;
+        save([sbj.sbjFolder '/info_Experiment.mat'], 'Experiment');
     end
-    
-    save([sbj.sbjFolder, '/trialData.mat'], 'trialData');                    % save data in subjectFolder
-    
-    Experiment.const       = const;
-    Experiment.dpi_set     = dpi_set;
-    Experiment.eyelink     = eyelink;
-    Experiment.trialData   = trialData;
-    Experiment.sbj         = sbj;
-    Experiment.screen      = screen;
-    save([sbj.sbjFolder '/info_Experiment.mat'], 'Experiment');
     
     % above.  Importantly, it closes the onscreen window if its open.
     fclose('all');                                                          % close any open files

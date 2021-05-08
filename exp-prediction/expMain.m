@@ -57,7 +57,12 @@ try
     for block = sbj.block:size(const.numTrialsPerBlock,2)                  % begin block FOR-LOOP
         
         %% (2.1) Show Calibration Instructions
-        PTBinstruction_page(2,screen,const);
+        keyPressed = PTBinstruction_page(2,screen,const, keys);
+        if keyPressed==keys.escape
+            fprintf('EXP: Experiment aborted by pressing esc key \n');
+            currentTrial = NaN;
+            throw(MException('EXP: MainLoop','Experiment aborted'));
+        end
         
         %% (2.2) Initialize and (2.3) Calibrate DPI
         if dpi_set.mode
@@ -146,7 +151,7 @@ try
             trialDataNew.t_response_VBL(:, 1:5)        = NaN;
             trialDataNew.iterations(:, 1)        = NaN;
             trialDataNew.response(:, 1)          = NaN; % -1=slower, 1=faster
-            trialDataNew.responseCorrect(:, 1)          = NaN; % 0=wrong, 1=correct
+%             trialDataNew.responseCorrect(:, 1)          = NaN; % 0=wrong, 1=correct
             trialDataNew.repeat(:, 1)          = 0; % if the trial was repeated, mark repeat as 1
             trialDataNew.trialCounter          = [1:size(trialDataNew, 1)]';
             trialData = [trialData; trialDataNew]; % fill in trialData with the trial conditions of the current block
@@ -167,14 +172,18 @@ try
         end
         
         PTBwrite_msg(screen, ['Block ', num2str(block)], 'center', 15, screen.black)
-        PTBwrite_msg(screen, 'press [space] to continue', 'center', -15, screen.black)
+        PTBwrite_msg(screen, 'press [right arrow] to continue', 'center', -15, screen.black)
         %         Screen('Flip', screen.window,screen.refreshRate);
         Screen('Flip', screen.window, screen.refreshRate, 0, 0, 2);
-          keyPressed = 0;
-        while keyPressed==0
-            keyPressed = PTBcheck_key_press(keys.space);
+        bPressed = 0;
+        while bPressed==0
+            [bPressed keyPressed] = PTBcheck_key_press([keys.right, keys.escape]);
+            if keyPressed==keys.escape
+                fprintf('EXP: Experiment aborted by pressing esc key \n');
+                currentTrial = NaN;
+                throw(MException('EXP: MainLoop','Experiment aborted'));
+            end
         end
-        %             PTBwait_anykey_press
         
         %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % (3) SINGLE TRIAL SETUP
@@ -201,21 +210,23 @@ try
             end
             control.rdkApertureDir  = trialData.rdkApertureDir(currentTrial);
             control.rdkApertureSpeed  = trialData.rdkApertureSpeed(currentTrial);
+            control.rdkApertureAngle  = trialData.rdkApertureAngle(currentTrial);
             control.rdkInternalSpeed = const.rdk.internalSpeed;
             control.shiftDis = trialData.shiftDis(currentTrial);
             control.shiftDir = trialData.shiftDir(currentTrial);
             control.shiftTime = trialData.shiftTime(currentTrial);
             
             control.fixationFrames = ceil(sec2frm(trialData.fixationDuration(currentTrial), screen));
-            control.rdkDurationWhole = trialData.rdkDurationBefore(currentTrial)+trialData.rdkDurationDuring(currentTrial)+trialData.rdkDurationAfter(currentTrial);
             control.rdkFramesBefore = ceil(sec2frm(trialData.rdkDurationBefore(currentTrial), screen));
             if isnan(const.rdk.distanceDuring) % fixed occlusion duration
+                control.rdkDurationDuring = const.rdk.durationDuring;
                 control.rdkFramesDuring = ceil(sec2frm(const.rdk.durationDuring, screen));
             else
-                durationDuring = const.rdk.distanceDuring/control.rdkApertureSpeed;
-                control.rdkFramesDuring = ceil(sec2frm(durationDuring, screen));
+                control.rdkDurationDuring = const.rdk.distanceDuring/control.rdkApertureSpeed;
+                control.rdkFramesDuring = ceil(sec2frm(control.rdkDurationDuring, screen));
             end
-            control.rdkFramesAfter = ceil(sec2frm(const.rdk.durationAfter(currentTrial), screen));
+            control.rdkDurationWhole = trialData.rdkDurationBefore(currentTrial)+control.rdkDurationDuring+const.rdk.durationAfter;
+            control.rdkFramesAfter = ceil(sec2frm(const.rdk.durationAfter, screen));
             
 %             % initialize for mouse response
 %             control.mouse_x = [];
@@ -439,36 +450,36 @@ try
                 end
                 
                 % check key press
-                [bPressed keyPressed] = PTBcheck_key_press([keys.right, keys.left, keys.escape, keys.recalibration]);
+                [bPressed keyPressed] = PTBcheck_key_press([keys.up, keys.down, keys.escape, keys.recalibration]);
                 if keyPressed==keys.escape
                     fprintf('EXP: Experiment aborted by pressing esc key \n');
                     control.abort = 1;
                     break;                                                      % BREAK the while loop, if trial was aborted by ESC press
                 elseif keyPressed==keys.recalibration
                     control.forceRecalibEL = 1;
-                elseif bPressed
+                elseif control.mode==3 && bPressed
                     control.mode = 4;
                     if eyelink.mode
                         Eyelink('Message', 'respond');
                     end
                     trialData.tResponse(currentTrial, 1) = control.data_time;
                     trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
-                    if keyPressed==keys.right
+                    if keyPressed==keys.up
                         trialData.response(control.currentTrial, 1) = 1; % ahead
-                    elseif keyPressed==keys.left
+                    elseif keyPressed==keys.down
                         trialData.response(control.currentTrial, 1) = -1; % behind
                     end
                     
-                    if (trialData.response(control.currentTrial, 1)==1 ...
-                            && trialData.rdkApertureSpeed(control.currentTrial, 1)>const.rdk.apertureStandardSpeed) || ...
-                            (trialData.response(control.currentTrial, 1)==-1 ...
-                            && trialData.rdkApertureSpeed(control.currentTrial, 1)<const.rdk.apertureStandardSpeed)
-                        %                         text = 'correct';
-                        trialData.responseCorrect(control.currentTrial, 1) = 1; % record if the response is correct
-                    else
-                        %                         text = 'wrong';
-                        trialData.responseCorrect(control.currentTrial, 1) = 0;
-                    end
+%                     if (trialData.response(control.currentTrial, 1)==1 ...
+%                             && trialData.rdkApertureSpeed(control.currentTrial, 1)>const.rdk.apertureStandardSpeed) || ...
+%                             (trialData.response(control.currentTrial, 1)==-1 ...
+%                             && trialData.rdkApertureSpeed(control.currentTrial, 1)<const.rdk.apertureStandardSpeed)
+%                         %                         text = 'correct';
+%                         trialData.responseCorrect(control.currentTrial, 1) = 1; % record if the response is correct
+%                     else
+%                         %                         text = 'wrong';
+%                         trialData.responseCorrect(control.currentTrial, 1) = 0;
+%                     end
                 end
                 
                 % check forced Recalibration:
@@ -492,7 +503,7 @@ try
                     trialData.t_response_VBL(end, 1:5)        = NaN;
                     trialData.iterations(end, 1)        = NaN;
                     trialData.response(end, 1)          = NaN; % -1=up, 1=down
-                    trialData.responseCorrect(end, 1)          = NaN; % -1=up, 1=down
+%                     trialData.responseCorrect(end, 1)          = NaN; % -1=up, 1=down
                     trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
                     trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
                     
@@ -649,42 +660,44 @@ try
     
     %% MY ERR
 catch myerr                                                                 % this "catch" section executes in case of an error in the "try" section
-    if eyelink.mode && (trialData.trialCounter(currentTrial, 1)>1)
-        % eye recording output
-        %             Eyelink('Command','clear_screen 0'); % clears the box from the Eyelink-operator screen
-        %             Eyelink('Command', 'set_idle_mode');
-        WaitSecs(0.5);
-        Eyelink('CloseFile');
-        try
-            fprintf('Receiving data file ''%s''\n', eyelink.edfName);
-            status=Eyelink('ReceiveFile');
-            if status > 0
-                fprintf('ReceiveFile status %d\n', status);
+    if ~isnan(currentTrial)
+        if eyelink.mode && (trialData.trialCounter(currentTrial, 1)>1)
+            % eye recording output
+            %             Eyelink('Command','clear_screen 0'); % clears the box from the Eyelink-operator screen
+            %             Eyelink('Command', 'set_idle_mode');
+            WaitSecs(0.5);
+            Eyelink('CloseFile');
+            try
+                fprintf('Receiving data file ''%s''\n', eyelink.edfName);
+                status=Eyelink('ReceiveFile');
+                if status > 0
+                    fprintf('ReceiveFile status %d\n', status);
+                end
+                if 2==exist(eyelink.edfName, 'file')
+                    fprintf('Data file ''%s'' can be found in ''%s''\n', eyelink.edfName, sbj.sbjFolder);
+                end
+            catch
+                fprintf('Problem receiving data file ''%s''\n', eyelink.edfName, sbj.sbjFolder);
             end
-            if 2==exist(eyelink.edfName, 'file')
-                fprintf('Data file ''%s'' can be found in ''%s''\n', eyelink.edfName, sbj.sbjFolder);
-            end
-        catch
-            fprintf('Problem receiving data file ''%s''\n', eyelink.edfName, sbj.sbjFolder);
+            % rename the edf file so it doesn't replace the "normal" one
+            oldName = [sbj.sbjFolder '\' eyelink.edfName];
+            currentTime = clock;
+            currentDate = sprintf('%d-%d-%d_%d%d', currentTime(1:5));
+            newName = [sbj.sbjFolder '\' eyelink.edfName(1:end-4) '_' currentDate '.edf'];
+            copyfile(oldName, newName)
         end
-        % rename the edf file so it doesn't replace the "normal" one
-        oldName = [sbj.sbjFolder '\' eyelink.edfName];
-        currentTime = clock;
-        currentDate = sprintf('%d-%d-%d_%d%d', currentTime(1:5));
-        newName = [sbj.sbjFolder '\' eyelink.edfName(1:end-4) '_' currentDate '.edf'];
-        copyfile(oldName, newName)
+        
+        save([sbj.sbjFolder, '/trialData.mat'], 'trialData');                    % save data in subjectFolder
+        
+        Experiment.const       = const;
+        Experiment.dpi_set     = dpi_set;
+        Experiment.eyelink     = eyelink;
+        Experiment.trialData   = trialData;
+        Experiment.sbj         = sbj;
+        Experiment.screen      = screen;
+        save([sbj.sbjFolder '/info_Experiment.mat'], 'Experiment');
     end
-    
-    save([sbj.sbjFolder, '/trialData.mat'], 'trialData');                    % save data in subjectFolder
-    
-    Experiment.const       = const;
-    Experiment.dpi_set     = dpi_set;
-    Experiment.eyelink     = eyelink;
-    Experiment.trialData   = trialData;
-    Experiment.sbj         = sbj;
-    Experiment.screen      = screen;
-    save([sbj.sbjFolder '/info_Experiment.mat'], 'Experiment');
-    
+
     % above.  Importantly, it closes the onscreen window if its open.
     fclose('all');                                                          % close any open files
     delete(DPI);
