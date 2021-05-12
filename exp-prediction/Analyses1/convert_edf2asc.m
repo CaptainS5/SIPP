@@ -31,7 +31,7 @@ nHeader = 10; % this number depends on data collection; lines to skip when readi
 % cd(currentFolder);
 
 % or Loop over all subjects and convert
-for ii = 5:5%:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
+for ii = 8:8%:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
     % define current subject/folder
     currentSubject{ii-2} = folderNames(ii).name;
     currentFolder = [dataPath currentSubject{ii-2}];
@@ -80,8 +80,8 @@ for ii = 5:5%:length(folderNames) % we are starting at 3 because matlab always h
                     eventLog.fixationOn(trialCounter, 1) = str2num(entries{2}{lineN}); % read frame idx in original data
                 elseif strcmp(entries{3}{lineN}, 'rdkOn') && valid==1
                     eventLog.rdkOn(trialCounter, 1) = str2num(entries{2}{lineN});
-                elseif strcmp(entries{3}{lineN}, 'perturbationOn') && valid==1
-                    eventLog.perturbationOn(trialCounter, 1) = str2num(entries{2}{lineN});
+                elseif strcmp(entries{3}{lineN}, 'occlusionOn') && valid==1
+                    eventLog.occlusionOn(trialCounter, 1) = str2num(entries{2}{lineN});
                 elseif strcmp(entries{3}{lineN}, 'frameRDK') && valid==1
                     frameN = str2num(entries{4}{lineN});
                     if frameN > 0
@@ -91,6 +91,8 @@ for ii = 5:5%:length(folderNames) % we are starting at 3 because matlab always h
                     end
                     rdkFrameLog{trialCounter}.eyeLinkTimeStamp(frameCounter, 1) = str2num(entries{2}{lineN});
                     frameCounter = frameCounter + 1;
+                elseif strcmp(entries{3}{lineN}, 'occlusionOff') && valid==1
+                    eventLog.occlusionOff(trialCounter, 1) = str2num(entries{2}{lineN});
                 elseif strcmp(entries{3}{lineN}, 'rdkOff') && valid==1
                     eventLog.rdkOff(trialCounter, 1) = str2num(entries{2}{lineN});
                 elseif strcmp(entries{3}{lineN}, 'respond') && valid==1
@@ -120,18 +122,8 @@ for ii = 5:5%:length(folderNames) % we are starting at 3 because matlab always h
             currentTrial = trialInLog(trialN, 1);
             startI = find(rawAsc(:, 1)==eventLog.trialStart(currentTrial, 1));
             endI = find(rawAsc(:, 1)==eventLog.trialEnd(currentTrial, 1));
-%             % only for w00:
-%             if trialN<size(trialInLog, 1)
-%                 endI = find(rawAsc(:, 1)==eventLog.trialIDFrame(currentTrial+1, 1))-1;
-%             else % the last trial in the block
-%                 endI = length(rawAsc);
-%             end
-%             eventLog.trialEnd(currentTrial, 1) = rawAsc(endI, 1);
-            %%%%%
             allData = rawAsc(startI:endI, :);
             save([currentSubject{ii-2}, 't', num2str(currentTrial, '%03d'), '.mat'], 'allData') % if you have over 1000 trials, make it "04d"
         end
     end
 end
-% % only for w00
-% save('eventLog.mat', 'eventLog')

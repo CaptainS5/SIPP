@@ -4,7 +4,7 @@
 
 clear all; close all; clc
 
-names = {'504'};
+names = {'510'};
 subStartI = 1;
 
 cd ..
@@ -49,14 +49,24 @@ for subN = subStartI:length(names)
             analyzeTrial;
             % to get target info
             eyeTrialData.rdkApertureDir(subN, currentTrial) = trial.log.rdkApertureDir; % positive is up, negative is down
+            eyeTrialData.rdkApertureSpeed(subN, currentTrial) = trial.log.rdkApertureSpeed;
             eyeTrialData.rdkApertureAngle(subN, currentTrial) = trial.log.rdkApertureAngle;
+            
             eyeTrialData.rdkInternalSpeed(subN, currentTrial) = trial.log.rdkInternalSpeed; %
             eyeTrialData.rdkInternalDir(subN, currentTrial) = trial.log.rdkInternalDir; % direction std
             eyeTrialData.rdkCoh(subN, currentTrial) = trial.log.rdkCoh;
+            eyeTrialData.rdkInternalCons(subN, currentTrial) = trial.log.rdkInternalCons;
+            
+            eyeTrialData.shiftDis(subN, currentTrial) = trial.log.shiftDis;
+            eyeTrialData.shiftDir(subN, currentTrial) = trial.log.shiftDir;
+            eyeTrialData.shiftTime(subN, currentTrial) = trial.log.shiftTime;
+            
             eyeTrialData.response(subN, currentTrial) = trial.log.response;
             
             eyeTrialData.frameLog.fixationOn(subN, currentTrial) = trial.log.trialStart;
             eyeTrialData.frameLog.rdkOn(subN, currentTrial) = trial.log.targetOnset;
+            eyeTrialData.frameLog.occlusionOn(subN, currentTrial) = trial.log.occlusionOnset;
+            eyeTrialData.frameLog.occlusionOff(subN, currentTrial) = trial.log.occlusionOffset;
             eyeTrialData.frameLog.rdkOff(subN, currentTrial) = trial.log.targetOffset;
             %             eyeTrialData.frameLog.respond(subN, currentTrial) = trial.log.trialEnd;
             %             eyeTrialData.target{subN, currentTrial} = trial.target;
@@ -92,15 +102,24 @@ for subN = subStartI:length(names)
         else
             eyeTrialData.frameLog.fixationOn(subN, currentTrial) = NaN;
             eyeTrialData.frameLog.rdkOn(subN, currentTrial) = NaN;
+            eyeTrialData.frameLog.occlusionOn(subN, currentTrial) = NaN;
+            eyeTrialData.frameLog.occlusionOff(subN, currentTrial) = NaN;
             eyeTrialData.frameLog.rdkOff(subN, currentTrial) = NaN;
             %             eyeTrialData.frameLog.respond(subN, currentTrial) = NaN;
             %             eyeTrialData.target{subN, currentTrial} = trial.target;
             
             eyeTrialData.rdkApertureDir(subN, currentTrial) = NaN; % positive is up, negative is down
+            eyeTrialData.rdkApertureSpeed(subN, currentTrial) = NaN;
             eyeTrialData.rdkApertureAngle(subN, currentTrial) = NaN;
             eyeTrialData.rdkInternalDir(subN, currentTrial) = NaN; % direction std
             eyeTrialData.rdkInternalSpeed(subN, currentTrial) = NaN; %
             eyeTrialData.rdkCoh(subN, currentTrial) = NaN;
+            eyeTrialData.rdkInternalCons(subN, currentTrial) = NaN;
+            
+            eyeTrialData.shiftDis(subN, currentTrial) = NaN;
+            eyeTrialData.shiftDir(subN, currentTrial) = NaN;
+            eyeTrialData.shiftTime(subN, currentTrial) = NaN;
+            
             eyeTrialData.response(subN, currentTrial) = NaN;
             
 %             fields = fieldnames(trial.pursuit);

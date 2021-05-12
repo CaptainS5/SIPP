@@ -4,7 +4,7 @@
 
 clear all; close all; clc
 
-names = {'504'};
+names = {'503'};
 subStartI = 1;
 
 cd ..
@@ -49,10 +49,11 @@ for subN = subStartI:length(names)
             analyzeTrial;
             % to get target info
             eyeTrialData.rdkApertureDir(subN, currentTrial) = trial.log.rdkApertureDir; % positive is up, negative is down
-            eyeTrialData.rdkApertureAngle(subN, currentTrial) = trial.log.rdkApertureAngle;
+            eyeTrialData.rdkApertureSpeed(subN, currentTrial) = trial.log.rdkApertureSpeed;
             eyeTrialData.rdkInternalSpeed(subN, currentTrial) = trial.log.rdkInternalSpeed; %
             eyeTrialData.rdkInternalDir(subN, currentTrial) = trial.log.rdkInternalDir; % direction std
             eyeTrialData.rdkCoh(subN, currentTrial) = trial.log.rdkCoh;
+            eyeTrialData.rdkInternalCons(subN, currentTrial) = trial.log.rdkInternalCons;
             eyeTrialData.response(subN, currentTrial) = trial.log.response;
             
             eyeTrialData.frameLog.fixationOn(subN, currentTrial) = trial.log.trialStart;
@@ -97,10 +98,11 @@ for subN = subStartI:length(names)
             %             eyeTrialData.target{subN, currentTrial} = trial.target;
             
             eyeTrialData.rdkApertureDir(subN, currentTrial) = NaN; % positive is up, negative is down
-            eyeTrialData.rdkApertureAngle(subN, currentTrial) = NaN;
+            eyeTrialData.rdkApertureSpeed(subN, currentTrial) = NaN;
             eyeTrialData.rdkInternalDir(subN, currentTrial) = NaN; % direction std
             eyeTrialData.rdkInternalSpeed(subN, currentTrial) = NaN; %
             eyeTrialData.rdkCoh(subN, currentTrial) = NaN;
+            eyeTrialData.rdkInternalCons(subN, currentTrial) = NaN;
             eyeTrialData.response(subN, currentTrial) = NaN;
             
 %             fields = fieldnames(trial.pursuit);

@@ -31,7 +31,7 @@ nHeader = 10; % this number depends on data collection; lines to skip when readi
 % cd(currentFolder);
 
 % or Loop over all subjects and convert
-for ii = 6:6 %:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
+for ii = 11:11 %:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
     % define current subject/folder
     currentSubject{ii-2} = folderNames(ii).name;
     currentFolder = [dataPath currentSubject{ii-2}];
@@ -72,8 +72,6 @@ for ii = 6:6 %:length(folderNames) % we are starting at 3 because matlab always 
                         % initialize for the frame log
                         rdkFrameLog{trialCounter} = table;
                         frameCounter = 1;
-%                         % only for w00...
-%                         eventLog.trialIDFrame(trialCounter, 1) = str2num(entries{2}{lineN});
                     end
                 elseif strcmp(entries{3}{lineN}, 'SYNCTIME') && valid==1
                     eventLog.trialStart(trialCounter, 1) = str2num(entries{2}{lineN});
@@ -87,7 +85,11 @@ for ii = 6:6 %:length(folderNames) % we are starting at 3 because matlab always 
                     if frameN > 0
                         rdkFrameLog{trialCounter}.frame(frameCounter, 1) = frameN;
                     else
+                        %                         if frameCounter==1 % just for i01 b1 t11...
+                        %                             rdkFrameLog{trialCounter}.frame(frameCounter, 1) = NaN;
+                        %                         else
                         rdkFrameLog{trialCounter}.frame(frameCounter, 1) = rdkFrameLog{trialCounter}.frame(frameCounter-1, 1)+1;
+                        %                         end
                     end
                     rdkFrameLog{trialCounter}.eyeLinkTimeStamp(frameCounter, 1) = str2num(entries{2}{lineN});
                     frameCounter = frameCounter + 1;

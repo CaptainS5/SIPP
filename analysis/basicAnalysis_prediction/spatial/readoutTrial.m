@@ -40,29 +40,31 @@ elseif Experiment.const.startExp==1
 end
 trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
 trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % either left or right, the "base" direction
-if trial.log.rdkApertureDir==0 % moving rightward
-    trial.log.rdkApertureAngle = Experiment.trialData.rdkApertureAngle(trialIdxInData, 1); % positive is up, negative is down
-    trial.log.response = Experiment.trialData.reportAngle(trialIdxInData, 1);
-else % moving leftward
-    trial.log.rdkApertureAngle = trial.log.rdkApertureDir - Experiment.trialData.rdkApertureAngle(trialIdxInData, 1); % positive is up, negative is down, relative to the aperture direction
-    trial.log.response = -Experiment.trialData.reportAngle(trialIdxInData, 1);
-end
+trial.log.rdkApertureSpeed = Experiment.trialData.rdkApertureSpeed(trialIdxInData, 1); % positive is up, negative is down, relative to the aperture direction
+trial.log.rdkApertureAngle = Experiment.trialData.rdkApertureAngle(trialIdxInData, 1);
+
 trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed;
-if Experiment.trialData.rdkInternalCons(trialIdxInData, 1)==0
+trial.log.rdkInternalCons = Experiment.trialData.rdkInternalCons(trialIdxInData, 1);
+if trial.log.rdkInternalCons==-1
     trial.log.rdkInternalDir = 0;
     trial.log.rdkCoh = 0;
 else
-    %%%%%%%%%% the negative sign is only for 500 and 501...
-    trial.log.rdkInternalDir = -Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
-    %%%%%%%%%%
-%     trial.log.rdkInternalDir = Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
+    trial.log.rdkInternalDir = Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
     trial.log.rdkCoh = 1;
 end
+
+trial.log.shiftDis = Experiment.trialData.shiftDis(trialIdxInData, 1);
+trial.log.shiftDir = Experiment.trialData.shiftDir(trialIdxInData, 1);
+trial.log.shiftTime = Experiment.trialData.shiftTime(trialIdxInData, 1);
+
+trial.log.response = Experiment.trialData.response(trialIdxInData, 1);
 trial.log.eyeSampleRate = eyeData.sampleRate;
 
 % frame indices of all events; after comparing eventLog with eyeData.frameIdx
 trial.log.trialStart = 1; % the first frame, fixation onset, decided in readEyeData
 trial.log.targetOnset = find(eyeData.timeStamp==eventLog.rdkOn(currentTrial, 1)); % rdk onset
+trial.log.occlusionOnset = find(eyeData.timeStamp==eventLog.occlusionOn(currentTrial, 1)); % rdk onset
+trial.log.occlusionOffset = find(eyeData.timeStamp==eventLog.occlusionOff(currentTrial, 1)); % rdk offset
 trial.log.targetOffset = find(eyeData.timeStamp==eventLog.rdkOff(currentTrial, 1)); % rdk offset
 trial.log.trialEnd = find(eyeData.timeStamp==eventLog.trialEnd(currentTrial, 1)); % response given
 end

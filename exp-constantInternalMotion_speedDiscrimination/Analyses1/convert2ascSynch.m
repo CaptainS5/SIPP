@@ -23,7 +23,7 @@ eventLog = table();
 
 %% (2)  loop over all asc files for 1 subject/data folder
 
-for j = 1:length(ascfiles)
+for j = 11:11%:length(ascfiles)
     ascfile = ascfiles(j).name;
     path = fullfile(dataPath, ascfile);
     fid = fopen(path);

@@ -13,13 +13,11 @@ clear all; close all; clc
 % internalDirCons = [-45 -90 -135 45 90 135]; % -1:left, 1-right
 % internalDirNames = {'-45', '-90', '-135', '45', '90', '135'};
 
-names = {'504'}; % also for 500, 501
+% names = {'501'}; % also for 500
 % apertureAngles = [-12 -9 -6 -3 0 3 6 9 12];
 % apertureAngleNames = {'-12', '-9', '-6', '-3', '0', '3', '6', '9', '12'};
-apertureAngles = [-9 -6 -3 0 3 6 9];
-apertureAngleNames = {'-9', '-6', '-3', '0', '3', '6', '9'};
-internalCons = [0, -90, 90];
-internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
+% internalCons = [0, -90, 90];
+% internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
 % internalConNames = {'static', 'dir down', 'dir up'}; % d00
 
 % names = {'x02'};
@@ -28,6 +26,10 @@ internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
 % allCons.apertureAngles = [-21 -14 -7 0 7 14 21];
 % apertureAngleNames = {'-21', '-14', '-7', '0', '7', '14', '21'};
 
+names = {'503'}; 
+apertureSpeed = [8 9 11 12];
+internalCons = [-1, 180, 0];
+internalConNames = {'coh 0', 'dir backward', 'dir forward'}; 
 sampleRate = 1000;
 
 analysisFolder = pwd;
@@ -54,7 +56,7 @@ for t = 1:size(names, 2) % individual color for scatter plots, can do 10 people
         markerC(t, :) = (t-6)/4*[255 90 255]/255;
     end
 end
-colorCons = [0 0 0; 1 0 0; 0 0 1]; % for 500
+colorCons = [0 0 0; 1 0 0; 0 0 1]; % for 500/503
 % colorProb = [8,48,107;198,219,239;8,48,107]/255; % all blue hues
 % colorProb = [8,48,107;66,146,198;198,219,239;66,146,198;8,48,107]/255; % all blue hues
 % colorPlot = [232 113 240; 15 204 255; 255 182 135; 137 126 255; 113 204 100]/255; % each row is one colour for one probability

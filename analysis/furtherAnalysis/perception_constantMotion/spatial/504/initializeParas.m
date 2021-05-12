@@ -16,8 +16,8 @@ clear all; close all; clc
 names = {'504'}; % also for 500, 501
 % apertureAngles = [-12 -9 -6 -3 0 3 6 9 12];
 % apertureAngleNames = {'-12', '-9', '-6', '-3', '0', '3', '6', '9', '12'};
-apertureAngles = [-9 -6 -3 0 3 6 9];
-apertureAngleNames = {'-9', '-6', '-3', '0', '3', '6', '9'};
+apertureAngles = [-6 -3 0 3 6];
+apertureAngleNames = {'-6', '-3', '0', '3', '6'};
 internalCons = [0, -90, 90];
 internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
 % internalConNames = {'static', 'dir down', 'dir up'}; % d00
