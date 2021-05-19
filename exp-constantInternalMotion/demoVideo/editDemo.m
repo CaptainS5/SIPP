@@ -4,7 +4,7 @@ clc; clear; close all
 files = dir;
 idxF = [files.isdir]; % find out which are folders
 folders = files(idxF); % a list of all folders
-for nameN = 3:length(folders)
+for nameN = 4:4%3:length(folders)
     frames = {};
     demoName = folders(nameN).name;
     

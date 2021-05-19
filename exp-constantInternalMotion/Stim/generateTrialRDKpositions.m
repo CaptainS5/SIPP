@@ -38,7 +38,7 @@ rdkInternalDir = -control.rdkInternalDir; % now the internal direction is fixed 
 %     rdkInternalDir = control.rdkApertureDir+control.rdkInternalDir;
 % end
 
-if const.startExp==1 || const.startExp==0 % actual experiment, translating aperture
+% if const.startExp==1 || const.startExp==0 % actual experiment, translating aperture
     % initialize horizontal aperture movement per frame
     [moveDistanceAperture, ] = dva2pxl(const.rdk.apertureSpeed, const.rdk.apertureSpeed, screen)*screen.refreshRate; % pixel per frame
     % initialize the starting center position relative to center of screen
@@ -49,9 +49,9 @@ if const.startExp==1 || const.startExp==0 % actual experiment, translating apert
     rdkControl.randCenterX = round(screen.x_mid+(2*rand-1)*jitterDisX);
     rdkControl.randCenterY = round(screen.y_mid-(2*rand-1)*jitterDisY);
     rdkControl.apertureCenterPos{1} = [rdkControl.randCenterX-apertureStartDisX rdkControl.randCenterY+apertureStartDisY]; % the initial starting position, depends on moving direction and speed
-elseif const.startExp==-1 % baseline, static aperture
-    rdkControl.apertureCenterPos{1} = screen.center;
-end
+% elseif const.startExp==-1 % baseline, static aperture
+%     rdkControl.apertureCenterPos{1} = screen.center;
+% end
 
 % Define the texture center and texture window for both the whole aperture texture and RDK dot field 
 % They should always overlap, regardless whether the aperture is the same
@@ -122,18 +122,18 @@ dots.movement{1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanc
 % generate the dot matrices of the RDK for the whole trial
 for frameN = 1:rdkFrames-1
     % update the center position of the translating aperture
-    if const.startExp==1 || const.startExp==0
+%     if const.startExp==1 || const.startExp==0
         rdkControl.apertureCenterPos{frameN+1} = [rdkControl.apertureCenterPos{frameN}(1)+moveDistanceAperture*cos(rdkApertureAngle/180*pi), ...
             rdkControl.apertureCenterPos{frameN}(2)-moveDistanceAperture*sin(rdkApertureAngle/180*pi)];
         rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
         rdkControl.textureWindow{frameN+1} = [rdkControl.textureCenterPos{frameN+1}(1)-dotFieldRadiusX, ...
             rdkControl.textureCenterPos{frameN+1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{frameN+1}(1)+dotFieldRadiusX, ...
             rdkControl.textureCenterPos{frameN+1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
-    elseif const.startExp==-1 % baseline, static aperture
-        rdkControl.apertureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN};
-        rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
-        rdkControl.textureWindow{frameN+1} = rdkControl.textureWindow{frameN};
-    end
+%     elseif const.startExp==-1 % baseline, static aperture
+%         rdkControl.apertureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN};
+%         rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
+%         rdkControl.textureWindow{frameN+1} = rdkControl.textureWindow{frameN};
+%     end
     
     if coh==0 % static pattern; if want to use noise pattern, just comment out this "if"
         % no need to update dot position, just copy...

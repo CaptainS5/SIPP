@@ -55,11 +55,12 @@ trialNoText = uicontrol(fig,'Style','text',...
 
 if trial.log.rdkApertureDir==0
     rdkDir = 'right';
-    angle = trial.log.rdkApertureAngle;
+%     angle = trial.log.rdkApertureAngle;
 else
     rdkDir = 'left';
-    angle = 180-trial.log.rdkApertureAngle;
+%     angle = 180-trial.log.rdkApertureAngle;
 end
+angle = trial.log.rdkApertureAngle;
 % if trial.log.rdkInternalDir>0
 %     sdText = 'up';
 % else
@@ -82,6 +83,11 @@ trialNoText = uicontrol(fig,'Style','text',...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
 
+if trial.log.rdkApertureDir==0
+    responseAngle = trial.log.response;
+else
+    responseAngle = 180-trial.log.response;
+end
 % if trial.log.choice>0
 %     choice = 'up';
 % else
@@ -89,7 +95,7 @@ trialNoText = uicontrol(fig,'Style','text',...
 % end
 textblock = textblock+1;
 trialNoText = uicontrol(fig,'Style','text',...
-    'String', ['Response: ', num2str(trial.log.response)],...
+    'String', ['Response: ', num2str(responseAngle)],...
     'Position',[xPosition yPosition-textblock*verticalDistance width height],...
     'HorizontalAlignment','left');
 

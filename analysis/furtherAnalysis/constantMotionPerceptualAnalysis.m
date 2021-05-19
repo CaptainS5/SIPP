@@ -7,12 +7,19 @@ averagedPlots = 0;
 
 % plot settings
 textFontSize = 8;
-plotSub = {'504'};
+plotSub = {'ib1'};
 
 % make rdkApertureAngle left/right flipped--only the up/down values
 % relative to the aperture direction
 idxT = find(eyeTrialData.errorStatus==0 & eyeTrialData.rdkApertureDir==180); % leftward valid trials
-eyeTrialData.rdkApertureAngle(idxT) = 180-eyeTrialData.rdkApertureAngle(idxT);
+% eyeTrialData.rdkApertureAngle(idxT) = 180-eyeTrialData.rdkApertureAngle(idxT);
+eyeTrialData.response(idxT) = 180-eyeTrialData.response(idxT);
+
+% delete obvious error trials
+idxT = find(eyeTrialData.errorStatus==0 & ...
+    abs(eyeTrialData.rdkApertureAngle-eyeTrialData.response)>20 & ...
+    eyeTrialData.rdkApertureAngle.*eyeTrialData.response<=0); % leftward valid trials;
+eyeTrialData.errorStatus(idxT) = -2;
 
 % % flip the down aperture directions
 % idxT = find(eyeTrialData.errorStatus==0 & eyeTrialData.rdkApertureAngle<0); 
@@ -65,7 +72,7 @@ if individualPlots
         %         xticklabels(plotSub)
         axis square
         xlim([-10 10])
-        ylim([-20 20])
+        ylim([-30 30])
         legend(internalConNames, 'box', 'on', 'location', 'northwest', 'color', 'w')
         xlabel('Aperture trajectory angle')
         ylabel('Reported angle')

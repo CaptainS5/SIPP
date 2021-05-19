@@ -57,15 +57,15 @@ switch control.mode
         stepTime = 0.15; % how many secs it takes for the aperture center to move from the step to the fixation
         [stepDis, ] = dva2pxl(const.rdk.apertureSpeed*stepTime, const.rdk.apertureSpeed*stepTime, screen);
         
-        if const.startExp==1 || const.startExp==0
+%         if const.startExp==1 || const.startExp==0
             if control.rdkApertureDir==0 % moving rightward
                 fixationCenter = [rdkControl.apertureCenterPos{1}(1)+stepDis, rdkControl.apertureCenterPos{1}(2)];
             else % moving leftward
                 fixationCenter = [rdkControl.apertureCenterPos{1}(1)-stepDis, rdkControl.apertureCenterPos{1}(2)];
             end
-        elseif const.startExp==-1
-            fixationCenter = screen.center;
-        end
+%         elseif const.startExp==-1
+%             fixationCenter = screen.center;
+%         end
         
         % draw target
         if eyelink.mode && ~eyelink.dummy
@@ -169,7 +169,11 @@ switch control.mode
             % show the cursor; put it at the start angle everytime
             %%% this is for only drawing the line, or only having rightward
             %%% directions
-            control.respAngle = rand*180-90;
+            if control.rdkApertureDir==0 % rightward
+                control.respAngle = rand*180-90;
+            else % leftward, make the range 90-270
+                control.respAngle = rand*180+90;
+            end
             %%%
 %             %%% this is for drawing the arrow, range from -180 to 180
 %             control.respAngle = rand*360-180;
@@ -180,7 +184,12 @@ switch control.mode
             ShowCursor;
         else
             % changing the angle of the next loop according to the cursor position
-            control.respAngle = atan2(rdkControl.randCenterY-control.mouse_y, control.mouse_x-rdkControl.randCenterX)/pi*180;
+            control.respAngle = atan2(screen.y_mid -control.mouse_y, control.mouse_x-screen.x_mid)/pi*180;
+            if control.rdkApertureDir==180 % leftward, make the range between 90-270 deg
+                if control.respAngle<0
+                    control.respAngle = control.respAngle + 360;
+                end
+            end
         end
         %%%%%%%%%% show an arrow for the response... currently just show at
         % calculate line coordinates and width in pixel

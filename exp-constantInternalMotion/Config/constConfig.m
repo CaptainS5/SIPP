@@ -17,12 +17,12 @@ if sbj.block == 1 && sbj.trial==1
     % Some dsign-related things (These will be used in paramConfig):
     if const.startExp==1 || const.startExp==0
 %         if const.internalOnsetType==1 % constant internal motion
-            const.numTrialsPerBlock    = 54*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+            const.numTrialsPerBlock    = 42*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         elseif const.internalOnsetType==2 % perturbation of internal motion
 %             const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         end
     elseif const.startExp==-1
-        const.numTrialsPerBlock    = 32*ones(1, 10);
+        const.numTrialsPerBlock    = 42; %32*ones(1, 10);
     end
     if const.makeVideo; const.numTrialsPerBlock = 1; end
     const.numTrials            = sum(const.numTrialsPerBlock);                  % total number of trials
@@ -41,9 +41,9 @@ if sbj.block == 1 && sbj.trial==1
     
     % RDK stimulus
     const.startingPositionJitter = 1; % in deg, randomize the aperture trajectory center within this radius range around the screen center
-    const.rdk.duration = 1; % display duration of the whole RDK, s
+    const.rdk.duration = 0.8; % display duration of the whole RDK, s
     const.rdk.dotDensity = 10; % dot per dva^2
-    const.rdk.lifeTime = const.rdk.duration;
+    const.rdk.lifeTime = 0.1;
     % how long before a dot disappears and reappears
     const.rdk.labelUpdateTime = 0.050; % change labels and assign new directions for all
     % for Transparent motion, label update time >= the whole rdk duration;
@@ -64,8 +64,8 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.apertureSpeed = 10; % dva per sec
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
-    const.rdk.apertureDir = [0]; % left (180) and right (0) 
-    const.rdk.apertureAngle = [-12:3:12];
+    const.rdk.apertureDir = [180]; % left (180) and right (0) 
+    const.rdk.apertureAngle = [-9:3:9];
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
 %     const.rdk.coh = [1]; % for classical RDKs
     %     if const.apertureType==0

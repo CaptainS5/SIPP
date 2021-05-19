@@ -4,7 +4,7 @@
 
 clear all; close all; clc
 
-names = {'504'};
+names = {'ib1'};
 subStartI = 1;
 
 cd ..
