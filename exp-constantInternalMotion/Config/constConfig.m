@@ -22,7 +22,7 @@ if sbj.block == 1 && sbj.trial==1
 %             const.numTrialsPerBlock    = 32*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         end
     elseif const.startExp==-1
-        const.numTrialsPerBlock    = 42; %32*ones(1, 10);
+        const.numTrialsPerBlock    = 21; %32*ones(1, 10);
     end
     if const.makeVideo; const.numTrialsPerBlock = 1; end
     const.numTrials            = sum(const.numTrialsPerBlock);                  % total number of trials
@@ -64,7 +64,7 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.apertureSpeed = 10; % dva per sec
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
-    const.rdk.apertureDir = [180]; % left (180) and right (0) 
+    const.rdk.apertureDir = [0]; % left (180) and right (0) 
     const.rdk.apertureAngle = [-9:3:9];
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right; 
 %     const.rdk.coh = [1]; % for classical RDKs
