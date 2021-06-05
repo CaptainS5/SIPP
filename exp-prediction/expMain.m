@@ -273,6 +273,11 @@ try
             end
             %% or, start Eyelink recording
             if eyelink.mode
+                % periodic drift check
+                if trialData.trialCounter(currentTrial)~=1 && rem(trialData.trialCounter(currentTrial), const.numDriftCheck)==1
+                    EyelinkDoDriftCorrection(eyelink.el);
+                end
+                
                 Eyelink('Message', 'TrialID: %s', num2str(currentTrial));
                 WaitSecs(0.05);
                 Eyelink('Command', 'set_idle_mode'); %it puts the tracker into offline mode

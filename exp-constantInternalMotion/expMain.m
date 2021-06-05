@@ -95,9 +95,8 @@ try
             % time for the network connection to make sure the connection stays active
             % even during long pauses, nly need to set it once at the start of the experiment
             
-            
             % Calibrate the eye tracker
-            EyelinkDoTrackerSetup(eyelink.el);
+            EyelinkDoTrackerSetup(eyelink.el); % Pressing the ‘M’ key switches automatic calibration off. It may be switched back on by pressing the ‘A’ key. 
             
             % do a final check of calibration using driftcorrection
             EyelinkDoDriftCorrection(eyelink.el);
@@ -244,6 +243,11 @@ try
             end
             %% or, start Eyelink recording
             if eyelink.mode
+                % periodic drift check
+                if trialData.trialCounter(currentTrial)~=1 && rem(trialData.trialCounter(currentTrial), const.numDriftCheck)==1
+                    EyelinkDoDriftCorrection(eyelink.el);
+                end
+                
                 Eyelink('Message', 'TrialID: %s', num2str(currentTrial));
                 WaitSecs(0.05);
                 Eyelink('Command', 'set_idle_mode'); %it puts the tracker into offline mode
@@ -403,6 +407,7 @@ try
                     end
                     trialData.iterations(currentTrial, 1) = iterations;
                     fprintf('EXP: Block %d Trial %d finished \n', block, trialData.trialCounter(currentTrial, 1));
+                    
                     break; % BREAK the while loop, if trial was finished!
                 end
                 

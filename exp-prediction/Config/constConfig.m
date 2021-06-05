@@ -25,6 +25,9 @@ if sbj.block == 1 && sbj.trial==1
         const.numTrialsPerBlock    = [10]; % 32*ones(1, 10);
     end
     const.standardInterval = 9; % one standard trial once every x trials indicated by this number
+    
+    const.numDriftCheck        = 12; % drift check after every n trials
+    
     if const.makeVideo; const.numTrialsPerBlock = 1; end
     const.numTrials            = sum(const.numTrialsPerBlock);                  % total number of trials
     

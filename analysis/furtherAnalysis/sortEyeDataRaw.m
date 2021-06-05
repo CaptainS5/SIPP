@@ -4,7 +4,7 @@
 
 clear all; close all; clc
 
-names = {'ib1'};
+names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts'};
 subStartI = 1;
 
 cd ..
@@ -49,9 +49,11 @@ for subN = subStartI:length(names)
             analyzeTrial;
             % to get target info
             eyeTrialData.rdkApertureDir(subN, currentTrial) = trial.log.rdkApertureDir; % positive is up, negative is down
+            eyeTrialData.rdkApertureSpeed(subN, currentTrial) = trial.log.rdkApertureSpeed; % positive is up, negative is down
             eyeTrialData.rdkApertureAngle(subN, currentTrial) = trial.log.rdkApertureAngle;
             eyeTrialData.rdkInternalSpeed(subN, currentTrial) = trial.log.rdkInternalSpeed; %
-            eyeTrialData.rdkInternalDir(subN, currentTrial) = trial.log.rdkInternalDir; % direction std
+            eyeTrialData.rdkInternalCon(subN, currentTrial) = trial.log.rdkInternalCon;
+            eyeTrialData.rdkInternalDir(subN, currentTrial) = trial.log.rdkInternalDir; 
             eyeTrialData.rdkCoh(subN, currentTrial) = trial.log.rdkCoh;
             eyeTrialData.response(subN, currentTrial) = trial.log.response;
             
@@ -59,13 +61,13 @@ for subN = subStartI:length(names)
             eyeTrialData.frameLog.rdkOn(subN, currentTrial) = trial.log.targetOnset;
             eyeTrialData.frameLog.rdkOff(subN, currentTrial) = trial.log.targetOffset;
             %             eyeTrialData.frameLog.respond(subN, currentTrial) = trial.log.trialEnd;
-            %             eyeTrialData.target{subN, currentTrial} = trial.target;
+            eyeTrialData.target{subN, currentTrial} = trial.target;
             
-%             % all pursuit data
-%             fields = fieldnames(trial.pursuit);
-%             for ii = 1:length(fields)
-%                 eyeTrialData.pursuit.(fields{ii})(subN, currentTrial) = trial.pursuit.(fields{ii});
-%             end
+            % all pursuit data
+            fields = fieldnames(trial.pursuit);
+            for ii = 1:length(fields)
+                eyeTrialData.pursuit.(fields{ii})(subN, currentTrial) = trial.pursuit.(fields{ii});
+            end
 %             
 %             eyeTrialData.saccades.number(subN, currentTrial) = trial.saccades.num;
 %             eyeTrialData.saccades.meanAmp2D(subN, currentTrial) = trial.saccades.meanAmp2D;
@@ -87,26 +89,28 @@ for subN = subStartI:length(names)
             eyeTrialDataSub.trial{1, currentTrial}.Y_interpolSac = trial.Y_interpolSac;
             eyeTrialDataSub.trial{1, currentTrial}.DX_interpolSac = trial.DX_interpolSac;
             eyeTrialDataSub.trial{1, currentTrial}.DY_interpolSac = trial.DY_interpolSac;
-            eyeTrialDataSub.trial{1, currentTrial}.targetVelX = trial.target.velocityX;
-            eyeTrialDataSub.trial{1, currentTrial}.targetVelY = trial.target.velocityY;
+            eyeTrialDataSub.trial{1, currentTrial}.targetVelX = trial.target.velX;
+            eyeTrialDataSub.trial{1, currentTrial}.targetVelY = trial.target.velY;
         else
             eyeTrialData.frameLog.fixationOn(subN, currentTrial) = NaN;
             eyeTrialData.frameLog.rdkOn(subN, currentTrial) = NaN;
             eyeTrialData.frameLog.rdkOff(subN, currentTrial) = NaN;
             %             eyeTrialData.frameLog.respond(subN, currentTrial) = NaN;
-            %             eyeTrialData.target{subN, currentTrial} = trial.target;
+            eyeTrialData.target{subN, currentTrial} = trial.target;
             
             eyeTrialData.rdkApertureDir(subN, currentTrial) = NaN; % positive is up, negative is down
+            eyeTrialData.rdkApertureSpeed(subN, currentTrial) = NaN;
             eyeTrialData.rdkApertureAngle(subN, currentTrial) = NaN;
+            eyeTrialData.rdkInternalCon(subN, currentTrial) = NaN;
             eyeTrialData.rdkInternalDir(subN, currentTrial) = NaN; % direction std
             eyeTrialData.rdkInternalSpeed(subN, currentTrial) = NaN; %
             eyeTrialData.rdkCoh(subN, currentTrial) = NaN;
             eyeTrialData.response(subN, currentTrial) = NaN;
             
-%             fields = fieldnames(trial.pursuit);
-%             for ii = 1:length(fields)
-%                 eyeTrialData.pursuit.(fields{ii})(subN, currentTrial) = NaN;
-%             end
+            fields = fieldnames(trial.pursuit);
+            for ii = 1:length(fields)
+                eyeTrialData.pursuit.(fields{ii})(subN, currentTrial) = NaN;
+            end
 %             
 %             eyeTrialData.saccades.number(subN, currentTrial) = NaN;
 %             eyeTrialData.saccades.meanAmp2D(subN, currentTrial) = NaN;

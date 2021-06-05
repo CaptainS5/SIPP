@@ -6,45 +6,15 @@
 
 function [target] = readoutTarget(eyeData, Experiment, trial, currentSubjectPath, currentTrial, eventLog, rdkFrameLog)
 % initialize target velocity and location vectors
-target.velocityX = zeros(trial.log.trialEnd, 1);
-target.velocityY = zeros(trial.log.trialEnd, 1);
-target.internalVelX = zeros(trial.log.trialEnd, 1);
-target.internalVelY = zeros(trial.log.trialEnd, 1);
-target.averageVelX = zeros(trial.log.trialEnd, 1);
-target.averageVelY = zeros(trial.log.trialEnd, 1);
+target.velX = NaN(trial.log.trialEnd, 1);
+target.velY = NaN(trial.log.trialEnd, 1);
+target.internalVelX = NaN(trial.log.trialEnd, 1);
+target.internalVelY = NaN(trial.log.trialEnd, 1);
+target.averageVelX = NaN(trial.log.trialEnd, 1);
+target.averageVelY = NaN(trial.log.trialEnd, 1);
 
 target.posX = NaN(trial.log.trialEnd, 1);
 target.posY = NaN(trial.log.trialEnd, 1);
-
-% fill in the velocity values
-target.velocityX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-    = Experiment.const.rdk.apertureSpeed*cos(trial.log.rdkApertureAngle/180*pi); 
-target.velocityY(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-    = Experiment.const.rdk.apertureSpeed*sin(trial.log.rdkApertureAngle/180*pi);
-
-if trial.log.rdkCoh==0
-    target.averageVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-        = target.velocityX(trial.log.targetOnset:trial.log.targetOffset, 1);
-    target.averageVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-        = target.velocityY(trial.log.targetOnset:trial.log.targetOffset, 1);
-else
-    target.internalVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-        = cos(trial.log.rdkInternalDir/180*pi); % relative internalDir
-    target.internalVelY(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-        = sin(trial.log.rdkInternalDir/180*pi); % relative internalDir
-    
-    if trial.log.rdkApertureDir==0
-        target.averageVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-            = cos((trial.log.rdkApertureAngle+trial.log.rdkInternalDir)/180*pi);
-        target.averageVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-            = sin((trial.log.rdkApertureAngle+trial.log.rdkInternalDir)/180*pi);
-    else
-        target.averageVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-            = cos((trial.log.rdkApertureAngle-trial.log.rdkInternalDir)/180*pi);
-        target.averageVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
-            = sin((trial.log.rdkApertureAngle-trial.log.rdkInternalDir)/180*pi);
-    end
-end
 
 % position values
 % load the rdk center position for the current trial
@@ -69,4 +39,25 @@ end
 % interpolate target center positions
 target.posX(trial.log.targetOnset:trial.log.targetOffset, 1) = interp1(rdkFrames, rdkPosX, eyeFrames);
 target.posY(trial.log.targetOnset:trial.log.targetOffset, 1) = interp1(rdkFrames, rdkPosY, eyeFrames);
+
+% velocity values
+% calculate target (aperture) velocity based on position values
+target.velX(trial.log.targetOnset:trial.log.targetOffset, 1) = [diff(target.posX(trial.log.targetOnset:trial.log.targetOffset, 1))*eyeData.sampleRate; NaN];
+target.velY(trial.log.targetOnset:trial.log.targetOffset, 1) = [diff(target.posY(trial.log.targetOnset:trial.log.targetOffset, 1))*eyeData.sampleRate; NaN];
+
+if trial.log.rdkCoh==0 % static pattern
+    target.internalVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
+        = 0; % relative internal motion
+    target.internalVelY(trial.log.targetOnset:trial.log.targetOffset, 1) ...
+        = 0; % relative internal motion
+else
+    target.internalVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
+        = cos(trial.log.rdkInternalDir/180*pi)*trial.log.rdkInternalSpeed; % relative internal motion
+    target.internalVelY(trial.log.targetOnset:trial.log.targetOffset, 1) ...
+        = sin(trial.log.rdkInternalDir/180*pi)*trial.log.rdkInternalSpeed; % relative internal motion
+end
+target.averageVelX(trial.log.targetOnset:trial.log.targetOffset, 1) ...
+    = target.velX(trial.log.targetOnset:trial.log.targetOffset, 1)+target.internalVelX(trial.log.targetOnset:trial.log.targetOffset, 1);
+target.averageVelY(trial.log.targetOnset:trial.log.targetOffset, 1) ...
+    = target.velY(trial.log.targetOnset:trial.log.targetOffset, 1)+target.internalVelY(trial.log.targetOnset:trial.log.targetOffset, 1);
 end

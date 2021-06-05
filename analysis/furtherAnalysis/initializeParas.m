@@ -13,7 +13,7 @@ clear all; close all; clc
 % internalDirCons = [-45 -90 -135 45 90 135]; % -1:left, 1-right
 % internalDirNames = {'-45', '-90', '-135', '45', '90', '135'};
 
-names = {'ib1'}; % also for 500, 501, 504, ib1...
+names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts'}; % also for 500, 501, 504, ib1...
 % apertureAngles = [-12 -9 -6 -3 0 3 6 9 12];
 % apertureAngleNames = {'-12', '-9', '-6', '-3', '0', '3', '6', '9', '12'};
 apertureAngles = [-9 -6 -3 0 3 6 9];

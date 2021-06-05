@@ -27,6 +27,8 @@ if sbj.block == 1 && sbj.trial==1
     if const.makeVideo; const.numTrialsPerBlock = 1; end
     const.numTrials            = sum(const.numTrialsPerBlock);                  % total number of trials
     
+    const.numDriftCheck        = 21; % drift check after every n trials
+    
     %% Fixation:
     % const.fixationRadiusEyeVA    = 2.5;                                         % This is radius threshold for eye fixation (in pix?)
     % const.fixationRadiusEyePX    = round(screen.ppd*const.fixationRadiusEyeVA);

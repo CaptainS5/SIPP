@@ -17,9 +17,7 @@ clear all;
 %% STEP 1
 % Define different folder and data structure
 startFolder = [pwd '\'];  % Eyelink's edf2asc executable has to be in this folder
-cd ..
-cd ..
-dataPath = fullfile(pwd,'data\'); % assuming that the data folder is in the start folder
+dataPath = fullfile(pwd,'\..\..\data\'); % assuming that the data folder is in the start folder
 folderNames = dir(dataPath); % this will be a list of all folders in the data folder, e.g. a list of all subjects
 currentSubject = {};
 nHeader = 10; % this number depends on data collection; lines to skip when reading out messages
@@ -31,7 +29,7 @@ nHeader = 10; % this number depends on data collection; lines to skip when readi
 % cd(currentFolder);
 
 % or Loop over all subjects and convert
-for ii = 8:8%:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
+for ii = 15:15%:length(folderNames) % we are starting at 3 because matlab always has 2 empty entries for the dir command
     % define current subject/folder
     currentSubject{ii-2} = folderNames(ii).name;
     currentFolder = [dataPath currentSubject{ii-2}];
