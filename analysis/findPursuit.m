@@ -17,7 +17,7 @@
 function [pursuit] = findPursuit(trial)
 
 if trial.log.eyeType==0 % fixation
-    pursuit.onset = NaN;
+    pursuit.summary.onset = NaN;
 else
     pursuitSearchStart = 50; % when should we start looking for pursuit onset, x ms after stimulus onset
     pursuitSearchEnd = 250; % this means we stop searching for pursuit onset x ms after stimulus onset
@@ -58,15 +58,15 @@ else
     %                    /
     % fixation__________/ pursuit onset
     if any(isnan(XY))
-        pursuit.onset = NaN;
+        pursuit.summary.onset = NaN;
     else
         [cx,cy,ly,ry] = changeDetect(time,XY);
-        pursuit.onset = round(cx);
+        pursuit.summary.onset = round(cx);
     end
     % this next part has been written by JF to make sure that the pursuit
     % onset is legit (e.g. not in an undetected saccade or during a
     % fixation --> there was no pursuit at all
-    mark = pursuit.onset;
+    mark = pursuit.summary.onset;
     % % in this first part we're getting the first saccade onset after the
     % % stimulus starts moving to make sure that the pursuit onset is before
     % if isempty(trial.saccades.onsets)

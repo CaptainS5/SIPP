@@ -1,8 +1,12 @@
 initializeParas;
 
-checkVariables = {'response', 'gainXexternal', 'gainYexternal', 'gainYaverage', 'gain2Dexternal', 'gain2Daverage', ...
-    'dirGainExternal', 'dirClp', 'dirError', 'disCenterMean'}; % always put all saccade parameters at last
-saccadeVarStart = 100; % if there is no saccade variables, just use a number larger than the number of all variables to be plotted
+checkVariables = {'response', 'initialMeanVelocity2D', 'initialPeakVelocity2D', 'initialAccelerationFit2D', 'dirOlp', ...
+    'gainXexternal', 'gainYexternal', 'gainYaverage', 'gain2Dexternal', 'gain2Daverage', 'dirGainExternal', ...
+    'dirClp', 'dirClpEarly', 'dirClpLate', 'dirClpChange', 'dirError', 'disCenterMean', 'disCenterMeanEarly', 'disCenterMeanLate', ...
+    'num', 'numXLeft', 'numXRight', 'numYUp', 'numYDown', 'meanAmp2D', 'meanAmpXLeft', 'meanAmpXRight', 'meanAmpYUp', 'meanAmpYDown',...
+    'sumAmp2D', 'sumAmpXLeft', 'sumAmpXRight', 'sumAmpYUp', 'sumAmpYDown'}; % always put all saccade parameters at last
+openloopVarEnd = 6;
+saccadeVarStart = 20; % if there is no saccade variables, just use a number larger than the number of all variables to be plotted
 
 % delete obvious error trials
 idxT = find(eyeTrialData.errorStatus==0 & ...
@@ -12,12 +16,18 @@ eyeTrialData.errorStatus(idxT) = -2;
 
 % delete trials with little eye movements
 idxT = find(eyeTrialData.errorStatus==0 & ...
+    eyeTrialData.pursuit.gainXexternal<0.5); 
+eyeTrialData.errorStatus(idxT) = -3;
+
+idxT = find(eyeTrialData.errorStatus==0 & ...
     eyeTrialData.pursuit.travelClpDis<eyeTrialData.pursuit.targetClpDis/2); 
 eyeTrialData.errorStatus(idxT) = -3;
 
 % initialization
 summaryData = table;
+summaryDataDiff = table;
 count = 1;
+countDiff = 1;
 %%
 for subN = 1:size(names, 2)
     for internalConN = 1:size(internalCons, 2) % each column is one internal condition
@@ -32,12 +42,29 @@ for subN = 1:size(names, 2)
             end
             summaryData.rdkApertureAngle(count, 1) = apertureAngles(angleN);
             
-            idxT = find(eyeTrialData.rdkCoh(subN, :)==summaryData.rdkCoh(count, 1) & ...
-                eyeTrialData.rdkApertureAngle(subN, :)==summaryData.rdkApertureAngle(count, 1) & ...
-                eyeTrialData.rdkInternalDir(subN, :)==summaryData.rdkInternalDir(count, 1) & ...
-                eyeTrialData.errorStatus(subN, :)==0);
-            
+            if internalConN>1 % calculate the difference from baseline
+                summaryDataDiff.sub(countDiff, 1) = subN;
+                summaryDataDiff.rdkCoh(countDiff, 1) = 1;
+                summaryDataDiff.rdkInternalDir(countDiff, 1) = internalCons(internalConN);
+                summaryDataDiff.rdkApertureAngle(countDiff, 1) = apertureAngles(angleN);
+            end
+                        
             for varN = 1:length(checkVariables)
+                % if open-loop parameters, choose trials that have a valid
+                % open-loop
+                if varN>=2 && varN <=openloopVarEnd % open-loop parameters
+                    idxT = find(eyeTrialData.rdkCoh(subN, :)==summaryData.rdkCoh(count, 1) & ...
+                        eyeTrialData.rdkApertureAngle(subN, :)==summaryData.rdkApertureAngle(count, 1) & ...
+                        eyeTrialData.rdkInternalDir(subN, :)==summaryData.rdkInternalDir(count, 1) & ...
+                        eyeTrialData.pursuit.onsetType(subN, :)==0 & ...
+                        eyeTrialData.errorStatus(subN, :)==0);
+                else % perception, closed-loop, or saccades
+                    idxT = find(eyeTrialData.rdkCoh(subN, :)==summaryData.rdkCoh(count, 1) & ...
+                        eyeTrialData.rdkApertureAngle(subN, :)==summaryData.rdkApertureAngle(count, 1) & ...
+                        eyeTrialData.rdkInternalDir(subN, :)==summaryData.rdkInternalDir(count, 1) & ...
+                        eyeTrialData.errorStatus(subN, :)==0);
+                end
+                
                 if strcmp(checkVariables{varN}, 'latency') % needs to calculate from onset
                     onsetT = eyeTrialData.pursuit.onset(subN, idxT);
                     rdkOnT = eyeTrialData.frameLog.rdkOn(subN, idxT);
@@ -48,8 +75,18 @@ for subN = 1:size(names, 2)
                         yMeanDiffSub.(checkVariables{varN}){subN}(angleN, internalConN-1) = nanmean(onsetT-rdkOnT-yMeanSub.(checkVariables{varN}){subN}(angleN, 1));
                         yStdDiffSub.(checkVariables{varN}){subN}(angleN, internalConN-1) = nanstd(onsetT-rdkOnT-yMeanSub.(checkVariables{varN}){subN}(angleN, 1));
                     end
-                elseif strcmp(checkVariables{varN}, 'dirClp') % needs to calculate from vectors
-                    dir = atan2(eyeTrialData.pursuit.dirClpY(subN, idxT), eyeTrialData.pursuit.dirClpX(subN, idxT))/pi*180;
+                elseif strcmp(checkVariables{varN}, 'dirClp') || strcmp(checkVariables{varN}, 'dirOlp') ...
+                        || strcmp(checkVariables{varN}, 'dirClpEarly') || strcmp(checkVariables{varN}, 'dirClpLate') % needs to calculate from vectors
+                    dirXName = [checkVariables{varN}, 'X'];
+                    dirYName = [checkVariables{varN}, 'Y'];
+                    dir = atan2(eyeTrialData.pursuit.(dirYName)(subN, idxT), eyeTrialData.pursuit.(dirXName)(subN, idxT))/pi*180;
+                    
+                    % delete extreme values for Olp pursuit direction... or
+                    % better, just do not analyze olp pursuit or really
+                    % figure out the problem with finding pursuit onset
+                    if strcmp(checkVariables{varN}, 'dirOlp')
+                        dir(abs(dir)>90)=[]; % has to be wrong, shouldn't be moving to the left...
+                    end
                     
                     yMeanSub.(checkVariables{varN}){subN}(angleN, internalConN) = nanmean(dir);
                     yStdSub.(checkVariables{varN}){subN}(angleN, internalConN) = nanstd(dir);
@@ -84,11 +121,22 @@ for subN = 1:size(names, 2)
                     end
                 end
                 summaryData.(checkVariables{varN})(count, 1) = yMeanSub.(checkVariables{varN}){subN}(angleN, internalConN);
+                if internalConN>1 % calculate the difference from baseline
+                    summaryDataDiff.(checkVariables{varN})(countDiff, 1) = yMeanDiffSub.(checkVariables{varN}){subN}(angleN, internalConN-1);
+                end
             end
             count = count+1;
+            if internalConN>1 % calculate the difference from baseline
+                countDiff = countDiff+1;
+            end
             
         end
     end
 end
 save('summaryDataSub.mat', 'yMeanSub', 'yStdSub', 'yMeanDiffSub', 'yStdDiffSub')
 save('summaryData.mat', 'summaryData')
+save('summaryDataDiff.mat', 'summaryDataDiff')
+
+%% generate csv for plotting in R
+writetable(summaryData, [RFolder, 'summaryData.csv'])
+writetable(summaryDataDiff, [RFolder, 'summaryDataDiff.csv'])

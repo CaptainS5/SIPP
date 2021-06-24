@@ -3,6 +3,22 @@
 
 clear all; close all; clc
 
+names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz'}; % also for 500, 501, 504, ib1...
+apertureAngles = [-9 -6 -3 0 3 6 9];
+apertureAngleNames = {'-9', '-6', '-3', '0', '3', '6', '9'};
+internalCons = [0, -90, 90];
+internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
+% internalConNames = {'static', 'dir down', 'dir up'}; % d00
+
+% parameter settings for plots
+plotVariables = {'response', 'initialMeanVelocity2D', 'initialPeakVelocity2D', 'initialAccelerationFit2D', 'dirOlp', ...
+    'gainXexternal', 'gainYexternal', 'gainYaverage', 'gain2Dexternal', 'gain2Daverage', 'dirGainExternal', ...
+    'dirClp', 'dirClpEarly', 'dirClpLate', 'dirClpChange', 'dirError', 'disCenterMean', 'disCenterMeanEarly', 'disCenterMeanLate', ...
+    'num', 'numXLeft', 'numXRight', 'numYUp', 'numYDown', 'meanAmp2D', 'meanAmpXLeft', 'meanAmpXRight', 'meanAmpYUp', 'meanAmpYDown',...
+    'sumAmp2D', 'sumAmpXLeft', 'sumAmpXRight', 'sumAmpYUp', 'sumAmpYDown'}; % always put all saccade parameters at last
+openloopVarEnd = 6;
+saccadeVarStart = 20; 
+
 % names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07' 'w08' 'w09' 'w10'};
 % cohCons = [0; 0.5; 1]; % RDK coherence'
 % cohNames = {'coh-0', 'coh-50%', 'coh-100%'};
@@ -12,15 +28,6 @@ clear all; close all; clc
 % names = {'xw0' 'dc0' 'ib0'};
 % internalDirCons = [-45 -90 -135 45 90 135]; % -1:left, 1-right
 % internalDirNames = {'-45', '-90', '-135', '45', '90', '135'};
-
-names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts'}; % also for 500, 501, 504, ib1...
-% apertureAngles = [-12 -9 -6 -3 0 3 6 9 12];
-% apertureAngleNames = {'-12', '-9', '-6', '-3', '0', '3', '6', '9', '12'};
-apertureAngles = [-9 -6 -3 0 3 6 9];
-apertureAngleNames = {'-9', '-6', '-3', '0', '3', '6', '9'};
-internalCons = [0, -90, 90];
-internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
-% internalConNames = {'static', 'dir down', 'dir up'}; % d00
 
 % names = {'x02'};
 % allCons.internalCons = [0, -90, 90];
@@ -32,15 +39,19 @@ sampleRate = 1000;
 
 analysisFolder = pwd;
 load('eyeTrialData_all.mat');
+load('summaryData')
+load('summaryDataDiff')
+load('summaryDataSub')
 perceptFolder = ['..\perceptPlots\'];
 eyeTracesFolder = ['..\eyeTraces\'];
 pursuitFolder = ['..\pursuitPlots\'];
 saccadeFolder = ['..\saccadePlots\'];
 correlationFolder = ['..\corrPlots\'];
 perceptFolder = ['..\perceptualPlots\'];
-% RFolder = pwd;
+RFolder = ['..\R\'];
 
 % for plotting
+textFontSize = 8;
 for t = 1:size(names, 2) % individual color for scatter plots, can do 10 people
     if t<=2
         markerC(t, :) = (t+2)/4*[77 255 202]/255;

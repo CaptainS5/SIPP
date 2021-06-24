@@ -57,8 +57,26 @@ try
     for block = sbj.block:size(const.numTrialsPerBlock,2)                  % begin block FOR-LOOP
         
         %% (2.1) Show Calibration Instructions
+%         if const.measureLuminance
+%             Screen('FillRect', screen.window, screen.background)
+%             Screen('Flip', screen.window)
+%             KbWait();
+%             clear KbCheck
+%             WaitSecs(0.2)
+%             
+%             Screen('FillRect', screen.window, screen.white)
+%             Screen('Flip', screen.window)
+%             KbWait();
+%             clear KbCheck
+%         end
         PTBinstruction_page(2,screen,const);
-        
+%         keyPressed = PTBinstruction_page(2,screen,const, keys);
+%         if keyPressed==keys.escape
+%             fprintf('EXP: Experiment aborted by pressing esc key \n');
+%             currentTrial = NaN;
+%             throw(MException('EXP: MainLoop','Experiment aborted'));
+%         end
+%         
         %% (2.2) Initialize and (2.3) Calibrate DPI
         if dpi_set.mode
             dpi_calibrationSetup(screen, const);                                % show Setup-Screen (Crosshair of bulleys)
@@ -165,12 +183,22 @@ try
         PTBwrite_msg(screen, 'press [space] to continue', 'center', -15, screen.black)
         %         Screen('Flip', screen.window,screen.refreshRate);
         Screen('Flip', screen.window, screen.refreshRate, 0, 0, 2);
+%         Screen('Flip', screen.window, screen.refreshRate, 0, 0, 2);
           keyPressed = 0;
         while keyPressed==0
             keyPressed = PTBcheck_key_press(keys.space);
         end
-        %             PTBwait_anykey_press
-        
+%         
+%         bPressed = 0;
+%         while bPressed==0
+%             [bPressed keyPressed] = PTBcheck_key_press([keys.right, keys.escape]);
+%             if keyPressed==keys.escape
+%                 fprintf('EXP: Experiment aborted by pressing esc key \n');
+%                 currentTrial = NaN;
+%                 throw(MException('EXP: MainLoop','Experiment aborted'));
+%             end
+%         end
+%         
         %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % (3) SINGLE TRIAL SETUP
         %      1) enter TRIAL-WHILE-loop: trial setup (control-struct),

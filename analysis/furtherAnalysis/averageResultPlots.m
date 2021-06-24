@@ -2,25 +2,14 @@
 initializeParas;
 
 % choose which plot to look at
-individualPlots = 0;
+individualPlots = 1;
 averagePlots = 1;
-
-% input the parameters to plot
-plotVariables = {'response', 'gainXexternal', 'gainYexternal', 'gainYaverage', 'gain2Dexternal', 'gain2Daverage', ...
-    'dirGainExternal', 'dirClp', 'dirError', 'disCenterMean'};
-saccadeVarStart = 100; % if there is no saccade variables, just use a super large number (larger than the number of all variables to be plotted)
-% % for saccades
-% checkVariables = {'number', 'meanAmp2D', 'sumAmp2D'};
-
-% plot settings
-textFontSize = 8;
-
-load('summaryData')
-load('summaryDataSub')
+plotVarStart = 5;
+plotVarEnd = 5;
 
 %%
 if individualPlots
-    for varN = 2:length(plotVariables)
+    for varN = plotVarStart:plotVarEnd
         for subN = 1:size(names, 2)
             % plot difference from baseline
             figure
@@ -93,14 +82,14 @@ if individualPlots
                 saveas(gcf, [pursuitFolder, 'individuals\pursuit_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
             end
             
-            close all
+%             close all
         end
     end
 end
 
 %%
 if averagePlots
-    for varN = 1:length(plotVariables)
+    for varN = plotVarStart:plotVarEnd
         % plot difference from baseline
         figure
         hold on
@@ -109,16 +98,11 @@ if averagePlots
             stdDiffAll =NaN(size(apertureAngles));
             
             for angleN = 1:length(apertureAngles)
-                baselineIdx = find(summaryData.rdkCoh(:, 1)==0 & ...
-                    summaryData.rdkInternalDir(:, 1)==0 & ...
-                    summaryData.rdkApertureAngle(:, 1)==apertureAngles(angleN));
-                baselineMean = nanmean(summaryData.(plotVariables{varN})(baselineIdx, 1));
-                
-                idxT = find(summaryData.rdkCoh(:, 1)==1 & ...
-                    summaryData.rdkInternalDir(:, 1)==internalCons(internalConN) & ...
-                    summaryData.rdkApertureAngle(:, 1)==apertureAngles(angleN));
-                meanDiffAll(angleN) = nanmean(summaryData.(plotVariables{varN})(idxT, 1)-baselineMean);
-                stdDiffAll(angleN) = nanstd(summaryData.(plotVariables{varN})(idxT, 1)-baselineMean);
+                idxT = find(summaryDataDiff.rdkCoh(:, 1)==1 & ...
+                    summaryDataDiff.rdkInternalDir(:, 1)==internalCons(internalConN) & ...
+                    summaryDataDiff.rdkApertureAngle(:, 1)==apertureAngles(angleN));
+                meanDiffAll(angleN) = nanmean(summaryDataDiff.(plotVariables{varN})(idxT, 1));
+                stdDiffAll(angleN) = nanstd(summaryDataDiff.(plotVariables{varN})(idxT, 1));
             end
             errorbar(apertureAngles, meanDiffAll, stdDiffAll, 'color', colorCons(internalConN, :))
         end
@@ -139,8 +123,8 @@ if averagePlots
         figure
         hold on
         for internalConN = 1:size(internalCons, 2)
-            meanDiffAll = NaN(size(apertureAngles));
-            stdDiffAll =NaN(size(apertureAngles));
+            meanAll = NaN(size(apertureAngles));
+            stdAll =NaN(size(apertureAngles));
             if internalCons(internalConN)==0
                 rdkCoh = 0;
                 rdkInternalDir = 0;
@@ -153,10 +137,10 @@ if averagePlots
                 idxT = find(summaryData.rdkCoh(:, 1)==rdkCoh & ...
                     summaryData.rdkInternalDir(:, 1)==rdkInternalDir & ...
                     summaryData.rdkApertureAngle(:, 1)==apertureAngles(angleN));
-                meanDiffAll(angleN) = nanmean(summaryData.(plotVariables{varN})(idxT, 1));
-                stdDiffAll(angleN) = nanstd(summaryData.(plotVariables{varN})(idxT, 1));
+                meanAll(angleN) = nanmean(summaryData.(plotVariables{varN})(idxT, 1));
+                stdAll(angleN) = nanstd(summaryData.(plotVariables{varN})(idxT, 1));
             end
-            errorbar(apertureAngles, meanDiffAll, stdDiffAll, 'color', colorCons(internalConN, :))
+            errorbar(apertureAngles, meanAll, stdAll, 'color', colorCons(internalConN, :))
         end
         title('all')
 %         axis square

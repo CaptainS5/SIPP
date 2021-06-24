@@ -7,11 +7,10 @@
 initializeParas;
 
 % choose which plot to look at now
-individualPlots = 1;
-averagedPlots = 0;
-textFontSize = 8;
+individualPlots = 0;
+averagedPlots = 1;
 subStart = 1;
-subEnd = 11;
+subEnd = 14;
 
 groupName = {'visualDir'};
 % naming by trial type (could include grouping rules) + group based on which direction (visual or perceived)
@@ -29,6 +28,7 @@ yRangeY = [-3 3];
 
 %% align RDK onset, frame data for all trials
 frameLength = NaN(size(names, 2), 1);
+latency = NaN(size(names));
 for subN = subStart:subEnd
     cd(analysisFolder)
     load(['eyeTrialDataSub_' names{subN} '.mat']);
@@ -37,6 +37,8 @@ for subN = subStart:subEnd
     tempL = eyeTrialData.frameLog.rdkOff(subN, idxT)-eyeTrialData.frameLog.rdkOn(subN, idxT)+200; % starting from 200 ms before RDK onset, to the end of RDK
     tempL(tempL==0) = [];
     frameLength(subN, 1) = min(tempL);
+    % latency
+    latency(subN) = nanmean(eyeTrialData.pursuit.onset(subN, idxT)-eyeTrialData.frameLog.rdkOn(subN, idxT));
     
     for internalConN = 1:length(allCons.internalCons)
         if allCons.internalCons(internalConN)==0
@@ -86,7 +88,8 @@ for ii = 1:length(groupN)
     % plot mean traces for each participant
     if individualPlots
         for subN = subStart:subEnd
-            % velocity; each internal cons is one figure
+            % velocity; each internal cons is one figure; difference from
+            % baseline
             for internalConN = 2:length(allCons.internalCons)
                 figure
                 for dimN = 1:2
@@ -110,37 +113,86 @@ for ii = 1:length(groupN)
                     end
                     box off
                 end
-                saveas(gcf, [eyeTracesFolder, '\individuals\velTraceDiff_internalCon' num2str(allCons.internalCons(internalConN)) '_' names{subN} '.pdf'])
+                saveas(gcf, [eyeTracesFolder, 'individuals\velTraceDiff_internalCon' num2str(allCons.internalCons(internalConN)) '_' names{subN} '.pdf'])
             end
         end
     end
     
-%     % plot mean traces of all participants in all probabilities
-%     if averagedPlots
-%         % align at rdk onset
-%         figure
-%         for dimN = 1:2
-%             subplot(2, 1, dimN)
-%             hold on
-%             for conN = 1:size(allCons, 1)
-%                 internalDirN = allCons(conN, 1)+1;
-%                 if allCons(conN, 2)==30 % low sd, solid line
-%                     lineStyle = '-';
-%                 else % high sd
-%                     lineStyle = '--';
-%                 end
-%                 p{conN} = plot(timePointsOnset{internalDirN}, allMean{ii}.onset{conN, dimN}, 'LineStyle', lineStyle, 'color', colorPlot(conN, :)); %, 'LineWidth', 1);
-%             end
-%             legend([p{:}], conNames, 'Location', 'best')
-%             title(['up&down merged, vel in the ', groupName{groupN(ii)}])
-%             xlabel('Time from RDK onset (ms)')
-%             ylabel([dimNames{dimN}, ' eye velocity (deg/s)'])
-%             %             xlim([-500 700])
-%             %             ylim(yRange)
-%             box off
-%         end
-%         saveas(gcf, [eyeTracesFolder, '\velTrace_' groupName{groupN(ii)} '_perturbationOnsetAlign_all.pdf'])
-%     end
+    % plot mean traces of all participants in all probabilities
+    if averagedPlots
+        % align at rdk onset
+        % all conditions
+        for internalConN = 1:length(allCons.internalCons)
+            figure
+            for dimN = 1:2
+                subplot(2, 1, dimN)
+                hold on
+                for angleN = 1:length(allCons.apertureAngles)
+                    if allCons.apertureAngles(angleN)>0 % upward internal dir
+                        lineStyle = '-';
+                    else % downward internal dir
+                        lineStyle = '--';
+                    end
+                    p{angleN} = plot(timePointsOnset, allMean{ii}.vel{angleN, internalConN}{dimN}, 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
+                end
+                % average pursuit onset
+                line([mean(latency) mean(latency)], [-0.5, 0.5])
+                % average olp end
+                line([mean(latency)+140 mean(latency)+140], [-0.5, 0.5])
+                % average early/late clp phase border
+                line([mean(latency)+140+(700-mean(latency)-140)/2 mean(latency)+140+(700-mean(latency)-140)/2], [-0.5, 0.5])
+                % end of clp analysis window
+                line([700 700], [-0.5, 0.5])
+                
+                title(['all, ', internalConNames{internalConN}])
+                xlabel('Time from RDK onset (ms)')
+                ylabel([dimNames{dimN}, ' eye velocity (deg/s)'])
+                xlim([-200 800])
+                
+                if dimN==1
+                    legend([p{:}], apertureAngleNames, 'Location', 'best')
+                end
+                box off
+            end
+            saveas(gcf, [eyeTracesFolder, 'velTrace_internalCon' num2str(allCons.internalCons(internalConN)) '_all.pdf'])
+        end
+        
+        % difference from baseline
+        for internalConN = 2:length(allCons.internalCons)
+            figure
+            for dimN = 1:2
+                subplot(2, 1, dimN)
+                hold on
+                for angleN = 1:length(allCons.apertureAngles)
+                    if allCons.apertureAngles(angleN)>0 % upward internal dir
+                        lineStyle = '-';
+                    else % downward internal dir
+                        lineStyle = '--';
+                    end
+                    p{angleN} = plot(timePointsOnset, allMean{ii}.velDiff{angleN, internalConN}{dimN}, 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
+                end
+                % average pursuit onset
+                line([mean(latency) mean(latency)], [-0.5, 0.5])
+                % average olp end
+                line([mean(latency)+140 mean(latency)+140], [-0.5, 0.5])
+                % average early/late clp phase border
+                line([mean(latency)+140+(700-mean(latency)-140)/2 mean(latency)+140+(700-mean(latency)-140)/2], [-0.5, 0.5])
+                % end of clp analysis window
+                line([700 700], [-0.5, 0.5])
+                
+                title(['all, ', internalConNames{internalConN}])
+                xlabel('Time from RDK onset (ms)')
+                ylabel([dimNames{dimN}, ' eye velocity difference (deg/s)'])
+                xlim([-200 800])
+                
+                if dimN==1
+                    legend([p{:}], apertureAngleNames, 'Location', 'best')
+                end
+                box off
+            end
+            saveas(gcf, [eyeTracesFolder, 'velTraceDiff_internalCon' num2str(allCons.internalCons(internalConN)) '_all.pdf'])
+        end
+    end
 end
 
 %% generate csv files, each file for one probability condition
@@ -150,7 +202,8 @@ end
 % % cd(RsaveFolder)
 % % averaged traces
 % for ii = 1:length(groupN)
-%     for probNmerged = 1:probTotalN
+%     % raw velocity values
+%     for internalConN = 1:length(allCons.internalCons)
 %         velTAverageSub = [];
 %         for binN = 1:2
 %             if binN==1
@@ -162,7 +215,7 @@ end
 %                 velTAverageSub((binN-1)*length(names)+subN, :) = dataTemp(subN, :);
 %             end
 %         end
-%         csvwrite(['velocityTrace_' groupName{groupN(ii)} '_exp' num2str(expN) '_prob' num2str(probCons(probNmerged+probTotalN-1)), '.csv'], velTAverageSub)
+%         csvwrite(['velocityTrace_' groupName{groupN(ii)} '_internalCon' num2str(), '.csv'], velTAverageSub)
 %     end
 % end
 

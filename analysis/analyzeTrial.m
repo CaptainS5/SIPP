@@ -57,7 +57,7 @@ else
             trial = analyzePursuit(trial, pursuit);
             
             %% analyze saccades
-%             trial = analyzeSaccades(trial);
+            trial = analyzeSaccades(trial);
 %         else
             %% OPTIONAL: find micro saccades
             % % remove saccades

@@ -4,7 +4,7 @@
 
 clear all; close all; clc
 
-names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts'};
+names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz'};
 subStartI = 1;
 
 cd ..
@@ -64,18 +64,21 @@ for subN = subStartI:length(names)
             eyeTrialData.target{subN, currentTrial} = trial.target;
             
             % all pursuit data
-            fields = fieldnames(trial.pursuit);
+            fields = fieldnames(trial.pursuit.summary);
             for ii = 1:length(fields)
-                eyeTrialData.pursuit.(fields{ii})(subN, currentTrial) = trial.pursuit.(fields{ii});
+                eyeTrialData.pursuit.(fields{ii})(subN, currentTrial) = trial.pursuit.summary.(fields{ii});
             end
-%             
-%             eyeTrialData.saccades.number(subN, currentTrial) = trial.saccades.num;
-%             eyeTrialData.saccades.meanAmp2D(subN, currentTrial) = trial.saccades.meanAmp2D;
-%             eyeTrialData.saccades.meanAmpXLeft(subN, currentTrial) = trial.saccades.meanAmpXLeft;
-%             eyeTrialData.saccades.meanAmpXRight(subN, currentTrial) = trial.saccades.meanAmpXRight;
-%             eyeTrialData.saccades.meanAmpYUp(subN, currentTrial) = trial.saccades.meanAmpYUp;
-%             eyeTrialData.saccades.meanAmpYDown(subN, currentTrial) = trial.saccades.meanAmpYDown;
-%             eyeTrialData.saccades.sumAmp2D(subN, currentTrial) = trial.saccades.sumAmp2D;
+            % all saccade summary data
+            fields = fieldnames(trial.saccades.summary);
+            for ii = 1:length(fields)
+                eyeTrialData.saccades.(fields{ii})(subN, currentTrial) = trial.saccades.summary.(fields{ii});
+            end
+            eyeTrialData.saccades.dirXY{subN, currentTrial} = trial.saccades.dirXY;
+            eyeTrialData.saccades.dirAngle{subN, currentTrial} = trial.saccades.dirAngle;
+            eyeTrialData.saccades.eyePosOnset{subN, currentTrial} = trial.saccades.eyePosOnset;
+            eyeTrialData.saccades.eyePosOffset{subN, currentTrial} = trial.saccades.eyePosOffset;
+            eyeTrialData.saccades.targetPosOnset{subN, currentTrial} = trial.saccades.targetPosOnset;
+            eyeTrialData.saccades.targetPosOffset{subN, currentTrial} = trial.saccades.targetPosOffset;
             
             eyeTrialDataSub.trial{1, currentTrial}.eyeX_filt = trial.eyeX_filt; % for velocity traces
             eyeTrialDataSub.trial{1, currentTrial}.eyeY_filt = trial.eyeY_filt;
@@ -91,6 +94,7 @@ for subN = subStartI:length(names)
             eyeTrialDataSub.trial{1, currentTrial}.DY_interpolSac = trial.DY_interpolSac;
             eyeTrialDataSub.trial{1, currentTrial}.targetVelX = trial.target.velX;
             eyeTrialDataSub.trial{1, currentTrial}.targetVelY = trial.target.velY;
+            eyeTrialDataSub.trial{1, currentTrial}.pursuit.dirVec = trial.pursuit.eyeDir;
         else
             eyeTrialData.frameLog.fixationOn(subN, currentTrial) = NaN;
             eyeTrialData.frameLog.rdkOn(subN, currentTrial) = NaN;
@@ -107,18 +111,20 @@ for subN = subStartI:length(names)
             eyeTrialData.rdkCoh(subN, currentTrial) = NaN;
             eyeTrialData.response(subN, currentTrial) = NaN;
             
-            fields = fieldnames(trial.pursuit);
+            fields = fieldnames(trial.pursuit.summary);
             for ii = 1:length(fields)
                 eyeTrialData.pursuit.(fields{ii})(subN, currentTrial) = NaN;
             end
-%             
-%             eyeTrialData.saccades.number(subN, currentTrial) = NaN;
-%             eyeTrialData.saccades.meanAmp2D(subN, currentTrial) = NaN;
-%             eyeTrialData.saccades.meanAmpXLeft(subN, currentTrial) = NaN;
-%             eyeTrialData.saccades.meanAmpXRight(subN, currentTrial) = NaN;
-%             eyeTrialData.saccades.meanAmpYUp(subN, currentTrial) = NaN;
-%             eyeTrialData.saccades.meanAmpYDown(subN, currentTrial) = NaN;
-%             eyeTrialData.saccades.sumAmp2D(subN, currentTrial) = NaN;
+            fields = fieldnames(trial.saccades.summary);
+            for ii = 1:length(fields)
+                eyeTrialData.saccades.(fields{ii})(subN, currentTrial) = NaN;
+            end
+            eyeTrialData.saccades.dirXY{subN, currentTrial} = NaN;
+            eyeTrialData.saccades.dirAngle{subN, currentTrial} = NaN;
+            eyeTrialData.saccades.eyePosOnset{subN, currentTrial} = NaN;
+            eyeTrialData.saccades.eyePosOffset{subN, currentTrial} = NaN;
+            eyeTrialData.saccades.targetPosOnset{subN, currentTrial} = NaN;
+            eyeTrialData.saccades.targetPosOffset{subN, currentTrial} = NaN;
             
             eyeTrialDataSub.trial{1, currentTrial} = NaN; % for velocity traces
         end

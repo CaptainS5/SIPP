@@ -39,7 +39,7 @@
 function [pursuit] = findPursuitNew(trial)
 
 if trial.log.eyeType==0 % fixation
-    pursuit.onset = NaN;
+    pursuit.summary.onset = NaN;
 else
     %% set parameters
     slopeRange = [-0.01 0.01; 0.01 inf]; % if you are using changeDetectRange.m, see explanations there
@@ -84,13 +84,13 @@ else
     % confirm if we have a valid baseline interval
     if baselineStart == -999
         disp('Error of fixation interval in findPursuitNew.m!')
-        pursuit.onset = NaN; % no pursuit onset
-        pursuit.baselineStart = NaN;
-        pursuit.baselineEnd = NaN;
-        pursuit.meanBaseline = NaN;
-        pursuit.sdBaseline = NaN;
-        pursuit.pursuitIntervalStart = NaN;
-        pursuit.pursuitIntervalEnd = NaN;
+        pursuit.summary.onset = NaN; % no pursuit onset
+        pursuit.summary.baselineStart = NaN;
+        pursuit.summary.baselineEnd = NaN;
+        pursuit.summary.meanBaseline = NaN;
+        pursuit.summary.sdBaseline = NaN;
+        pursuit.summary.pursuitIntervalStart = NaN;
+        pursuit.summary.pursuitIntervalEnd = NaN;
         return
     end
     
@@ -130,15 +130,15 @@ else
         %                    /
         % fixation__________/ pursuit onset
         if any(isnan(XY))
-            pursuit.onset = NaN;
+            pursuit.summary.onset = NaN;
         else
             cxRange = [trial.stim_onset; time(end)]; % not really restricting the onsets now...
             [cx,cy,slope1,slope2] = changeDetectSlope(time, XY, cxRange, slopeRange);
-            pursuit.onset = round(cx);
+            pursuit.summary.onset = round(cx);
         end
         
-        pursuit.pursuitIntervalStart = NaN;
-        pursuit.pursuitIntervalEnd = NaN;
+        pursuit.summary.pursuitIntervalStart = NaN;
+        pursuit.summary.pursuitIntervalEnd = NaN;
     else
         if all(changeDiff~=1) % if already much higher than fixation, start from 50ms and eventually use 0-200 ms
             potentialStartingPoints = 1;
@@ -178,15 +178,15 @@ else
         %                    /
         % fixation__________/ pursuit onset
         if any(isnan(XY))
-            pursuit.onset = NaN;
+            pursuit.summary.onset = NaN;
         else
             cxRange = [trial.stim_onset; pursuitIntervalStart]; % restrict the onset to be before the starting point of the pursuit interval
             [cx,cy,slope1,slope2] = changeDetectSlope(time, XY, cxRange, slopeRange); % restrict the range of slopes
-            pursuit.onset = round(cx);
+            pursuit.summary.onset = round(cx);
         end
         
-        pursuit.pursuitIntervalStart = pursuitIntervalStart; % for debugging...
-        pursuit.pursuitIntervalEnd = pursuitIntervalStart+pursuitIntervalLength-1;
+        pursuit.summary.pursuitIntervalStart = pursuitIntervalStart; % for debugging...
+        pursuit.summary.pursuitIntervalEnd = pursuitIntervalStart+pursuitIntervalLength-1;
         
         %% using linear regression, could result in super early pursuit onsets, unstable
         %   % could try restrictions if you want, but I still recommend the
@@ -212,11 +212,11 @@ else
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
     
-%     % for debugging
-%     pursuit.baselineStart = baselineStart;
-%     pursuit.baselineEnd = baselineEnd;
-%     pursuit.meanBaseline = meanBaseline;
-%     pursuit.sdBaseline = sdBaseline;
+    % for debugging
+    pursuit.summary.baselineStart = baselineStart;
+    pursuit.summary.baselineEnd = baselineEnd;
+    pursuit.summary.meanBaseline = meanBaseline;
+    pursuit.summary.sdBaseline = sdBaseline;
 %     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 

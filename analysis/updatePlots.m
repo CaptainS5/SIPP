@@ -48,6 +48,11 @@ ylabel('y-position (deg)', 'fontsize', 12);
 % plot eye x- versus y-position
 plot(trial.eyeX_filt(startFrame:stimOnset), trial.eyeY_filt(startFrame:stimOnset), 'k');
 plot(trial.eyeX_filt(stimOnset+1:stimOffset), trial.eyeY_filt(stimOnset+1:stimOffset), 'b');
+plot(trial.eyeX_filt(stimOnset+1:stimOffset), trial.eyeY_filt(stimOnset+1:stimOffset), 'b');
+% mark pursuit onset and open-loop phase
+plot(trial.eyeX_filt(trial.pursuit.summary.onset), trial.eyeY_filt(trial.pursuit.summary.onset), 'bo');
+plot(trial.eyeX_filt(trial.pursuit.summary.onset+140), trial.eyeY_filt(trial.pursuit.summary.onset+140), 'go');
+
 plot(trial.eyeX_filt(stimOffset+1:endFrame), trial.eyeY_filt(stimOffset+1:endFrame), 'k');
 % plot target center position
 plot(trial.target.posX(startFrame:endFrame), trial.target.posY(startFrame:endFrame), 'g');
@@ -74,8 +79,8 @@ plot(trial.saccades.Y.offsets,trial.eyeY_filt(trial.saccades.Y.offsets),'c*');
 line([trial.log.targetOnset trial.log.targetOnset], [minPosX maxPosX],'Color','k','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minPosX maxPosX],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
-    line([trial.pursuit.onset trial.pursuit.onset], [minPosX maxPosX],'Color','b','LineStyle','--');
-    line([trial.pursuit.onset+140 trial.pursuit.onset+140], [minPosX maxPosX],'Color','b','LineStyle','--');
+    line([trial.pursuit.summary.onset trial.pursuit.summary.onset], [minPosX maxPosX],'Color','b','LineStyle','--');
+    line([trial.pursuit.summary.onset+140 trial.pursuit.summary.onset+140], [minPosX maxPosX],'Color','b','LineStyle','--');
 % end
 line([startFrame endFrame], [0 0],'Color','k','LineStyle','--')
 % if ~isempty(trial.pursuit.onset)
@@ -112,14 +117,14 @@ line([trial.log.targetOnset trial.log.targetOnset], [minVel maxVel],'Color','k',
 % line([trial.stim_offset-ms2frames(100) trial.stim_offset-ms2frames(100)], [minVel maxVel],'Color','b','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minVel maxVel],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
-    line([trial.pursuit.onset trial.pursuit.onset], [minVel maxVel],'Color','b','LineStyle','-');
-    line([trial.pursuit.onset+140 trial.pursuit.onset+140], [minVel maxVel],'Color','b','LineStyle','--');
+    line([trial.pursuit.summary.onset trial.pursuit.summary.onset], [minVel maxVel],'Color','b','LineStyle','-');
+    line([trial.pursuit.summary.onset+140 trial.pursuit.summary.onset+140], [minVel maxVel],'Color','b','LineStyle','--');
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% debugging for pursuit latency
-%     line([trial.pursuit.baselineStart trial.pursuit.baselineStart], [minVel maxVel],'Color','g','LineStyle','--');
-%     line([trial.pursuit.baselineEnd trial.pursuit.baselineEnd], [minVel maxVel],'Color','g','LineStyle','--');
-%     line([trial.pursuit.pursuitIntervalStart trial.pursuit.pursuitIntervalStart], [minVel maxVel],'Color','r','LineStyle','--');
-%     line([trial.pursuit.pursuitIntervalEnd trial.pursuit.pursuitIntervalEnd], [minVel maxVel],'Color','r','LineStyle','--');
-%     line([startFrame endFrame], [trial.pursuit.meanBaseline+4*trial.pursuit.sdBaseline trial.pursuit.meanBaseline+4*trial.pursuit.sdBaseline],'Color','b','LineStyle','--')
+    line([trial.pursuit.summary.baselineStart trial.pursuit.summary.baselineStart], [minVel maxVel],'Color','g','LineStyle','--');
+    line([trial.pursuit.summary.baselineEnd trial.pursuit.summary.baselineEnd], [minVel maxVel],'Color','g','LineStyle','--');
+    line([trial.pursuit.summary.pursuitIntervalStart trial.pursuit.summary.pursuitIntervalStart], [minVel maxVel],'Color','r','LineStyle','--');
+    line([trial.pursuit.summary.pursuitIntervalEnd trial.pursuit.summary.pursuitIntervalEnd], [minVel maxVel],'Color','r','LineStyle','--');
+    line([startFrame endFrame], [trial.pursuit.summary.meanBaseline+4*trial.pursuit.summary.sdBaseline trial.pursuit.summary.meanBaseline+4*trial.pursuit.summary.sdBaseline],'Color','b','LineStyle','--')
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % end
 line([startFrame endFrame], [0 0],'Color','k','LineStyle','--')
@@ -161,8 +166,8 @@ plot(trial.saccades.Y.offsets,trial.eyeDDY_filt(trial.saccades.Y.offsets),'c*');
 line([trial.log.targetOnset trial.log.targetOnset], [minAcc maxAcc],'Color','k','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minAcc maxAcc],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
-    line([trial.pursuit.onset trial.pursuit.onset], [minAcc maxAcc],'Color','b','LineStyle','--');
-    line([trial.pursuit.onset+140 trial.pursuit.onset+140], [minAcc maxAcc],'Color','b','LineStyle','--');
+    line([trial.pursuit.summary.onset trial.pursuit.summary.onset], [minAcc maxAcc],'Color','b','LineStyle','--');
+    line([trial.pursuit.summary.onset+140 trial.pursuit.summary.onset+140], [minAcc maxAcc],'Color','b','LineStyle','--');
 % end
 line([startFrame endFrame], [0 0],'Color','k','LineStyle','--')
 % if ~isempty(trial.pursuit.onset)

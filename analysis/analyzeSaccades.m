@@ -21,14 +21,14 @@ function [trial, saccades] = analyzeSaccades(trial)
 % define the window you want to analyze saccades in
 % all saccade properties are within this window, using onsets_pursuit and
 % offsets_pursuit
-startFrame = nanmax(trial.log.targetOnset, trial.pursuit.onset);
+startFrame = nanmax(trial.log.targetOnset, trial.pursuit.summary.onset);
 endFrame = trial.log.targetOffset-ms2frames(100);
 
 % then find the proper onsets and offsets
 idx = find(trial.saccades.onsets>=startFrame & trial.saccades.onsets<=endFrame);
 trial.saccades.onsets_pursuit = trial.saccades.onsets(idx);
 trial.saccades.offsets_pursuit = trial.saccades.offsets(idx);
-trial.saccades.num = length(trial.saccades.onsets_pursuit); % this is the number of all saccades during pursuit, including both olp and clp...
+trial.saccades.summary.num = length(trial.saccades.onsets_pursuit); % this is the number of all saccades during pursuit, including both olp and clp...
 % however, if we simply exclude trials with saccades during opl, then the
 % number would be clp only in other trials...
 
@@ -45,25 +45,66 @@ if numel(trial.saccades.onsets_pursuit) == 0
     trial.saccades.amplitudes2D = NaN;
     trial.saccades.amplitudesX = NaN;
     trial.saccades.amplitudesY = NaN;
-    trial.saccades.meanAmp2D = NaN;
-    trial.saccades.meanAmpXLeft = NaN;
-    trial.saccades.meanAmpXRight = NaN;
-    trial.saccades.meanAmpYUp = NaN;
-    trial.saccades.meanAmpYDown = NaN;
-    trial.saccades.sumAmp2D = NaN;
-        
+    trial.saccades.dirXY = NaN;
+    trial.saccades.dirAngle = NaN;
+    trial.saccades.eyePosOnset = NaN;
+    trial.saccades.eyePosOffset = NaN;
+    trial.saccades.targetPosOnset = NaN;
+    trial.saccades.targetPosOffset = NaN; 
+    
+    trial.saccades.summary.meanAmp2D = NaN;
+    trial.saccades.summary.meanAmpXLeft = NaN;
+    trial.saccades.summary.meanAmpXRight = NaN;
+    trial.saccades.summary.meanAmpYUp = NaN;
+    trial.saccades.summary.meanAmpYDown = NaN;
+    
+    trial.saccades.summary.sumAmp2D = NaN;
+    trial.saccades.summary.sumAmpXLeft = NaN;
+    trial.saccades.summary.sumAmpXRight = NaN;
+    trial.saccades.summary.sumAmpYUp = NaN;
+    trial.saccades.summary.sumAmpYDown = NaN;
+    
+    trial.saccades.summary.numXLeft = NaN;
+    trial.saccades.summary.numXRight = NaN;
+    trial.saccades.summary.numYUp = NaN;
+    trial.saccades.summary.numYDown = NaN;
 else
-        trial.saccades.amplitudes2D = sqrt((trial.eyeX_filt(trial.saccades.offsets_pursuit) - trial.eyeX_filt(trial.saccades.onsets_pursuit)).^2 ...
-            + (trial.eyeY_filt(trial.saccades.offsets_pursuit) - trial.eyeY_filt(trial.saccades.onsets_pursuit)).^2);
-        trial.saccades.amplitudesX = trial.eyeX_filt(trial.saccades.offsets_pursuit) - trial.eyeX_filt(trial.saccades.onsets_pursuit);
-        trial.saccades.amplitudesY = trial.eyeY_filt(trial.saccades.offsets_pursuit) - trial.eyeY_filt(trial.saccades.onsets_pursuit);
-        
-        trial.saccades.meanAmp2D = nanmean(trial.saccades.amplitudes2D);
-        trial.saccades.meanAmpXLeft = nanmean(trial.saccades.amplitudesX(trial.saccades.amplitudesX<=0));
-        trial.saccades.meanAmpXRight = nanmean(trial.saccades.amplitudesX(trial.saccades.amplitudesX>0));
-        trial.saccades.meanAmpYUp = nanmean(trial.saccades.amplitudesY(trial.saccades.amplitudesY>0));
-        trial.saccades.meanAmpYDown = nanmean(trial.saccades.amplitudesY(trial.saccades.amplitudesY<=0));
-        trial.saccades.sumAmp2D = nansum(trial.saccades.amplitudes2D);
+    trial.saccades.amplitudes2D = sqrt((trial.eyeX_filt(trial.saccades.offsets_pursuit) - trial.eyeX_filt(trial.saccades.onsets_pursuit)).^2 ...
+        + (trial.eyeY_filt(trial.saccades.offsets_pursuit) - trial.eyeY_filt(trial.saccades.onsets_pursuit)).^2);
+    trial.saccades.amplitudesX = trial.eyeX_filt(trial.saccades.offsets_pursuit) - trial.eyeX_filt(trial.saccades.onsets_pursuit); % with direction
+    trial.saccades.amplitudesY = trial.eyeY_filt(trial.saccades.offsets_pursuit) - trial.eyeY_filt(trial.saccades.onsets_pursuit); % with direction
+    
+    % the starting and ending location of each saccade and the target
+    % location at that moment
+    trial.saccades.eyePosOnset = [trial.eyeX_filt(trial.saccades.onsets_pursuit) trial.eyeY_filt(trial.saccades.onsets_pursuit)];
+    trial.saccades.eyePosOffset = [trial.eyeX_filt(trial.saccades.offsets_pursuit) trial.eyeY_filt(trial.saccades.offsets_pursuit)];
+    trial.saccades.targetPosOnset = [trial.target.posX(trial.saccades.onsets_pursuit) trial.target.posY(trial.saccades.onsets_pursuit)];
+    trial.saccades.targetPosOffset = [trial.target.posX(trial.saccades.offsets_pursuit) trial.target.posY(trial.saccades.offsets_pursuit)];    
+    
+    % direction vector (unit length) of each saccade
+    eyeVec = [trial.eyeX_filt(trial.saccades.offsets_pursuit) - trial.eyeX_filt(trial.saccades.onsets_pursuit), ...
+        trial.eyeY_filt(trial.saccades.offsets_pursuit) - trial.eyeY_filt(trial.saccades.onsets_pursuit)]; % each row is one vector of the saccade
+    normEye = vecnorm(eyeVec, 2, 2);
+    eyeVec = eyeVec./repmat(normEye, 1, 2); % now each vector is of unit length
+    trial.saccades.dirXY = eyeVec; % direction vectors, the first column is x, the second column is y
+    trial.saccades.dirAngle = atan2(eyeVec(:,2), eyeVec(:, 1))/pi*180;
+    
+    trial.saccades.summary.meanAmp2D = nanmean(trial.saccades.amplitudes2D);
+    trial.saccades.summary.meanAmpXLeft = -nanmean(trial.saccades.amplitudesX(trial.saccades.amplitudesX<=0));
+    trial.saccades.summary.meanAmpXRight = nanmean(trial.saccades.amplitudesX(trial.saccades.amplitudesX>0));
+    trial.saccades.summary.meanAmpYUp = nanmean(trial.saccades.amplitudesY(trial.saccades.amplitudesY>0));
+    trial.saccades.summary.meanAmpYDown = -nanmean(trial.saccades.amplitudesY(trial.saccades.amplitudesY<=0));
+    
+    trial.saccades.summary.sumAmp2D = nansum(trial.saccades.amplitudes2D);
+    trial.saccades.summary.sumAmpXLeft = -nansum(trial.saccades.amplitudesX(trial.saccades.amplitudesX<=0));
+    trial.saccades.summary.sumAmpXRight = nansum(trial.saccades.amplitudesX(trial.saccades.amplitudesX>0));
+    trial.saccades.summary.sumAmpYUp = nansum(trial.saccades.amplitudesY(trial.saccades.amplitudesY>0));
+    trial.saccades.summary.sumAmpYDown = -nansum(trial.saccades.amplitudesY(trial.saccades.amplitudesY<=0));
+    
+    trial.saccades.summary.numXLeft = length(find((trial.saccades.amplitudesX<=0)));
+    trial.saccades.summary.numXRight = length(find((trial.saccades.amplitudesX>0)));
+    trial.saccades.summary.numYUp = length(find((trial.saccades.amplitudesY>0)));
+    trial.saccades.summary.numYDown = length(find((trial.saccades.amplitudesY<=0)));
 end
 
 % xSacL = length(trial.saccades.X_left.onsets_pursuit);
