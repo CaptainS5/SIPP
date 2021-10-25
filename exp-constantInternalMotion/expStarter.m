@@ -37,11 +37,12 @@ pathConfig;
 const.expName              = 'MicroPursuit_constantInternalMotion'; 								% Experiment name
 const.internalOnsetType    = 1;                                             % 1: constant internal motion; 2(not implemented yet): perturbation of internal motion 
 % const.apertureType         = 0;                                             % 0: dots move together with the aperture; 1: aperture translates across the dot field
-const.startExp             = 1;                                             % -1 = practice; 1 = experiment mode; 0 = debugging mode
+const.startExp             = -1;                                             % -1 = practice; 1 = experiment mode; 0 = debugging mode; 
 const.expType              = 1;                                             % 1: experiment; --not implemented...-1: practice; 0: baseline
 const.checkEyeFix          = 1;                                             % 1 = checks gaze fixation (this needs to be 1 also when in dummy mode)
-% const.feedback             = 1;												% 1 = show task feedback (defined in runSingleTrial); 0 = off
-const.makeVideo            = 0;                           
+% const.feedback             = 1;											% 1 = show task feedback (defined in runSingleTrial); 0 = off
+const.makeVideo            = 0;
+const.measureLuminance     = 0;                                             % if yes (1), will show full screens of the colour used in the experiment for luminance measure
 
 % 1 = creates a video of a single trial(set any conditions manually in expMain); 0 = off (normal experiment mode)
 const.runScreenCalib       = 0;                                             % 1 = run screen calibration instead of experiment; 0 = experiment mode

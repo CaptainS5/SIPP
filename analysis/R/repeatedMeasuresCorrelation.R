@@ -2,6 +2,7 @@ library(ggplot2)
 library(rmcorr)
 library(lme4)
 library(lmerTest)
+library(ggeffects)
 
 #### clear environment
 rm(list = ls())
@@ -52,9 +53,20 @@ dataCorr$rdkInternalDir <- as.factor(dataCorr$rdkInternalDir)
 
 # using lme4
 # fm1 <- lmer(measure1 ~ rdkInternalDir*rdkApertureAngle + (1 | rdkInternalDir:sub) + (1 | rdkApertureAngle:sub), dataCorr, REML = F)
-fm1 <- lmer(measure1 ~ rdkInternalDir + measure2 + measure3 + measure4 + (1 | rdkApertureAngle) + (1 | sub), dataCorr, REML = F)
-# fm1 <- lmer(measure1 ~ rdkInternalDir + measure2 + measure3 + measure4 + (1 | sub) , dataCorr, REML = F)
+# fm1 <- lmer(measure1 ~ rdkInternalDir + measure2 + measure3 + measure4 + (1 | rdkApertureAngle) + (1 | sub), dataCorr, REML = F)
+fm1 <- lmer(measure1 ~ rdkInternalDir + (1|rdkApertureAngle) + (1|sub), dataCorr, REML = F)
 summary(fm1)
+# fm2 <- lmer(measure1 ~ rdkInternalDir + measure2 + (1|sub), dataCorr, REML = F)
+fm2 <- lmer(measure1 ~ rdkInternalDir + measure4 + (1|rdkApertureAngle) + (1|sub), dataCorr, REML = F)
+summary(fm2)
+
+p <- ggplot(dataCorr, aes(x = rdkInternalDir, y = measure3)) + 
+        geom_point()
+print(p)
+
+fm6 <- lmer(measure1 ~ measure3 + (1|sub) + (1|rdkInternalDir), dataCorr, REML = F)
+
+# fm1 <- lmer(measure1 ~ rdkInternalDir + measure2 + measure3 + measure4 + (1 | sub) , dataCorr, REML = F)
 plot(fm1, which = 2)
 plot(fm1, rdkInternalDir ~ resid(.), abline = 0 )
 qqnorm(resid(fm1))
