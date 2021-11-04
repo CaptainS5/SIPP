@@ -4,8 +4,8 @@ initializeParas;
 % choose which plot to look at
 individualPlots = 1;
 averagePlots = 1;
-plotVarStart = 5;
-plotVarEnd = 5;
+plotVarStart = 1;
+plotVarEnd = 1;
 
 %%
 if individualPlots

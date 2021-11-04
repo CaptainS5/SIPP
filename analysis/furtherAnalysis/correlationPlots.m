@@ -2,10 +2,10 @@
 initializeParas;
 
 % choose which plot to look at
-individualPlots = 0; % within-sub
-averagePlots = 1; % across-sub
-plotVarStart = 15;
-plotVarEnd = 15;
+individualPlots = 1; % within-sub
+averagePlots = 0; % across-sub
+plotVarStart = 12;
+plotVarEnd = 12;
 
 %%
 close all
@@ -31,46 +31,66 @@ if individualPlots
 %             end
 %         end
         
-%         % absolute difference from baseline values, compared with perception
-%         for varN = plotVarStart:plotVarEnd
-%             figure
-%             hold on
+        % absolute difference from baseline values, compared with perception
+        for varN = plotVarStart:plotVarEnd
+            figure
+            hold on
+%             % one point per condition
 %             for internalConN = 1:size(yMeanDiffSub.(plotVariables{varN}){subN}, 2)
 %                 s{internalConN} = scatter(abs(yMeanDiffSub.response{subN}(:, internalConN)), abs(yMeanDiffSub.(plotVariables{varN}){subN}(:, internalConN)), 'MarkerEdgeColor', colorCons(internalConN, :));
 %             end
 %             [rho, pval] = corr(abs(yMeanDiffSub.response{subN}(:)), abs(yMeanDiffSub.(plotVariables{varN}){subN}(:)));
+             
+%             % one point per trial
+%             idxT = find(strcmp(eyeTrialData.sub, names{subN}) & eyeTrialData.rdkInternalCon~=0 & eyeTrialData.errorStatus==0);
+%             absPerception = [];
+%             absEye = [];
+%             for ii = 1:idxT
+%                 apertureA = eyeTrialData.rdkApertureAngle(idxT(ii));
+%                 baseI = find(summaryData.sub==subN & summaryData.rdkInternalDir==0 & summaryData.rdkApertureAngle==apertureA);
+%                 
+%                 respT = ;
+%                 respB = summaryData.response(baseI);
+%                 eyeT = eyeTrialData.(plotVariables{varN})-----need to do a bit more to get here...;
+%                 eyeB = summaryData.(plotVariables{varN})(baseI);
+%                 
+%                 absPerception = [absPerception; abs(respT-respB)];
+%                 absEye = [absEye; abs(eyeT-eyeB)];
+%             end
+%             scatter(absPerception, absEye);
+%             [rho, pval] = corr(absPerception, absEye);
+            
+            xlabel('Abs perceptual response difference (deg)')
+            ylabel(['Abs ', plotVariables{varN}, ' diff'])
+%             legend([s{1:2}], internalConNames(2:3), 'box', 'on', 'location', 'best', 'color', 'w')
+            title([names{subN}, ', r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
+            if varN>=saccadeVarStart
+                saveas(gcf, [correlationFolder, 'individuals\absDiffTrial_sac_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
+            else
+                saveas(gcf, [correlationFolder, 'individuals\absDiffTrial_pursuit_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
+            end
+        end
+
+% % one raw value, one difference from baseline value
+%         for varN = plotVarStart:plotVarEnd
+%             figure
+%             hold on
+%             for internalConN = 1:size(yMeanDiffSub.(plotVariables{varN}){subN}, 2)
+%                 s{internalConN} = scatter(yMeanSub.(plotVariables{varN}){subN}(:, internalConN+1), yMeanDiffSub.response{subN}(:, internalConN), 'MarkerEdgeColor', colorCons(internalConN, :));
+%             end
+%             rawValues = yMeanSub.(plotVariables{varN}){subN}(:, 2:3);
+%             [rho, pval] = corr(yMeanDiffSub.response{subN}(:), rawValues(:));
 %             
-%             xlabel('Abs perceptual response difference (deg)')
-%             ylabel(['Abs ', plotVariables{varN}, ' diff'])
+%             ylabel('Perceptual response difference (deg)')
+%             xlabel([plotVariables{varN}])
 %             legend([s{1:2}], internalConNames(2:3), 'box', 'on', 'location', 'best', 'color', 'w')
 %             title([names{subN}, ', r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
 %             if varN>=saccadeVarStart
-%                 saveas(gcf, [correlationFolder, 'individuals\absDiff_sac_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
+%                 saveas(gcf, [correlationFolder, 'individuals\rawVSdiff_sac_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
 %             else
-%                 saveas(gcf, [correlationFolder, 'individuals\absDiff_pursuit_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
+%                 saveas(gcf, [correlationFolder, 'individuals\rawVSdiff_pursuit_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
 %             end
 %         end
-
-% one raw value, one difference from baseline value
-        for varN = plotVarStart:plotVarEnd
-            figure
-            hold on
-            for internalConN = 1:size(yMeanDiffSub.(plotVariables{varN}){subN}, 2)
-                s{internalConN} = scatter(yMeanSub.(plotVariables{varN}){subN}(:, internalConN+1), yMeanDiffSub.response{subN}(:, internalConN), 'MarkerEdgeColor', colorCons(internalConN, :));
-            end
-            rawValues = yMeanSub.(plotVariables{varN}){subN}(:, 2:3);
-            [rho, pval] = corr(yMeanDiffSub.response{subN}(:), rawValues(:));
-            
-            ylabel('Perceptual response difference (deg)')
-            xlabel([plotVariables{varN}])
-            legend([s{1:2}], internalConNames(2:3), 'box', 'on', 'location', 'best', 'color', 'w')
-            title([names{subN}, ', r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
-            if varN>=saccadeVarStart
-                saveas(gcf, [correlationFolder, 'individuals\rawVSdiff_sac_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
-            else
-                saveas(gcf, [correlationFolder, 'individuals\rawVSdiff_pursuit_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
-            end
-        end
 
 %         % 'raw' valuse in all conditions, compared with perception
 %         for varN = plotVarStart:plotVarEnd
@@ -130,31 +150,31 @@ if averagePlots % one point per person
             idxT = find(summaryDataDiff.sub==subN);
             corrData.response(subN, 1) = abs(nanmean(summaryDataDiff.response(idxT)));
             
-%             % diff vs. diff
-%             corrData.(plotVariables{varN})(subN, 1) = abs(nanmean(summaryDataDiff.(plotVariables{varN})(idxT)));
+            % diff vs. diff
+            corrData.(plotVariables{varN})(subN, 1) = abs(nanmean(summaryDataDiff.(plotVariables{varN})(idxT)));
             
-            % raw vs. diff in response
-            idxT = find(summaryData.sub==subN & ...
-                summaryData.rdkInternalDir ~= 0); % exclude the baseline condition
-            corrData.(plotVariables{varN})(subN, 1) = abs(nanmean(summaryData.(plotVariables{varN})(idxT)));
+%             % raw vs. diff in response
+%             idxT = find(summaryData.sub==subN & ...
+%                 summaryData.rdkInternalDir ~= 0); % exclude the baseline condition
+%             corrData.(plotVariables{varN})(subN, 1) = abs(nanmean(summaryData.(plotVariables{varN})(idxT)));
         end
         [rho, pval] = corr(corrData.(plotVariables{varN}), corrData.response);
         
         figure
         scatter(corrData.(plotVariables{varN}), corrData.response)
-%         xlabel(['Absolute bias in ', plotVariables{varN}])
-        xlabel(['Absolute ', plotVariables{varN}])
+        xlabel(['Absolute bias in ', plotVariables{varN}])
+%         xlabel(['Absolute ', plotVariables{varN}])
         ylabel('Absolute bias in perceived direction')
         title(['r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
-%         if varN>=saccadeVarStart
-%             saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
-%         else
-%             saveas(gcf, [correlationFolder, 'pursuitDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
-%         end
         if varN>=saccadeVarStart
-            saveas(gcf, [correlationFolder, 'sac_raw', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
+            saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
         else
-            saveas(gcf, [correlationFolder, 'pursuit_raw', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
+            saveas(gcf, [correlationFolder, 'pursuitDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
         end
+%         if varN>=saccadeVarStart
+%             saveas(gcf, [correlationFolder, 'sac_raw', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
+%         else
+%             saveas(gcf, [correlationFolder, 'pursuit_raw', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
+%         end
     end
 end

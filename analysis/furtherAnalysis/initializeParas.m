@@ -3,7 +3,7 @@
 
 clear all; close all; clc
 
-names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz' 'dc1' 'fa'}; % also for 500, 501, 504, ib1...
+names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz' 'dc1'}; % also for 500, 501, 504, ib1...
 apertureAngles = [-9 -6 -3 0 3 6 9];
 apertureAngleNames = {'-9', '-6', '-3', '0', '3', '6', '9'};
 internalCons = [0, -90, 90];

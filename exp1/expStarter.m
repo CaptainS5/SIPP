@@ -7,7 +7,7 @@
 % adapted by Xiuyun Wu for micropursuit (xiuyunwu5@gmail.com)
 % 04 / Mar / 2021
 % Project : micropursuit
-% Version : pilot
+% Version : exp1, constant dot motion
 % 
 % ----------------------------------------------------------------------
 % Description of Experiment

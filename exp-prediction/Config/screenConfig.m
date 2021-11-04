@@ -27,13 +27,13 @@ function [screen] = screenConfig(const)
 screen.name                = 'Eyelink_Koerner';
 % Screen('Preference', 'SkipSyncTests', 2);
 screen.desired_Hertz       = 85; %60; % 85;											% desired Refresh Rate (Hz) of the Screen
-screen.desired_widthPX     = 1600;  											% desired width (pixels) of the Screen
-screen.desired_heightPX    = 1200;      										% desired height(pixels) of the Screen
+screen.desired_widthPX     = 1280;  %1600 before... but cannot get 85Hz now											% desired width (pixels) of the Screen
+screen.desired_heightPX    = 1024;  %1200 before... but cannot get 85Hz now		 								% desired height(pixels) of the Screen
 
-screen.widthCM             = 40.7; %47.3; % 36.7; % 47.3; % 36.5;                                          % measured size (in cm)
-screen.heightCM            = 30.3; % 29.6; % 27; % 29.6; % 27;                                            % measured size (in cm)
-screen.widthMM             = 407;                                           % measured size (in mm) --> this is needed for screen calibration
-screen.heightMM            = 303;                                           % measured size (in mm)
+screen.widthCM             = 36.7; % 40.7--old one                                       % measured size (in cm)
+screen.heightCM            = 27.5; % 30.3--old one                                            % measured size (in cm)
+screen.widthMM             = 367;                                           % measured size (in mm) --> this is needed for screen calibration
+screen.heightMM            = 275;                                           % measured size (in mm)
 screen.dist                = 55; % 85;                                            % measured distance Subject-Screen (in cm)
 
 % Get Screen from PTB:
@@ -117,7 +117,6 @@ screen.white               = WhiteIndex(screen.window);
 screen.black               = BlackIndex(screen.window);
 screen.gray                = round((screen.white+screen.black)./2);
 screen.orange              = [255,150,0];
-screen.green              = [0,255,0];
 screen.calibBlack          = BlackIndex(screen.window);
 screen.calibWhite          = WhiteIndex(screen.window);
 screen.calibGray           = round((screen.calibWhite+screen.calibBlack)./2);

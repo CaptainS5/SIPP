@@ -138,5 +138,5 @@ save('summaryData.mat', 'summaryData')
 save('summaryDataDiff.mat', 'summaryDataDiff')
 
 %% generate csv for plotting in R
-writetable(summaryData, [RFolder, 'summaryData.csv'])
-writetable(summaryDataDiff, [RFolder, 'summaryDataDiff.csv'])
+% writetable(summaryData, [RFolder, 'summaryData.csv'])
+% writetable(summaryDataDiff, [RFolder, 'summaryDataDiff.csv'])
