@@ -23,30 +23,30 @@ function [screen] = screenConfig(const)
 
 
 %% (1) Enter desired Screen Settings - this specific to each setup
-% screen.name                = 'DPI_Koerner';                                 % Screen name
-screen.name                = 'Eyelink_Koerner';
+screen.name                = 'Eyelink_ICICSbackroom';
 % Screen('Preference', 'SkipSyncTests', 2);
-screen.desired_Hertz       = 85; %60; % 85;											% desired Refresh Rate (Hz) of the Screen
-screen.desired_widthPX     = 1280;  %1600 before... but cannot get 85Hz now											% desired width (pixels) of the Screen
-screen.desired_heightPX    = 1024;  %1200 before... but cannot get 85Hz now		 								% desired height(pixels) of the Screen
+screen.desired_Hertz       = 85; %											% desired Refresh Rate (Hz) of the Screen
+screen.desired_widthPX     = 1600;  %										% desired width (pixels) of the Screen
+screen.desired_heightPX    = 1200;  %		 								% desired height(pixels) of the Screen
 
-screen.widthCM             = 36.7; % 40.7--old one                                       % measured size (in cm)
-screen.heightCM            = 27.5; % 30.3--old one                                            % measured size (in cm)
-screen.widthMM             = 367;                                           % measured size (in mm) --> this is needed for screen calibration
-screen.heightMM            = 275;                                           % measured size (in mm)
-screen.dist                = 55; % 85;                                            % measured distance Subject-Screen (in cm)
+screen.widthCM             = 39.6; % backroom in ICICS                              % measured size (in cm)
+screen.heightCM            = 29.7; % backroom in ICICS                              % measured size (in cm)
+screen.widthMM             = screen.widthCM*10;                                     % measured size (in mm) --> this is needed for screen calibration
+screen.heightMM            = screen.heightCM*10;                                    % measured size (in mm)
+screen.dist                = 55; %                                                  % measured distance Subject-Screen (in cm)
 
 % Get Screen from PTB:
-if ~const.startExp && ~const.runScreenCalib
-%     PsychDebugWindowConfiguration(0,0.5); 									% when in debugging, set transparency to 50%
-    %     screen.number = min(Screen('Screens'));
-    screen.number = max(Screen('Screens'));
-    %     sca
-else
-    screen.number = max(Screen('Screens'));
-    %     screen.number = 1;                                                      % needs to be 1 for DPI Setup with extended screens
-end
-
+% if ~const.startExp && ~const.runScreenCalib
+% %     PsychDebugWindowConfiguration(0,0.5); 									% when in debugging, set transparency to 50%
+%     %     screen.number = min(Screen('Screens'));
+%     screen.number = max(Screen('Screens'));
+%     %     sca
+% else
+%     screen.number = max(Screen('Screens'));
+%     %     screen.number = 1;                                                      % needs to be 1 for DPI Setup with extended screens
+% end
+%  screen.number = max(Screen('Screens')); % for Koerner
+screen.number = 1; % for X717, backroom in ICICS
 
 %% (2) Open Screen - initiating PTB:
 % Pixel Size:

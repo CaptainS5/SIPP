@@ -19,10 +19,10 @@ if sbj.block == 1 && sbj.trial==1
 %         if const.internalOnsetType==1 % constant internal motion
 %             const.numTrialsPerBlock    = 36*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         elseif const.internalOnsetType==2 % perturbation of internal motion
-            const.numTrialsPerBlock    = 30*ones(1, 10);                                % Each column = number of trials in one block; number of columns = number of blocks
+            const.numTrialsPerBlock    = 28*ones(1, 20);                                % Each column = number of trials in one block; number of columns = number of blocks
 %         end
     elseif const.startExp==-1
-        const.numTrialsPerBlock    = 32*ones(1, 10);
+        const.numTrialsPerBlock    = 28*ones(1, 10);
     end
     if const.makeVideo; const.numTrialsPerBlock = 1; end
     const.numTrials            = sum(const.numTrialsPerBlock);                  % total number of trials
@@ -43,15 +43,16 @@ if sbj.block == 1 && sbj.trial==1
     
     % RDK stimulus
     const.rdk.perturbationTime = [0, 1]; % 0=during pursuit initiation, 1=during steady-state
-    % for the "mock" pursuit onset time
-    const.rdk.durationBeforeDummy = 0.25; % also a cap for invalid trials when participants just don't initiate a pursuit
+    % for perturbation during initiation
+    const.rdk.durationBeforeMin0 = 0.1; % minimum display duration of the whole RDK, s
+    const.rdk.durationBeforeMax0 = 0.2;
     % for perturbation during steady state
     const.rdk.durationBeforeMin1 = 0.5; % minimum display duration of the whole RDK, s
     const.rdk.durationBeforeMax1 = 0.6;
     
-    const.rdk.durationPerturbation = 0.2; % display duration of the perturbation period, s
+    const.rdk.durationPerturbation = 0.3; % display duration of the perturbation period, s
     const.rdk.dotDensity = 10; % dot per dva^2
-    const.rdk.lifeTime = 10; % s; longer than the whold display duration equals to unlimited lifetime
+    const.rdk.lifeTime = 0.1; % s; longer than the whold display duration equals to unlimited lifetime
     % how long before a dot disappears and reappears
     const.rdk.labelUpdateTime = 0.050; % change labels and assign new directions for all
     % for Transparent motion, label update time >= the whole rdk duration;
@@ -69,17 +70,17 @@ if sbj.block == 1 && sbj.trial==1
     const.rdk.colour = screen.white;
     const.rdk.dotNumber = round(const.rdk.dotDensity*pi*const.rdk.dotFieldRadius^2);
     const.rdk.apertureDirBefore = [0]; % left and right  
-    const.rdk.apertureDirPerturbation = [-9 -6 -3 0 3 6 9]; % relative to the before perturbation aperture direction  
+    const.rdk.apertureAnglePerturbation = [-9 -6 -3 0 3 6 9]; % relative to the before perturbation aperture direction  
     % directions are defined as the polar angle in degs away (clockwise is negative) from horizontal right;
     const.rdk.internalSpeed = 5; % speed of each internal dot
     % internal dots during perturbation: (coherence is 0 before perturbation)
     %     const.rdk.cohPerturbation = [1]; % coherence during the perturbation
     %     const.rdk.internalDirPerturbation = [-90 90]; % direction within the aperture
-    const.rdk.internalPerturbationCons = [0, 90];
+    const.rdk.internalPerturbationCons = [-90, 90];
     
     % response line
     const.line.colour = screen.white; %
-    const.line.length = const.rdk.duration*const.rdk.apertureSpeed/4; % in dva
+    const.line.length = 0.7*const.rdk.apertureSpeed/4; % in dva
     const.line.width = 0.05; % in dva
     const.arrowAngle = 30; % relative to the line
     const.arrowLength = 0.25; % in dva

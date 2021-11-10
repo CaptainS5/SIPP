@@ -49,11 +49,12 @@ if sbj.block == 1 && sbj.trial==1 % ~exist([sbj.sbjFolder ,'/trialData.mat'],'fi
     % duration before perturbation for the steady-state condition; just
     % assign for all trials, but only use for the steady-state condition;
     % replaced by online detection for the pursuit initiation condition 
-    randVar.continuous.rdkDurationBefore = [const.rdk.durationBeforeMin1 const.rdk.durationBeforeMax1]; 
+    randVar.continuous.rdkDurationBefore0 = [const.rdk.durationBeforeMin0 const.rdk.durationBeforeMax0]; 
+    randVar.continuous.rdkDurationBefore1 = [const.rdk.durationBeforeMin1 const.rdk.durationBeforeMax1]; 
     
     randVar.trial.rdkPerturbationTime = const.rdk.perturbationTime;
     randVar.trial.rdkApertureDirBefore = const.rdk.apertureDirBefore;
-    randVar.trial.rdkApertureDirPerturbation = const.rdk.apertureDirPerturbation;
+    randVar.trial.rdkApertureAnglePerturbation = const.rdk.apertureAnglePerturbation;
     randVar.trial.rdkInternalPerturbationCons = const.rdk.internalPerturbationCons;
 %     randVar.trial.rdkCohPerturbation = const.rdk.cohPerturbation;
 %     randVar.trial.rdkInternalDirPerturbation = const.rdk.internalDirPerturbation; % upwards is minus, and downwards is plus

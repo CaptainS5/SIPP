@@ -57,26 +57,26 @@ try
     for block = sbj.block:size(const.numTrialsPerBlock,2)                  % begin block FOR-LOOP
         
         %% (2.1) Show Calibration Instructions
-%         if const.measureLuminance
-%             Screen('FillRect', screen.window, screen.background)
-%             Screen('Flip', screen.window)
-%             KbWait();
-%             clear KbCheck
-%             WaitSecs(0.2)
-%             
-%             Screen('FillRect', screen.window, screen.white)
-%             Screen('Flip', screen.window)
-%             KbWait();
-%             clear KbCheck
-%         end
+        %         if const.measureLuminance
+        %             Screen('FillRect', screen.window, screen.background)
+        %             Screen('Flip', screen.window)
+        %             KbWait();
+        %             clear KbCheck
+        %             WaitSecs(0.2)
+        %
+        %             Screen('FillRect', screen.window, screen.white)
+        %             Screen('Flip', screen.window)
+        %             KbWait();
+        %             clear KbCheck
+        %         end
         PTBinstruction_page(2,screen,const);
-%         keyPressed = PTBinstruction_page(2,screen,const, keys);
-%         if keyPressed==keys.escape
-%             fprintf('EXP: Experiment aborted by pressing esc key \n');
-%             currentTrial = NaN;
-%             throw(MException('EXP: MainLoop','Experiment aborted'));
-%         end
-%         
+        %         keyPressed = PTBinstruction_page(2,screen,const, keys);
+        %         if keyPressed==keys.escape
+        %             fprintf('EXP: Experiment aborted by pressing esc key \n');
+        %             currentTrial = NaN;
+        %             throw(MException('EXP: MainLoop','Experiment aborted'));
+        %         end
+        %
         %% (2.2) Initialize and (2.3) Calibrate DPI
         if dpi_set.mode
             dpi_calibrationSetup(screen, const);                                % show Setup-Screen (Crosshair of bulleys)
@@ -114,7 +114,7 @@ try
             % even during long pauses, nly need to set it once at the start of the experiment
             
             % Calibrate the eye tracker
-            EyelinkDoTrackerSetup(eyelink.el); % Pressing the ‘M’ key switches automatic calibration off. It may be switched back on by pressing the ‘A’ key. 
+            EyelinkDoTrackerSetup(eyelink.el); % Pressing the ‘M’ key switches automatic calibration off. It may be switched back on by pressing the ‘A’ key.
             
             % do a final check of calibration using driftcorrection
             EyelinkDoDriftCorrection(eyelink.el);
@@ -183,22 +183,22 @@ try
         PTBwrite_msg(screen, 'press [space] to continue', 'center', -15, screen.black)
         %         Screen('Flip', screen.window,screen.refreshRate);
         Screen('Flip', screen.window, screen.refreshRate, 0, 0, 2);
-%         Screen('Flip', screen.window, screen.refreshRate, 0, 0, 2);
-          keyPressed = 0;
+        %         Screen('Flip', screen.window, screen.refreshRate, 0, 0, 2);
+        keyPressed = 0;
         while keyPressed==0
             keyPressed = PTBcheck_key_press(keys.space);
         end
-%         
-%         bPressed = 0;
-%         while bPressed==0
-%             [bPressed keyPressed] = PTBcheck_key_press([keys.right, keys.escape]);
-%             if keyPressed==keys.escape
-%                 fprintf('EXP: Experiment aborted by pressing esc key \n');
-%                 currentTrial = NaN;
-%                 throw(MException('EXP: MainLoop','Experiment aborted'));
-%             end
-%         end
-%         
+        %
+        %         bPressed = 0;
+        %         while bPressed==0
+        %             [bPressed keyPressed] = PTBcheck_key_press([keys.right, keys.escape]);
+        %             if keyPressed==keys.escape
+        %                 fprintf('EXP: Experiment aborted by pressing esc key \n');
+        %                 currentTrial = NaN;
+        %                 throw(MException('EXP: MainLoop','Experiment aborted'));
+        %             end
+        %         end
+        %
         %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % (3) SINGLE TRIAL SETUP
         %      1) enter TRIAL-WHILE-loop: trial setup (control-struct),
@@ -243,8 +243,8 @@ try
             % For Trial Videos:
             if const.makeVideo == 1                                             % settings for single-trial video:
                 demoN = 1;
-%                 trialData.tMainSync(currentTrial, 1)        = 0;                       % can change params to show here.
-%                 control.frameCounter                 = 1;
+                %                 trialData.tMainSync(currentTrial, 1)        = 0;                       % can change params to show here.
+                %                 control.frameCounter                 = 1;
             end
             
             %% (3.2) Open Target-File (record displayed target path):
@@ -307,7 +307,7 @@ try
             %% ================================================================
             while  1                                                            % begin WITHIN-TRIAL-WHILE-loop (code will run through this part until break
                 iterations = iterations + 1;                                    % this runs every refresh Rate cycle (should be free of heavy computations)
-
+                
                 %% (4.2) Check Eyelink Recording:
                 if eyelink.mode == 1
                     errorEyelink = Eyelink('CheckRecording');
@@ -318,12 +318,12 @@ try
                 end
                 
                 %% (4.3) Eyelink Data Acquisition
-%                 if eyelink.mode == 1
-%                     [eyelink] = eyelink_dataAcquisition(eyelink.el,eyelink,trialData,currentTrial);
-%                     %                     control.data_time = eyelink.Data.time;
-%                     %                 else                                                                % for dummy mode
-%                     %                     control.data_time = GetSecs - trialData.tMainSync(currentTrial);
-%                 end
+                %                 if eyelink.mode == 1
+                %                     [eyelink] = eyelink_dataAcquisition(eyelink.el,eyelink,trialData,currentTrial);
+                %                     %                     control.data_time = eyelink.Data.time;
+                %                     %                 else                                                                % for dummy mode
+                %                     %                     control.data_time = GetSecs - trialData.tMainSync(currentTrial);
+                %                 end
                 
                 %% Update trial timer
                 if iterations>1
@@ -336,7 +336,7 @@ try
                 % =============================================================
                 [const, control] = drawSingleFrameEyelink(const, trialData, control, screen, photo, rdkControl, eyelink);
                 % =============================================================
-
+                
                 % show gaze or finger if it is turned on
                 %         if eyelink.mode && const.showGaze
                 %             PTBdraw_circles(screen, eyelink.Data.coord, 10, [255 255 255]);
@@ -346,7 +346,7 @@ try
                 % =============================================================
                 [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos] = Screen('Flip', screen.window);
                 % =============================================================
-                % record important time points and send eyelink messages                
+                % record important time points and send eyelink messages
                 if iterations == 1 % mark start of the trial
                     trialData.t_start_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
                     trialData.tMainSync(currentTrial, 1)            = GetSecs;                 % Get the current time as time when the trial started (used for the trial timer)
@@ -391,36 +391,70 @@ try
                         trialData.reportAngle(currentTrial, 1) = control.respAngle;
                     end
                 end
-                                
-%                 % if need to repeat the trial, set up
-%                 if control.repeat==1
-%                     trialData.repeat(currentTrial, 1) = 1;
-%                     % add the current trial to the end of the block...
-%                     trialData = [trialData; trialData(currentTrial, :)];
-%                     % initialize trial information for the added trial
-%                     trialData.tMainSync(end, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
-%                     trialData.tRDKon(end, 1)        = NaN;
-%                     trialData.tRDKoff(end, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
-%                     trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
-%                     trialData.t_start_VBL(end, 1:5)        = NaN;
-%                     trialData.t_rdkOn_VBL(end, 1:5)         = NaN;
-%                     trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
-%                     trialData.t_response_VBL(end, 1:5)        = NaN;
-%                     trialData.iterations(end, 1)        = NaN;
-%                     trialData.reportAngle(end, 1)          = NaN; % -1=up, 1=down
-%                     trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
-%                     trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
-%                     
-%                     WaitSecs(1) % show the information on the screen
-%                     break
-%                 end
+                
+                %                 % check key press
+                %                 [bPressed keyPressed] = PTBcheck_key_press([keys.up, keys.down, keys.escape, keys.recalibration]);
+                % %                 [bPressed keyPressed] = PTBcheck_key_press([keys.escape, keys.recalibration]);
+                %                 if keyPressed==keys.escape
+                %                     fprintf('EXP: Experiment aborted by pressing esc key \n');
+                %                     control.abort = 1;
+                %                     break;                                                      % BREAK the while loop, if trial was aborted by ESC press
+                %                 elseif keyPressed==keys.recalibration
+                %                     control.forceRecalibEL = 1;
+                %                 elseif bPressed % response
+                %                     control.mode = 4;
+                %                     if eyelink.mode
+                %                         Eyelink('Message', 'respond');
+                %                     end
+                %                     trialData.tResponse(currentTrial, 1) = control.data_time;
+                %                     trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
+                %                     if keyPressed==keys.up
+                %                         trialData.choice(control.currentTrial, 1) = 1; % the same sign as the direction mean defined, positive is up
+                %                     elseif keyPressed==keys.down
+                %                         trialData.choice(control.currentTrial, 1) = -1;
+                %                     end
+                %
+                % %                     if trialData.choice(control.currentTrial, 1)*trialData.rdkApertureDirPerturbation(control.currentTrial, 1)>0
+                % % %                         text = 'correct';
+                % %                         trialData.choiceCorrect(control.currentTrial, 1) = 1; % record if the response is correct
+                % %                     else
+                % % %                         text = 'wrong';
+                % %                         trialData.choiceCorrect(control.currentTrial, 1) = 0;
+                % %                     end
+                %                 end
+                
+                % check forced Recalibration:
+                if control.forceRecalibEL || control.repeat
+                    trialData.repeat(currentTrial, 1) = 1;
+                    % add the current trial to the end of the block...
+                    trialData = [trialData; trialData(currentTrial, :)];
+                    % initialize trial information for the added trial
+                    trialData.tMainSync(end, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
+                    trialData.tRDKon(end, 1)        = NaN;
+                    trialData.tPerturbationOn(end, 1)         = NaN;
+                    trialData.tRDKoff(end, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
+                    trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
+                    trialData.t_start_VBL(end, 1:5)        = NaN;
+                    trialData.t_rdkOn_VBL(end, 1:5)         = NaN;
+                    trialData.t_perturbationOn_VBL(:, 1:5)         = NaN;
+                    trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
+                    trialData.t_response_VBL(end, 1:5)        = NaN;
+                    trialData.iterations(end, 1)        = NaN;
+                    %                     trialData.pursuitOn(end, 1)         = NaN;
+                    trialData.choice(end, 1)          = NaN; % -1=up, 1=down
+                    trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
+                    trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
+                    
+                    WaitSecs(0.5) % show the information on the screen
+                    break;
+                end
                 
                 % Trial Video:
                 if const.makeVideo == 1                                         % if making video, here images are taken of each frame
                     imgDemo{demoN} = Screen('GetImage', screen.window); %, [], 'backbuffer');
                     demoN = demoN + 1;
-%                     imageArray(:,:,:,control.frameCounter) = Screen('GetImage',screen.window);
-%                     control.frameCounter = control.frameCounter + 1;            % update frameCounter
+                    %                     imageArray(:,:,:,control.frameCounter) = Screen('GetImage',screen.window);
+                    %                     control.frameCounter = control.frameCounter + 1;            % update frameCounter
                 end
                 
                 %% (4.5) End the trial (i.e. break while-loop; stop DPI recording)
@@ -437,40 +471,6 @@ try
                     fprintf('EXP: Block %d Trial %d finished \n', block, trialData.trialCounter(currentTrial, 1));
                     
                     break; % BREAK the while loop, if trial was finished!
-                end
-                
-                % check key press
-                [bPressed keyPressed] = PTBcheck_key_press([keys.escape, keys.recalibration]);
-                if keyPressed==keys.escape
-                    fprintf('EXP: Experiment aborted by pressing esc key \n');
-                    control.abort = 1;
-                    break;                                                      % BREAK the while loop, if trial was aborted by ESC press
-                elseif keyPressed==keys.recalibration
-                    control.forceRecalibEL = 1;
-                end
-                
-                % check forced Recalibration:
-                if control.forceRecalibEL
-                    control.repeat = 1;
-                    trialData.repeat(currentTrial, 1) = 1;
-                    % add the current trial to the end of the block...
-                    trialData = [trialData; trialData(currentTrial, :)];
-                    % initialize trial information for the added trial
-                    trialData.tMainSync(end, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
-                    trialData.tRDKon(end, 1)        = NaN;
-                    trialData.tRDKoff(end, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
-                    trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
-                    trialData.t_start_VBL(end, 1:5)        = NaN;
-                    trialData.t_rdkOn_VBL(end, 1:5)         = NaN;
-                    trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
-                    trialData.t_response_VBL(end, 1:5)        = NaN;
-                    trialData.iterations(end, 1)        = NaN;
-                    trialData.reportAngle(end, 1)          = NaN; % -1=up, 1=down
-                    trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
-                    trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
-                    
-                    WaitSecs(0.5) % show the information on the screen
-                    break;
                 end
                 
             end                                                                 % end of WITHIN-TRIAL-WHILE-loop
@@ -494,7 +494,7 @@ try
             if control.forceRecalibEL                                               % check if Eyelink calibration was forced
                 Eyelink('Message', 'FORCE_RECALIB_EL');                             % send Eyelink Message
                 eyelink_recalibration(control,const,eyelink.el);
-            end         
+            end
             
             %% (5.2) Save and move target file/ save trialData
             % close TARGET file and save/move file
@@ -532,15 +532,15 @@ try
                     imwrite(imgDemo{ii}, ['./demoVideo/' demoName, '/', 'frame', num2str(ii), '.jpg'])
                 end
                 % edit the demo later in that folder...
-%                 m = cat(4,imageArray);
-%                 vidName = input(sprintf('\n\tVideo name:\t'),'s');
-%                 fprintf('\n\tProcessing video - please wait...\n')
-%                 writerObj = VideoWriter(sprintf('./data/video/%s',vidName),'MPEG-4');
-%                 writerObj.FrameRate = 120;
-%                 writerObj.Quality = 100;
-%                 open(writerObj);
-%                 writeVideo(writerObj,m);
-%                 close(writerObj);
+                %                 m = cat(4,imageArray);
+                %                 vidName = input(sprintf('\n\tVideo name:\t'),'s');
+                %                 fprintf('\n\tProcessing video - please wait...\n')
+                %                 writerObj = VideoWriter(sprintf('./data/video/%s',vidName),'MPEG-4');
+                %                 writerObj.FrameRate = 120;
+                %                 writerObj.Quality = 100;
+                %                 open(writerObj);
+                %                 writeVideo(writerObj,m);
+                %                 close(writerObj);
             end
             
             %% (5.5) Update trial counter

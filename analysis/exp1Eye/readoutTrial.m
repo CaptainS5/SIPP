@@ -39,15 +39,15 @@ elseif Experiment.const.startExp==1
     trial.log.eyeType = 1; % pursuit condition
 end
 trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
-trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDirBefore(trialIdxInData, 1); % either left or right, the "base" direction
+trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % either left or right, the "base" direction
 trial.log.rdkApertureSpeed = Experiment.const.rdk.apertureSpeed;
 % if trial.log.rdkApertureDir==0 % moving rightward
-    trial.log.rdkApertureAngle = Experiment.trialData.rdkApertureAnglePerturbation(trialIdxInData, 1); % positive is up, negative is down
+    trial.log.rdkApertureAngle = Experiment.trialData.rdkApertureAngle(trialIdxInData, 1); % positive is up, negative is down
 % else % moving leftward
 %     trial.log.rdkApertureAngle = trial.log.rdkApertureDir - Experiment.trialData.rdkApertureAngle(trialIdxInData, 1); % positive is up, negative is down, relative to the aperture direction
 % end
 trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed;
-trial.log.rdkInternalCon = Experiment.trialData.rdkInternalPerturbationCons(trialIdxInData, 1);
+trial.log.rdkInternalCon = Experiment.trialData.rdkInternalCons(trialIdxInData, 1);
 if trial.log.rdkInternalCon==0
     trial.log.rdkInternalDir = 0;
     trial.log.rdkCoh = 0;
@@ -55,16 +55,15 @@ else
     %     %%%%%%%%%% the negative sign is only for 500 and 501...
     %     trial.log.rdkInternalDir = -Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
     %     %%%%%%%%%%
-    trial.log.rdkInternalDir = Experiment.trialData.rdkInternalPerturbationCons(trialIdxInData, 1); % relative direction within the RDK
+    trial.log.rdkInternalDir = Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
     trial.log.rdkCoh = 1;
 end
-trial.log.response = Experiment.trialData.choice(trialIdxInData, 1);
+trial.log.response = Experiment.trialData.reportAngle(trialIdxInData, 1);
 trial.log.eyeSampleRate = eyeData.sampleRate;
 
 % frame indices of all events; after comparing eventLog with eyeData.frameIdx
 trial.log.trialStart = 1; % the first frame, fixation onset, decided in readEyeData
 trial.log.targetOnset = find(eyeData.timeStamp==eventLog.rdkOn(currentTrial, 1)); % rdk onset
-trial.log.perturbationOnset = find(eyeData.timeStamp==eventLog.perturbationOn(currentTrial, 1));
 trial.log.targetOffset = find(eyeData.timeStamp==eventLog.rdkOff(currentTrial, 1)); % rdk offset
 trial.log.trialEnd = find(eyeData.timeStamp==eventLog.trialEnd(currentTrial, 1)); % response given
 end

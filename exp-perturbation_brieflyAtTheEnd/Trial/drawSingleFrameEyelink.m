@@ -1,4 +1,4 @@
-function [const, control] = drawSingleFrameEyelink(const, trialData, control, screen, photo, rdkControl, eyelink)
+function [const, control, rdkControl] = drawSingleFrameEyelink(const, trialData, control, screen, photo, rdkControl, eyelink)
 % =========================================================================
 % runSingleTrial(const, trialData, control, screen, photo)
 % =========================================================================
@@ -148,36 +148,73 @@ switch control.mode
         %             Screen('DrawLine', screen.window, screen.black, screen.center(1), screen.center(2), toH, toV, 5);
         %         end
         
-        % if you are dynamically detecting pursuit onset for perturbation
-        % during initiation
-        if control.rdkPerturbationTime==0 && eyelink.mode && ~eyelink.dummy && ~control.pursuitOn
-            if control.frameRDK==1
-                samples = Eyelink('GetQueuedData', eyelink.eye_used);
-                control.eyePos = [control.eyePos; samples]; % break point here for debugging... start with the latest for the first frame
-            else
-                samples = Eyelink('GetQueuedData', eyelink.eye_used);
-                control.eyePos = [control.eyePos; samples];
-            end
-            
-            if size(control.eyePos, 1)>=control.detectWindow
-                control.pursuitOn = isPursuitOn(control.eyePos(end-control.detectWindow+1:end, :), control.velThres, control.filter);
-            end % need to check if this takes too much time!
-            
-            if control.pursuitOn
-                % update the new duration
-                rdkControl.durationFramesBefore = control.frameRDK;
-                
-                % delete the rest of the before perturbation frames in
-                deleteI = [control.frameRDK+1:1:length(rdkControl.dotPos)-rdkControl.durationFramesPerturbation];
-                rdkControl.dotPos{deleteI} = [];
-            end
-            % note that if a pursuit onset is still not detected until the
-            % dummy duration is reached, the perturbation will be
-            % displayed anyway
-            % the trialData.pursuitOn to be recorded will only be meaninful
-            % for the perturbation during initiation trials when online
-            % detection was applied
-        end
+%         % if you are dynamically detecting pursuit onset for perturbation
+%         % during initiation
+%         if control.rdkPerturbationTime==0 && eyelink.mode && ~eyelink.dummy && ~control.pursuitOn && control.frameRDK < rdkControl.durationFramesBefore
+%             %             % not sure what happened, but this seems to be tooo slow...
+%             
+%             %             Eyelink('command','link_sample_data = INPUT,HMARKER')
+%             %             Eyelink('command','inputword_is_window = ON')
+%             %             [samples, a, b] = Eyelink('GetQueuedData', eyelink.eye_used);
+%             %             if eyelink.eye_used==0 % left eye
+%             %                 xI = 14;
+%             %                 yI = 16;
+%             %             else
+%             %                 xI = 15;
+%             %                 yI = 17;
+%             %             end
+%             %
+%             %             if control.frameRDK==1
+%             %                 % the columns are x position, y position, timestamp
+%             %                 control.eyePos = [control.eyePos; samples(xI, end), samples(yI, end), samples(1, end)]; % break point here for debugging... start with the latest for the first frame
+%             %             else
+%             %                 control.eyePos = [control.eyePos; samples(xI, 2:end)', samples(yI, 2:end)', samples(1, 2:end)'];
+%             %             end
+%             %             disp(['frame ', num2str(control.frameRDK)])
+%             %             disp(num2str(control.eyePos(:, 3)))
+%             %             if size(control.eyePos, 1)>=control.detectWindow
+%             %                 control.pursuitOn = isPursuitOn(screen, control.eyePos(:, 1:2), control.detectWindow, control.velThres, control.filter);
+%             %             end % need to check if this takes too much time!
+%             
+%             % use a position criteria, check for change of position across
+%             % frames...
+%             if Eyelink( 'NewFloatSampleAvailable') > 0
+%                 % get the sample in the form of an event structure
+%                 evt = Eyelink( 'NewestFloatSample');
+%                 xeye = evt.gx(eyelink.eye_used+1); % +1 as we're accessing MATLAB array
+%                 yeye = evt.gy(eyelink.eye_used+1);
+%                 
+%                 %% do we have valid data and is the pupil visible?
+%                 if xeye~=eyelink.el.MISSING_DATA && yeye~=eyelink.el.MISSING_DATA && evt.pa(eyelink.eye_used+1)>0
+%                     control.eyePos = [control.eyePos; xeye, yeye];
+%                     
+%                     % always compare with the initial eye location...
+%                     if size(control.eyePos, 1)>1
+%                         diffP = sqrt((control.eyePos(end, 1)-control.eyePos(1, 1))^2+((control.eyePos(end, 2)-control.eyePos(1, 2))/screen.pixelRatioWidthPerHeight)^2); % this is in pixels...
+%                         diffP = diffP*screen.dpp; % in degs
+%                         
+%                         if diffP > control.posThres % fixation ok
+%                             control.pursuitOn = 1;
+%                         end
+%                     end
+%                 end
+%             end
+%             
+%             if control.pursuitOn
+%                 % update the new duration
+%                 rdkControl.durationFramesBefore = control.frameRDK;
+%                 
+%                 % delete the rest of the before perturbation frames in
+%                 deleteI = [control.frameRDK+1:1:length(rdkControl.dotPos)-rdkControl.durationFramesPerturbation];
+%                 rdkControl.dotPos(deleteI) = [];
+%             end
+%             % note that if a pursuit onset is still not detected until the
+%             % dummy duration is reached, the perturbation will be
+%             % displayed anyway
+%             % the trialData.pursuitOn to be recorded will only be meaninful
+%             % for the perturbation during initiation trials when online
+%             % detection was applied
+%         end
         
         if control.frameRDK == rdkControl.durationFramesBefore + 1
             control.enterPerturbation = 1;
@@ -204,52 +241,53 @@ switch control.mode
     case 3                                                                  % PHASE 3: response screen if needed
         control.frameRDK = control.frameRDK - 1; % need to keep updating the frame numbers...
         
-        [ecc, ] = dva2pxl(const.line.length/2, const.line.length/2, screen); % distance of the cursor from center
-        if isempty(control.mouse_x) % the first response frame, show random angle
-            % show the cursor; put it at the start angle everytime
-            %%% this is for only drawing the line, or only having rightward
-            %%% directions
-            if control.rdkApertureDirBefore==0 % rightward
-                control.respAngle = rand*180-90;
-            else % leftward, make the range 90-270
-                control.respAngle = rand*180+90;
-            end
-            %%%
-%             %%% this is for drawing the arrow, range from -180 to 180
-%             control.respAngle = rand*360-180;
+%         % mouse resonse
+%         [ecc, ] = dva2pxl(const.line.length/2, const.line.length/2, screen); % distance of the cursor from center
+%         if isempty(control.mouse_x) % the first response frame, show random angle
+%             % show the cursor; put it at the start angle everytime
+%             %%% this is for only drawing the line, or only having rightward
+%             %%% directions
+%             if control.rdkApertureDirBefore==0 % rightward
+%                 control.respAngle = rand*180-90;
+%             else % leftward, make the range 90-270
+%                 control.respAngle = rand*180+90;
+%             end
 %             %%%
-            SetMouse(screen.x_mid + round(cos(control.respAngle/180*pi)*ecc*6), ...
-                screen.y_mid - round(sin(control.respAngle/180*pi)*ecc*6), ...
-                screen.window);
-            ShowCursor;
-        else
-            % changing the angle of the next loop according to the cursor position
-            control.respAngle = atan2(screen.y_mid -control.mouse_y, control.mouse_x-screen.x_mid)/pi*180;
-            if control.rdkApertureDir==180 % leftward, make the range between 90-270 deg
-                if control.respAngle<0
-                    control.respAngle = control.respAngle + 360;
-                end
-            end
-        end
-        %%%%%%%%%% show an arrow for the response... currently just show at
-        % calculate line coordinates and width in pixel
-        [lineWidth, ] = round(dva2pxl(const.line.width, const.line.width, screen));
-        [lineX, lineY] = dva2pxl(cos(control.respAngle/180*pi)*const.line.length/2, sin(control.respAngle/180*pi)*const.line.length/2, screen);
-        lineXY = round([-lineX, lineX; lineY, -lineY]); % this is the main line
-        
-        % now calculate coordinates for the two stroke arrow--make line end
-        % as the center (0, 0)
-        [arrow1X, arrow1Y] = dva2pxl(cos((180-control.respAngle-const.arrowAngle)/180*pi)*const.arrowLength, ...
-            sin((180-control.respAngle-const.arrowAngle)/180*pi)*const.arrowLength, screen);
-        arrow1XY = round([0, arrow1X; 0, arrow1Y]); 
-        [arrow2X, arrow2Y] = dva2pxl(cos((180-control.respAngle+const.arrowAngle)/180*pi)*const.arrowLength, ...
-            sin((180-control.respAngle+const.arrowAngle)/180*pi)*const.arrowLength, screen);
-        arrow2XY = round([0, arrow2X; 0, arrow2Y]); 
-        
-        % draw response line
-        % centered at the screen center
-        Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [screen.x_mid, screen.y_mid]);
-        Screen('DrawLines', screen.window, [arrow1XY arrow2XY], lineWidth, const.line.colour, [lineX+screen.x_mid, screen.y_mid-lineY]);
+% %             %%% this is for drawing the arrow, range from -180 to 180
+% %             control.respAngle = rand*360-180;
+% %             %%%
+%             SetMouse(screen.x_mid + round(cos(control.respAngle/180*pi)*ecc*6), ...
+%                 screen.y_mid - round(sin(control.respAngle/180*pi)*ecc*6), ...
+%                 screen.window);
+%             ShowCursor;
+%         else
+%             % changing the angle of the next loop according to the cursor position
+%             control.respAngle = atan2(screen.y_mid -control.mouse_y, control.mouse_x-screen.x_mid)/pi*180;
+%             if control.rdkApertureDirBefore==180 % leftward, make the range between 90-270 deg
+%                 if control.respAngle<0
+%                     control.respAngle = control.respAngle + 360;
+%                 end
+%             end
+%         end
+%         %%%%%%%%%% show an arrow for the response... currently just show at
+%         % calculate line coordinates and width in pixel
+%         [lineWidth, ] = round(dva2pxl(const.line.width, const.line.width, screen));
+%         [lineX, lineY] = dva2pxl(cos(control.respAngle/180*pi)*const.line.length/2, sin(control.respAngle/180*pi)*const.line.length/2, screen);
+%         lineXY = round([-lineX, lineX; lineY, -lineY]); % this is the main line
+%         
+%         % now calculate coordinates for the two stroke arrow--make line end
+%         % as the center (0, 0)
+%         [arrow1X, arrow1Y] = dva2pxl(cos((180-control.respAngle-const.arrowAngle)/180*pi)*const.arrowLength, ...
+%             sin((180-control.respAngle-const.arrowAngle)/180*pi)*const.arrowLength, screen);
+%         arrow1XY = round([0, arrow1X; 0, arrow1Y]); 
+%         [arrow2X, arrow2Y] = dva2pxl(cos((180-control.respAngle+const.arrowAngle)/180*pi)*const.arrowLength, ...
+%             sin((180-control.respAngle+const.arrowAngle)/180*pi)*const.arrowLength, screen);
+%         arrow2XY = round([0, arrow2X; 0, arrow2Y]); 
+%         
+%         % draw response line
+%         % centered at the screen center
+%         Screen('DrawLines', screen.window, lineXY, lineWidth, const.line.colour, [screen.x_mid, screen.y_mid]);
+%         Screen('DrawLines', screen.window, [arrow1XY arrow2XY], lineWidth, const.line.colour, [lineX+screen.x_mid, screen.y_mid-lineY]);
         
 %         % draw target
 %         if control.instruction==0 % fast block
@@ -260,7 +298,7 @@ switch control.mode
 %             msgColor = screen.msgfontcolour;
 %         end
 
-%         PTBwrite_msg(screen, '?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
+        PTBwrite_msg(screen, 'Up or Down?', 'center', 'center', screen.msgfontcolour) % coordinate in relation to screen center
 
 %         % draw square for photodiode:
 %         if photo.mode                                                       % Photodiode Event 2: Fixation target 2 on

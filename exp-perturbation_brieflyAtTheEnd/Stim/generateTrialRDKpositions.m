@@ -13,6 +13,7 @@ function [rdkControl seed] = generateTrialRDKpositions(const, screen, control)
 %   one dot
 
 % set up RDK
+cohBefore = 0;
 cohPerturbation = control.rdkCohPerturbation;
 rdkInternalSpeed = control.rdkInternalSpeed;
 rdkApertureDirBefore = control.rdkApertureDirBefore;
@@ -23,18 +24,18 @@ rdkDurationPerturbation = const.rdk.durationPerturbation;
 % "circular", need to be careful about the correspondence--eventually, an
 % internal dir of 45 means 45 degs above the aperture moving direction. To match
 % this, we need to sort out the values for stimuli display:
-% transfer the relative aperture perturbation motion direction & relative 
+% transfer the relative aperture perturbation motion direction & relative
 % internal motion direction to absolute direction for display
 if rdkApertureDirBefore==0 % moving rightward
-    rdkApertureDirPerturbation = rdkApertureDirBefore-control.rdkApertureDirPerturbation; % the absolute direction; flip since for PTB it is up-negative, down-positive
-    rdkInternalDirPerturbation = rdkApertureDirPerturbation-control.rdkInternalDirPerturbation;  
+    rdkApertureAnglePerturbation = control.rdkApertureAnglePerturbation; % the absolute direction; flip since for PTB it is up-negative, down-positive
 else
-    rdkApertureDirPerturbation = rdkApertureDirBefore+control.rdkApertureDirPerturbation;
-    rdkInternalDirPerturbation = rdkApertureDirPerturbation+control.rdkInternalDirPerturbation;
+    rdkApertureAnglePerturbation = rdkApertureDirBefore - control.rdkApertureAnglePerturbation;
 end
+rdkInternalDirPerturbation = -control.rdkInternalDirPerturbation; % now the internal direction is fixed within the RDK, irrelative to the aperture direction
+% flip for PTB...
 
 % initialize aperture center location
-mediumDurationBefore = (const.rdk.durationBeforeMin+const.rdk.durationBeforeMax)/2; % in s
+mediumDurationBefore = control.rdkDurationBefore; % in s
 if const.startExp==1 || const.startExp==0 % actual experiment, translating aperture
     % initialize horizontal aperture movement per frame
     [moveDistanceAperture, ] = dva2pxl(const.rdk.apertureSpeed, const.rdk.apertureSpeed, screen)*screen.refreshRate; % pixel per frame, absolute difference
@@ -62,7 +63,7 @@ rdkControl.textureWindow{1} = [rdkControl.textureCenterPos{1}(1)-dotFieldRadiusX
 rdkFramesBefore = ceil(sec2frm(control.rdkDurationBefore, screen));
 rdkControl.durationFramesBefore = rdkFramesBefore;
 rdkFramesPerturbation = ceil(sec2frm(const.rdk.durationPerturbation, screen));
-rdkControl.durationFramesPerturbation = rdkFramesPerturbation; 
+rdkControl.durationFramesPerturbation = rdkFramesPerturbation;
 rdkFramesAll = rdkFramesBefore+rdkFramesPerturbation;
 % rdkControl.durationFramesAll = rdkFramesAll;
 rdkLifeTime = round(sec2frm(const.rdk.lifeTime, screen));
@@ -90,88 +91,87 @@ rdkControl.dotPos{1} = [cos(theta) sin(theta)] .* [dots.distanceToCenterX{1} dot
 moveDistanceDot = repmat(moveDistanceDot, const.rdk.dotNumber, 1);
 
 % initialize dot life time and label time
-dots.label{1} = zeros(const.rdk.dotNumber, 1); % target = 1, noise = 0; start with 0 coherence
-dots.showTime{1} = ones(1, const.rdk.dotNumber)*rdkLifeTime; % in frames
-dots.labelTime(1) = round(sec2frm(const.rdk.labelUpdateTime, screen)); % in frames
+% if it's static dots before perturbation... use rdkFramesBefore+1 as the
+% initialization index for everything below (before the loop)
+% otherwise just use 1 as the index
+targetDotsN = round(cohPerturbation*const.rdk.dotNumber); % number of dots should be moving coherently
+dots.label{rdkFramesBefore+1} = [ones(targetDotsN, 1); zeros(const.rdk.dotNumber-targetDotsN, 1)]; % target = 1, noise = 0
+% dots.label{rdkFramesBefore+1} = zeros(const.rdk.dotNumber, 1); % target = 1, noise = 0; start with 0 coherence
+dots.showTime{rdkFramesBefore+1} = ones(1, const.rdk.dotNumber)*rdkLifeTime; % in frames
+dots.labelTime(rdkFramesBefore+1) = round(sec2frm(const.rdk.labelUpdateTime, screen)); % in frames
 
 % initialize moving directions； 0/2pi equals to the horizontal right, rotates CW
 moveTheta = 2 * pi * rand(const.rdk.dotNumber, 1); % all random directions except 0/2pi, or the horizontal right
 % 0 coherence from the beginning, just use random directions
-rdkControl.dotDir(1, :) = -moveTheta; % in radians, for this up is positive, down is negative
+rdkControl.dotDir(rdkFramesBefore+1, :) = -moveTheta; % in radians, for this up is positive, down is negative
 % movement of each dot from frame N to frame N+1, now initialize for frame 1
-dots.movement{1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanceDot*screen.pixelRatioWidthPerHeight];
+% if it's static dots before perturbation... use rdkFramesBefore+1 as the
+% initialization index
+dots.movement{rdkFramesBefore+1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanceDot*screen.pixelRatioWidthPerHeight];
 
-% transparent motion noise, fixed label for target and noise dots; 
+% transparent motion noise, fixed label for target and noise dots;
 %   noise dots moving in a new random direction after reappearance,
 %   while target dots always have the same moveTheta
 % to use Brownian motion, dots.label is updated later in each frame
 
 % generate the dot matrices of the RDK for the whole trial
 for frameN = 1:rdkFramesAll-1
-    % initial update
-    % update dot position
-    rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN} + dots.movement{frameN}; % without aperture movement
-    % update lifetime and labels 
-    dots.label{frameN+1} = dots.label{frameN}; % all noise dots
-    dots.showTime{frameN+1} = dots.showTime{frameN}-1;
-    dots.labelTime(frameN+1) = dots.labelTime(frameN)-1;
-    
-    % initialize for use in the next loop, from frame N+1 to N+2
-    dots.movement{frameN+1} = dots.movement{frameN};
-    rdkControl.dotDir(frameN+1, :) = rdkControl.dotDir(frameN, :);
-    
-    % movement depends on which phase it is, before/during the perturbation
+    % assign the correct coh and dir
     if frameN<=rdkFramesBefore
-        apertureDir = rdkApertureDirBefore;
+        rdkApertureAngle = control.rdkApertureDirBefore;
+        coh = cohBefore;
     else % during perturbation
-        apertureDir = rdkApertureDirPerturbation;
+        rdkApertureAngle = control.rdkApertureAnglePerturbation;
+        coh = cohPerturbation;
+    end
+    
+    % update the center position of the translating aperture
+    rdkControl.apertureCenterPos{frameN+1} = [rdkControl.apertureCenterPos{frameN}(1)+moveDistanceAperture*cos(rdkApertureAngle/180*pi), ...
+        rdkControl.apertureCenterPos{frameN}(2)-moveDistanceAperture*sin(rdkApertureAngle/180*pi)];
+    rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
+    rdkControl.textureWindow{frameN+1} = [rdkControl.textureCenterPos{frameN+1}(1)-dotFieldRadiusX, ...
+        rdkControl.textureCenterPos{frameN+1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{frameN+1}(1)+dotFieldRadiusX, ...
+        rdkControl.textureCenterPos{frameN+1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
+    
+    if coh==0 % static pattern; if want to use noise pattern, just comment out this "if" and modify the dot labels accordingly
+        % no need to update dot position, just copy...
+        rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN};
+        dots.showTime{frameN+1} = dots.showTime{frameN}-1;
+    else
+        % update dot position
+        rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN} + dots.movement{frameN}; % without aperture movement
+        % update lifetime and labels
+        dots.showTime{frameN+1} = dots.showTime{frameN}-1;
+        dots.labelTime(frameN+1) = dots.labelTime(frameN)-1;
         
-        if frameN == rdkFramesBefore+1 % when first enter perturbation
-            % renew label time
+        % initialize for use in the next loop, from frame N+1 to N+2
+        dots.movement{frameN+1} = dots.movement{frameN};
+        dots.label{frameN+1} = dots.label{frameN};
+        rdkControl.dotDir(frameN+1, :) = rdkControl.dotDir(frameN, :);
+        
+        % renew labels
+        if dots.labelTime(frameN+1)<=0
             dots.labelTime(frameN+1)=round(sec2frm(const.rdk.labelUpdateTime, screen));
-            % assign target labels
-            targetDotsNPerturbation = round(cohPerturbation*const.rdk.dotNumber); % number of dots should be moving coherently
-            dots.label{frameN+1} = [ones(targetDotsNPerturbation, 1); zeros(const.rdk.dotNumber-targetDotsNPerturbation, 1)]; % target = 1, noise = 0
-            % update new random directions
+            % generate new labels
+            labelOrder = randperm(size(dots.label{frameN}, 1));
+            dots.label{frameN+1}(:, 1) = dots.label{frameN}(labelOrder, 1); % randomly assign new labels
+            % update directions
             moveTheta = 2 * pi * rand(const.rdk.dotNumber, 1);
             moveTheta(dots.label{frameN+1}==1, :) = 0; % signal dots moving horizontally to the right
-            moveTheta = moveTheta+rdkInternalDirPerturbation/180*pi; % rotate the signal direction to the defined direction
+            moveTheta = moveTheta + rdkInternalDirPerturbation/180*pi; % rotate the signal direction to the defined direction
             rdkControl.dotDir(frameN+1, :) = -moveTheta; % in radians, for this up is positive, down is negative
             % movement of each dot from frame N+1 to frame N+2
             dots.movement{frameN+1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanceDot*screen.pixelRatioWidthPerHeight];
         end
+        % 2. Relocate dots out of the aperture
+        dotDist = rdkControl.dotPos{frameN+1}(:, 1).^2 + ...
+            ((rdkControl.dotPos{frameN+1}(:, 2)/screen.pixelRatioWidthPerHeight)).^2;
+        outDots = find(dotDist>dotFieldRadiusX^2); % all dots out of the aperture
+        % move dots in the aperture from the opposite edge, continue the assigned motion
+        rdkControl.dotPos{frameN+1}(outDots, :) = -rdkControl.dotPos{frameN+1}(outDots, :)+dots.movement{frameN}(outDots, :);
     end
     
-    % update the center position of the translating aperture
-    if const.startExp==1 || const.startExp==0
-        rdkControl.apertureCenterPos{frameN+1} = [rdkControl.apertureCenterPos{frameN}(1)+moveDistanceAperture*cos(apertureDir/180*pi), rdkControl.apertureCenterPos{frameN}(2)+moveDistanceAperture*sin(apertureDir/180*pi)];
-        rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
-        rdkControl.textureWindow{frameN+1} = [rdkControl.textureCenterPos{frameN+1}(1)-dotFieldRadiusX, ...
-            rdkControl.textureCenterPos{frameN+1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{frameN+1}(1)+dotFieldRadiusX, ...
-            rdkControl.textureCenterPos{frameN+1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
-    elseif const.startExp==-1 % baseline, static aperture
-        rdkControl.apertureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN};
-        rdkControl.textureCenterPos{frameN+1} = rdkControl.apertureCenterPos{frameN+1};
-        rdkControl.textureWindow{frameN+1} = rdkControl.textureWindow{frameN};
-    end
-    
-    % renew labels
-    if dots.labelTime(frameN+1)<=0
-        dots.labelTime(frameN+1)=round(sec2frm(const.rdk.labelUpdateTime, screen));
-        % generate new labels
-        labelOrder = randperm(size(dots.label{frameN}, 1));
-        dots.label{frameN+1}(:, 1) = dots.label{frameN}(labelOrder, 1); % randomly assign new labels
-        % update new random directions
-        moveTheta = 2 * pi * rand(const.rdk.dotNumber, 1);
-        moveTheta(dots.label{frameN+1}==1, :) = 0; % signal dots moving horizontally to the right
-        moveTheta = moveTheta+rdkInternalDirPerturbation/180*pi; % rotate the signal direction to the defined direction
-        rdkControl.dotDir(frameN+1, :) = -moveTheta; % in radians, for this up is positive, down is negative
-        % movement of each dot from frame N+1 to frame N+2
-        dots.movement{frameN+1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanceDot*screen.pixelRatioWidthPerHeight];
-    end
-    
-    % still needs to replace expired dots and move dots out of the aperture into the aperture again, from the opposite edge
-    % 1. Replace dots with expired lifetime
+    % Replace dots with expired lifetime
     expiredDots = find(dots.showTime{frameN+1}' <= 0);
     if expiredDots
         dotsN = length(expiredDots);
@@ -182,10 +182,4 @@ for frameN = 1:rdkFramesAll-1
         rdkControl.dotPos{frameN+1}(expiredDots, :) = [cos(theta) sin(theta)] .* [dis2CenterX dis2CenterX*screen.pixelRatioWidthPerHeight];
         dots.showTime{frameN+1}(expiredDots) = rdkLifeTime;
     end
-    % 2. Relocate dots out of the aperture
-    dotDist = rdkControl.dotPos{frameN+1}(:, 1).^2 + ...
-       ((rdkControl.dotPos{frameN+1}(:, 2)/screen.pixelRatioWidthPerHeight)).^2;
-    outDots = find(dotDist>dotFieldRadiusX^2); % all dots out of the aperture
-    % move dots in the aperture from the opposite edge, continue the assigned motion
-    rdkControl.dotPos{frameN+1}(outDots, :) = -rdkControl.dotPos{frameN+1}(outDots, :)+dots.movement{frameN}(outDots, :);
 end
