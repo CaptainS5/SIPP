@@ -392,36 +392,36 @@ try
                     end
                 end
                 
-                %                 % check key press
+                % check key press
                 %                 [bPressed keyPressed] = PTBcheck_key_press([keys.up, keys.down, keys.escape, keys.recalibration]);
-                % %                 [bPressed keyPressed] = PTBcheck_key_press([keys.escape, keys.recalibration]);
-                %                 if keyPressed==keys.escape
-                %                     fprintf('EXP: Experiment aborted by pressing esc key \n');
-                %                     control.abort = 1;
-                %                     break;                                                      % BREAK the while loop, if trial was aborted by ESC press
-                %                 elseif keyPressed==keys.recalibration
-                %                     control.forceRecalibEL = 1;
-                %                 elseif bPressed % response
-                %                     control.mode = 4;
-                %                     if eyelink.mode
-                %                         Eyelink('Message', 'respond');
-                %                     end
-                %                     trialData.tResponse(currentTrial, 1) = control.data_time;
-                %                     trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
-                %                     if keyPressed==keys.up
-                %                         trialData.choice(control.currentTrial, 1) = 1; % the same sign as the direction mean defined, positive is up
-                %                     elseif keyPressed==keys.down
-                %                         trialData.choice(control.currentTrial, 1) = -1;
-                %                     end
-                %
-                % %                     if trialData.choice(control.currentTrial, 1)*trialData.rdkApertureDirPerturbation(control.currentTrial, 1)>0
-                % % %                         text = 'correct';
-                % %                         trialData.choiceCorrect(control.currentTrial, 1) = 1; % record if the response is correct
-                % %                     else
-                % % %                         text = 'wrong';
-                % %                         trialData.choiceCorrect(control.currentTrial, 1) = 0;
-                % %                     end
-                %                 end
+                [bPressed keyPressed] = PTBcheck_key_press([keys.escape, keys.recalibration]);
+                if keyPressed==keys.escape
+                    fprintf('EXP: Experiment aborted by pressing esc key \n');
+                    control.abort = 1;
+                    break;                                                      % BREAK the while loop, if trial was aborted by ESC press
+                elseif keyPressed==keys.recalibration
+                    control.forceRecalibEL = 1;
+%                 elseif bPressed % response
+%                     control.mode = 4;
+%                     if eyelink.mode
+%                         Eyelink('Message', 'respond');
+%                     end
+%                     trialData.tResponse(currentTrial, 1) = control.data_time;
+%                     trialData.t_response_VBL(currentTrial,:) = [VBLTimestamp, StimulusOnsetTime, FlipTimestamp, Missed, Beampos];
+%                     if keyPressed==keys.up
+%                         trialData.choice(control.currentTrial, 1) = 1; % the same sign as the direction mean defined, positive is up
+%                     elseif keyPressed==keys.down
+%                         trialData.choice(control.currentTrial, 1) = -1;
+%                     end
+%                     
+%                     %                     if trialData.choice(control.currentTrial, 1)*trialData.rdkApertureDirPerturbation(control.currentTrial, 1)>0
+%                     % %                         text = 'correct';
+%                     %                         trialData.choiceCorrect(control.currentTrial, 1) = 1; % record if the response is correct
+%                     %                     else
+%                     % %                         text = 'wrong';
+%                     %                         trialData.choiceCorrect(control.currentTrial, 1) = 0;
+%                     %                     end
+                end
                 
                 % check forced Recalibration:
                 if control.forceRecalibEL || control.repeat

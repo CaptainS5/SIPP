@@ -90,15 +90,15 @@ rdkControl.dotPos{1} = [cos(theta) sin(theta)] .* [dots.distanceToCenterX{1} dot
 [moveDistanceDot, ] = dva2pxl(rdkInternalSpeed, rdkInternalSpeed, screen)*screen.refreshRate; % pixel per frame
 moveDistanceDot = repmat(moveDistanceDot, const.rdk.dotNumber, 1);
 
-% initialize dot life time and label time
+%% initialize dot life time and label time
 % if it's static dots before perturbation... use rdkFramesBefore+1 as the
 % initialization index for everything below (before the loop)
 % otherwise just use 1 as the index
-targetDotsN = round(cohPerturbation*const.rdk.dotNumber); % number of dots should be moving coherently
-dots.label{rdkFramesBefore+1} = [ones(targetDotsN, 1); zeros(const.rdk.dotNumber-targetDotsN, 1)]; % target = 1, noise = 0
-% dots.label{rdkFramesBefore+1} = zeros(const.rdk.dotNumber, 1); % target = 1, noise = 0; start with 0 coherence
-dots.showTime{rdkFramesBefore+1} = ones(1, const.rdk.dotNumber)*rdkLifeTime; % in frames
-dots.labelTime(rdkFramesBefore+1) = round(sec2frm(const.rdk.labelUpdateTime, screen)); % in frames
+% targetDotsN = round(cohPerturbation*const.rdk.dotNumber); % number of dots should be moving coherently
+% dots.label{1} = [ones(targetDotsN, 1); zeros(const.rdk.dotNumber-targetDotsN, 1)]; % target = 1, noise = 0
+dots.label{1} = zeros(const.rdk.dotNumber, 1); % target = 1, noise = 0; start with 0 coherence
+dots.showTime{1} = ones(1, const.rdk.dotNumber)*rdkLifeTime; % in frames
+dots.labelTime(1) = round(sec2frm(const.rdk.labelUpdateTime, screen)); % in frames
 
 % initialize moving directions； 0/2pi equals to the horizontal right, rotates CW
 moveTheta = 2 * pi * rand(const.rdk.dotNumber, 1); % all random directions except 0/2pi, or the horizontal right
@@ -107,7 +107,7 @@ rdkControl.dotDir(rdkFramesBefore+1, :) = -moveTheta; % in radians, for this up 
 % movement of each dot from frame N to frame N+1, now initialize for frame 1
 % if it's static dots before perturbation... use rdkFramesBefore+1 as the
 % initialization index
-dots.movement{rdkFramesBefore+1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanceDot*screen.pixelRatioWidthPerHeight];
+dots.movement{1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanceDot moveDistanceDot*screen.pixelRatioWidthPerHeight];
 
 % transparent motion noise, fixed label for target and noise dots;
 %   noise dots moving in a new random direction after reappearance,
@@ -117,12 +117,18 @@ dots.movement{rdkFramesBefore+1} = [cos(moveTheta) sin(moveTheta)].*[moveDistanc
 % generate the dot matrices of the RDK for the whole trial
 for frameN = 1:rdkFramesAll-1
     % assign the correct coh and dir
-    if frameN<=rdkFramesBefore
+    if frameN<rdkFramesBefore
         rdkApertureAngle = control.rdkApertureDirBefore;
         coh = cohBefore;
     else % during perturbation
         rdkApertureAngle = control.rdkApertureAnglePerturbation;
         coh = cohPerturbation;
+        if frameN==rdkFramesBefore
+            targetDotsN = round(coh*const.rdk.dotNumber); % number of dots should be moving coherently
+            dots.label{frameN} = [ones(targetDotsN, 1); zeros(const.rdk.dotNumber-targetDotsN, 1)];
+            dots.showTime{frameN} = ones(1, const.rdk.dotNumber)*rdkLifeTime; % in frames
+            dots.labelTime(frameN) = round(sec2frm(const.rdk.labelUpdateTime, screen)); % in frames
+        end
     end
     
     % update the center position of the translating aperture
@@ -133,11 +139,11 @@ for frameN = 1:rdkFramesAll-1
         rdkControl.textureCenterPos{frameN+1}(2)-dotFieldRadiusY, rdkControl.textureCenterPos{frameN+1}(1)+dotFieldRadiusX, ...
         rdkControl.textureCenterPos{frameN+1}(2)+dotFieldRadiusY]; % the window to draw aperture texture in
     
-    if coh==0 % static pattern; if want to use noise pattern, just comment out this "if" and modify the dot labels accordingly
-        % no need to update dot position, just copy...
-        rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN};
-        dots.showTime{frameN+1} = dots.showTime{frameN}-1;
-    else
+%     if coh==0 % static pattern; if want to use noise pattern, just comment out this "if" and modify the dot labels accordingly
+%         % no need to update dot position, just copy...
+%         rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN};
+%         dots.showTime{frameN+1} = dots.showTime{frameN}-1;
+%     else
         % update dot position
         rdkControl.dotPos{frameN+1} = rdkControl.dotPos{frameN} + dots.movement{frameN}; % without aperture movement
         % update lifetime and labels
@@ -169,7 +175,7 @@ for frameN = 1:rdkFramesAll-1
         outDots = find(dotDist>dotFieldRadiusX^2); % all dots out of the aperture
         % move dots in the aperture from the opposite edge, continue the assigned motion
         rdkControl.dotPos{frameN+1}(outDots, :) = -rdkControl.dotPos{frameN+1}(outDots, :)+dots.movement{frameN}(outDots, :);
-    end
+%     end
     
     % Replace dots with expired lifetime
     expiredDots = find(dots.showTime{frameN+1}' <= 0);

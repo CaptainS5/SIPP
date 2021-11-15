@@ -3,22 +3,105 @@ initializeParas;
 
 % choose which plot to look at
 individualPlots = 1;
-averagePlots = 1;
+averagePlots = 0;
 plotVarStart = 1;
 plotVarEnd = 1;
+
+% Psychometric function fitting settings
+PF = @PAL_Logistic;  %Alternatives: PAL_Gumbel, PAL_Weibull,
+%PAL_Quick, PAL_logQuick, PAL_Logistic
+%PAL_CumulativeNormal, PAL_HyperbolicSecant
+
+%Threshold, Slope, and lapse rate are free parameters, guess is fixed
+paramsFree = [1 1 1 1];  %1: free parameter, 0: fixed parameter
+
+%Parameter grid defining parameter space through which to perform a
+%brute-force search for values to be used as initial guesses in iterative
+%parameter search.
+searchGrid.alpha = -3:.01:3;
+searchGrid.beta = logspace(0,10,200);
+searchGrid.gamma = 0:0.01:0.05;  %scalar here (since fixed) but may be vector
+searchGrid.lambda = 0:0.001:0.05;  %ditto
 
 %%
 if individualPlots
     for varN = plotVarStart:plotVarEnd
         for subN = 1:size(names, 2)
-            % plot difference from baseline
+            % plot all conditions
             figure
-            hold on
-            % line plot
-            for internalConN = 1:size(yMeanDiffSub.(plotVariables{varN}){subN}, 2)
-                errorbar(apertureAngles, yMeanDiffSub.(plotVariables{varN}){subN}(:, internalConN), yStdDiffSub.(plotVariables{varN}){subN}(:, internalConN), 'color', colorCons(internalConN+1, :))
+            for perturbN = 1:2
+                subplot(2, 1, perturbN)
+                hold on
+                if varN==1 % psychometric functions for response
+                    for internalConN = 1:size(internalCons, 2)
+                        numRight = yMeanSub.choiceUpNum{subN, perturbN}(:, internalConN);
+                        outOfNum =yMeanSub.totalTrialN{subN, perturbN}(:, internalConN);
+                        % Perform fit
+                        [paramsValues LL exitflag] = PAL_PFML_Fit(apertureAngles, numRight, ...
+                            outOfNum, searchGrid, paramsFree, PF, 'lapseLimits',[0 0.1]);
+                        
+                        % plotting
+                        ProportionCorrectObserved=numRight./outOfNum;
+                        StimLevelsFineGrain=[min(apertureAngles):max(apertureAngles)./1000:max(apertureAngles)];
+                        ProportionCorrectModel = PF(paramsValues,StimLevelsFineGrain);
+                        
+                        if internalConN==1
+                            f{internalConN} = plot(StimLevelsFineGrain, ProportionCorrectModel,'-','color', colorCons(internalConN, :), 'linewidth', 2);
+                        else
+                            f{internalConN} = plot(StimLevelsFineGrain, ProportionCorrectModel,'--','color', colorCons(internalConN, :), 'linewidth', 2);
+                        end
+                        plot(apertureAngles, ProportionCorrectObserved,'.', 'color', colorCons(internalConN, :), 'markersize', 30);
+                    end
+                    set(gca, 'fontsize',16);
+                    set(gca, 'Xtick', apertureAngles);
+                    axis([min(apertureAngles) max(apertureAngles) 0 1]);
+                    xlabel('Aperture perturbation angle');
+                    ylabel('Proportion up');
+                    legend([f{:}], internalConNames, 'box', 'off', 'location', 'northwest')
+                    title([names{subN}, ', perturbPhase', num2str(perturbPhase(perturbN))])
+                else
+                    % line plot
+                    for internalConN = 1:size(internalCons, 2)
+                        errorbar(apertureAngles, yMeanSub.(plotVariables{varN}){subN, perturbN}(:, internalConN), yStdSub.(plotVariables{varN}){subN, perturbN}(:, internalConN), 'color', colorCons(internalConN, :))
+                    end
+                    
+                    %             % bar plot
+                    %             b = bar(yMeanSub.(plotVariables{varN}){subN});
+                    %             for ii = 1:size(yMeanSub.(plotVariables{varN}){subN}, 2)
+                    %                 xtips{ii} = b(ii).XEndPoints;
+                    %                 ytips{ii} = b(ii).YEndPoints;
+                    %                 for jj = 1:length(b(ii).YData)
+                    %                     labels{ii}{jj} = num2str(b(ii).YData(jj), '%.2f');
+                    %                 end
+                    %                 text(xtips{ii},ytips{ii},labels{ii},'HorizontalAlignment','center',...
+                    %                     'VerticalAlignment','bottom')
+                    %                 errorbar(xtips{ii},ytips{ii},yStdSub.(plotVariables{varN}){subN}(:, ii), 'lineStyle', 'none', 'color', 'k')
+                    %             end
+                    %             xticks(1:length(apertureAngles))
+                    %             xticklabels(apertureAngleNames)
+                    xlabel('Aperture angle (deg)')
+                    legend(internalConNames, 'box', 'on', 'location', 'best', 'color', 'w')
+                    ylabel(plotVariables{varN})
+                    title([names{subN}, ', perturbPhase', num2str(perturbPhase(perturbN))])
+                end
+            end
+            if varN>=saccadeVarStart
+                saveas(gcf, [saccadeFolder, 'individuals\exp2\sac_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
+            elseif varN==1
+                saveas(gcf, [perceptFolder, 'individuals\exp2\', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
+            else
+                saveas(gcf, [pursuitFolder, 'individuals\exp2\pursuit_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
             end
             
+            % plot difference between the two internal cons, compare
+            % between perturbation phases
+%             figure
+%             hold on
+%             % line plot
+%             for internalConN = 1:size(yMeanDiffSub.(plotVariables{varN}){subN}, 2)
+%                 errorbar(apertureAngles, yMeanDiffSub.(plotVariables{varN}){subN}(:, internalConN), yStdDiffSub.(plotVariables{varN}){subN}(:, internalConN), 'color', colorCons(internalConN+1, :))
+%             end
+%             
 %             % bar plot
 %             b = bar(yMeanDiffSub.(plotVariables{varN}){subPlotN});
 %             for ii = 1:size(yMeanDiffSub.(plotVariables{varN}){subPlotN}, 2)
@@ -33,56 +116,20 @@ if individualPlots
 %             end
 %             xticks(1:length(apertureAngles))
 %             xticklabels(apertureAngleNames)
-            xlabel('Aperture angle (deg)')
-            legend(internalConNames(2:3), 'box', 'on', 'location', 'best', 'color', 'w')
-            
-            ylabel(['Diff ', plotVariables{varN}])
-            title(names{subN})
-            if varN>=saccadeVarStart
-                saveas(gcf, [saccadeFolder, '\individuals\sacDiff_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
-            elseif varN==1
-                saveas(gcf, [perceptFolder, 'individuals\diff_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
-            else
-                saveas(gcf, [pursuitFolder, '\individuals\pursuitDiff_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
-            end
-            
-            % plot all conditions
-            figure
-            hold on
-            % line plot
-            for internalConN = 1:size(internalCons, 2)
-                errorbar(apertureAngles, yMeanSub.(plotVariables{varN}){subN}(:, internalConN), yStdSub.(plotVariables{varN}){subN}(:, internalConN), 'color', colorCons(internalConN, :))
-            end
-            
-%             % bar plot
-%             b = bar(yMeanSub.(plotVariables{varN}){subN});
-%             for ii = 1:size(yMeanSub.(plotVariables{varN}){subN}, 2)
-%                 xtips{ii} = b(ii).XEndPoints;
-%                 ytips{ii} = b(ii).YEndPoints;
-%                 for jj = 1:length(b(ii).YData)
-%                     labels{ii}{jj} = num2str(b(ii).YData(jj), '%.2f');
-%                 end
-%                 text(xtips{ii},ytips{ii},labels{ii},'HorizontalAlignment','center',...
-%                     'VerticalAlignment','bottom')
-%                 errorbar(xtips{ii},ytips{ii},yStdSub.(plotVariables{varN}){subN}(:, ii), 'lineStyle', 'none', 'color', 'k')
+%             xlabel('Aperture angle (deg)')
+%             legend(internalConNames(2:3), 'box', 'on', 'location', 'best', 'color', 'w')
+%             
+%             ylabel(['Diff ', plotVariables{varN}])
+%             title(names{subN})
+%             if varN>=saccadeVarStart
+%                 saveas(gcf, [saccadeFolder, '\individuals\sacDiff_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
+%             elseif varN==1
+%                 saveas(gcf, [perceptFolder, 'individuals\diff_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
+%             else
+%                 saveas(gcf, [pursuitFolder, '\individuals\pursuitDiff_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
 %             end
-%             xticks(1:length(apertureAngles))
-%             xticklabels(apertureAngleNames)
-
-            xlabel('Aperture angle (deg)')
-            legend(internalConNames, 'box', 'on', 'location', 'best', 'color', 'w')
             
-            ylabel(plotVariables{varN})
-            title(names{subN})
-            if varN>=saccadeVarStart
-                saveas(gcf, [saccadeFolder, 'individuals\sac_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
-            elseif varN==1
-                saveas(gcf, [perceptFolder, 'individuals\', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
-            else
-                saveas(gcf, [pursuitFolder, 'individuals\pursuit_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
-            end
-            
-%             close all
+            %             close all
         end
     end
 end

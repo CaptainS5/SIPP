@@ -3,29 +3,44 @@
 
 clear all; close all; clc
 
-names = {'w00'}; % 
+names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz' 'dc1'}; % also for 500, 501, 504, ib1...
 apertureAngles = [-9 -6 -3 0 3 6 9];
 apertureAngleNames = {'-9', '-6', '-3', '0', '3', '6', '9'};
-internalCons = [-90, 90];
-internalConNames = {'dir down', 'dir up'}; 
-perturbPhase = [1, 2]; % 1: perturbation during initiation; 2: perturbation during steady-state
-perturbPhaseNames = {'during initiation', 'during steady-state'};
+internalCons = [0, -90, 90];
+internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
+% internalConNames = {'static', 'dir down', 'dir up'}; % d00
 
 % parameter settings for plots
-plotVariables = {'response', 'latency', ...
+plotVariables = {'response', 'initialMeanVelocity2D', 'initialPeakVelocity2D', 'initialAccelerationFit2D', 'dirOlp', ...
     'gainXexternal', 'gainYexternal', 'gainYaverage', 'gain2Dexternal', 'gain2Daverage', 'dirGainExternal', ...
-    'dirPerturb', 'dirError', 'disCenterMean', ...
+    'dirClp', 'dirClpEarly', 'dirClpLate', 'dirClpChange', 'dirError', 'disCenterMean', 'disCenterMeanEarly', 'disCenterMeanLate', ...
     'num', 'numXLeft', 'numXRight', 'numYUp', 'numYDown', 'meanAmp2D', 'meanAmpXLeft', 'meanAmpXRight', 'meanAmpYUp', 'meanAmpYDown',...
     'sumAmp2D', 'sumAmpXLeft', 'sumAmpXRight', 'sumAmpYUp', 'sumAmpYDown'}; % always put all saccade parameters at last
-% openloopVarEnd = 6;
-saccadeVarStart = 12; 
+openloopVarEnd = 6;
+saccadeVarStart = 20; 
+
+% names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07' 'w08' 'w09' 'w10'};
+% cohCons = [0; 0.5; 1]; % RDK coherence'
+% cohNames = {'coh-0', 'coh-50%', 'coh-100%'};
+% internalDirCons = [-1 1]; % -1:left, 1-right
+% internalDirNames = {'up', 'down'};
+
+% names = {'xw0' 'dc0' 'ib0'};
+% internalDirCons = [-45 -90 -135 45 90 135]; % -1:left, 1-right
+% internalDirNames = {'-45', '-90', '-135', '45', '90', '135'};
+
+% names = {'x02'};
+% allCons.internalCons = [0, -90, 90];
+% internalConNames = {'coh 0', 'dir down', 'dir up'};
+% allCons.apertureAngles = [-21 -14 -7 0 7 14 21];
+% apertureAngleNames = {'-21', '-14', '-7', '0', '7', '14', '21'};
 
 sampleRate = 1000;
 
 analysisFolder = pwd;
-load('eyeTrialData_all2.mat');
+load('eyeTrialData_all.mat');
 load('summaryData')
-% load('summaryDataDiff')
+load('summaryDataDiff')
 load('summaryDataSub')
 perceptFolder = ['..\perceptPlots\'];
 eyeTracesFolder = ['..\eyeTraces\'];

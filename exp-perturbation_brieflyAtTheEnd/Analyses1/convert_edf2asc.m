@@ -36,8 +36,8 @@ for ii = 28:28%:length(folderNames) % we are starting at 3 because matlab always
     disp(['processing subject ' currentSubject{ii-2}]);
     cd(currentFolder);
     % Step 2.1
-%     % this step converts edf to asc containing all information
-%     [res, stat] = system([startFolder 'edf2asc -y ' currentFolder '\*.edf']);
+    % this step converts edf to asc containing all information
+    [res, stat] = system([startFolder 'edf2asc -y ' currentFolder '\*.edf']);
     % create a list of all converted files
     ascFiles = dir([currentFolder '\*.asc']);   
     load('trialData.mat')

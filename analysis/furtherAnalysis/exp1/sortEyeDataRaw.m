@@ -4,8 +4,8 @@
 
 clear all; close all; clc
 
-names = {'w00'};
-subStartI = 1;
+names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz' 'dc1'};
+subStartI = 15;
 
 cd ..
 analysisPath = pwd; % folder for the eye movement preprocessing codes
@@ -45,24 +45,23 @@ for subN = subStartI:length(names)
         eyeTrialData.blockN(subN, currentTrial) = Experiment.trialData.blockN(trialIdxInData, 1);
         eyeTrialData.errorStatus(subN, currentTrial) = errorStatus(currentTrial, 1);
         
-        analyzeTrial;
-        eyeTrialData.rdkApertureDir(subN, currentTrial) = trial.log.rdkApertureDir; % direction before perturbation, right (0) or left (180)
-        eyeTrialData.rdkApertureSpeed(subN, currentTrial) = trial.log.rdkApertureSpeed;
-        eyeTrialData.rdkApertureAngle(subN, currentTrial) = trial.log.rdkApertureAngle; % angle during perturbation
-        eyeTrialData.rdkInternalSpeed(subN, currentTrial) = trial.log.rdkInternalSpeed; % during perturbation
-        eyeTrialData.rdkInternalCon(subN, currentTrial) = trial.log.rdkInternalCon;
-        eyeTrialData.rdkInternalDir(subN, currentTrial) = trial.log.rdkInternalDir; % during perturbation
-        eyeTrialData.rdkCoh(subN, currentTrial) = trial.log.rdkCoh;
-        eyeTrialData.perturbPhase(subN, currentTrial) = trial.log.perturbTime;
-        eyeTrialData.response(subN, currentTrial) = trial.log.response;
-        
-        eyeTrialData.target{subN, currentTrial} = trial.target;
-        
         if errorStatus(currentTrial, 1)==0
+            analyzeTrial;
+            % to get target info
+            eyeTrialData.rdkApertureDir(subN, currentTrial) = trial.log.rdkApertureDir; % positive is up, negative is down
+            eyeTrialData.rdkApertureSpeed(subN, currentTrial) = trial.log.rdkApertureSpeed; % positive is up, negative is down
+            eyeTrialData.rdkApertureAngle(subN, currentTrial) = trial.log.rdkApertureAngle;
+            eyeTrialData.rdkInternalSpeed(subN, currentTrial) = trial.log.rdkInternalSpeed; %
+            eyeTrialData.rdkInternalCon(subN, currentTrial) = trial.log.rdkInternalCon;
+            eyeTrialData.rdkInternalDir(subN, currentTrial) = trial.log.rdkInternalDir; 
+            eyeTrialData.rdkCoh(subN, currentTrial) = trial.log.rdkCoh;
+            eyeTrialData.response(subN, currentTrial) = trial.log.response;
+            
             eyeTrialData.frameLog.fixationOn(subN, currentTrial) = trial.log.trialStart;
             eyeTrialData.frameLog.rdkOn(subN, currentTrial) = trial.log.targetOnset;
-            eyeTrialData.frameLog.perturbationOn(subN, currentTrial) = trial.log.perturbationOnset;
             eyeTrialData.frameLog.rdkOff(subN, currentTrial) = trial.log.targetOffset;
+            %             eyeTrialData.frameLog.respond(subN, currentTrial) = trial.log.trialEnd;
+            eyeTrialData.target{subN, currentTrial} = trial.target;
             
             % all pursuit data
             fields = fieldnames(trial.pursuit.summary);
@@ -99,9 +98,19 @@ for subN = subStartI:length(names)
         else
             eyeTrialData.frameLog.fixationOn(subN, currentTrial) = NaN;
             eyeTrialData.frameLog.rdkOn(subN, currentTrial) = NaN;
-            eyeTrialData.frameLog.perturbationOn(subN, currentTrial) = NaN;
             eyeTrialData.frameLog.rdkOff(subN, currentTrial) = NaN;
-
+            %             eyeTrialData.frameLog.respond(subN, currentTrial) = NaN;
+            eyeTrialData.target{subN, currentTrial} = trial.target;
+            
+            eyeTrialData.rdkApertureDir(subN, currentTrial) = NaN; % positive is up, negative is down
+            eyeTrialData.rdkApertureSpeed(subN, currentTrial) = NaN;
+            eyeTrialData.rdkApertureAngle(subN, currentTrial) = NaN;
+            eyeTrialData.rdkInternalCon(subN, currentTrial) = NaN;
+            eyeTrialData.rdkInternalDir(subN, currentTrial) = NaN; % direction std
+            eyeTrialData.rdkInternalSpeed(subN, currentTrial) = NaN; %
+            eyeTrialData.rdkCoh(subN, currentTrial) = NaN;
+            eyeTrialData.response(subN, currentTrial) = NaN;
+            
             fields = fieldnames(trial.pursuit.summary);
             for ii = 1:length(fields)
                 eyeTrialData.pursuit.(fields{ii})(subN, currentTrial) = NaN;
@@ -122,4 +131,4 @@ for subN = subStartI:length(names)
     end
     save([analysisPath '\furtherAnalysis\eyeTrialDataSub_' names{subN} '.mat'], 'eyeTrialDataSub');
 end
-save([analysisPath '\furtherAnalysis\eyeTrialData_all2.mat'], 'eyeTrialData');
+save([analysisPath '\furtherAnalysis\eyeTrialData_all.mat'], 'eyeTrialData');
