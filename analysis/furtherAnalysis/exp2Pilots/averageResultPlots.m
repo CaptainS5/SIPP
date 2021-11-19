@@ -18,8 +18,8 @@ paramsFree = [1 1 1 1];  %1: free parameter, 0: fixed parameter
 %Parameter grid defining parameter space through which to perform a
 %brute-force search for values to be used as initial guesses in iterative
 %parameter search.
-searchGrid.alpha = -3:.01:3;
-searchGrid.beta = logspace(0,10,200);
+searchGrid.alpha = -1:.01:3;
+searchGrid.beta = logspace(0,0.25,100);
 searchGrid.gamma = 0:0.01:0.05;  %scalar here (since fixed) but may be vector
 searchGrid.lambda = 0:0.001:0.05;  %ditto
 
@@ -28,16 +28,17 @@ if individualPlots
     for varN = plotVarStart:plotVarEnd
         for subN = 1:size(names, 2)
             % plot all conditions
-            figure
+%             figure
             for perturbN = 1:2
-                subplot(2, 1, perturbN)
+%                 subplot(2, 1, perturbN)
+figure
                 hold on
                 if varN==1 % psychometric functions for response
                     for internalConN = 1:size(internalCons, 2)
                         numRight = yMeanSub.choiceUpNum{subN, perturbN}(:, internalConN);
                         outOfNum =yMeanSub.totalTrialN{subN, perturbN}(:, internalConN);
                         % Perform fit
-                        [paramsValues LL exitflag] = PAL_PFML_Fit(apertureAngles, numRight, ...
+                        [paramsValues LL exitflag output] = PAL_PFML_Fit(apertureAngles, numRight, ...
                             outOfNum, searchGrid, paramsFree, PF, 'lapseLimits',[0 0.1]);
                         
                         % plotting

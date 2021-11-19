@@ -4,9 +4,10 @@
 
 clear all; close all; clc
 
-names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz' 'dc1'};
-subStartI = 15;
+names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz' 'dc1' 'ja' 'mg' 'yz' 'lk' 'as'};
+subStartI = 16;
 
+cd ..
 cd ..
 analysisPath = pwd; % folder for the eye movement preprocessing codes
 dataPath = ['..\data\']; % still need to go into specific folders
@@ -129,6 +130,6 @@ for subN = subStartI:length(names)
             eyeTrialDataSub.trial{1, currentTrial} = NaN; % for velocity traces
         end
     end
-    save([analysisPath '\furtherAnalysis\eyeTrialDataSub_' names{subN} '.mat'], 'eyeTrialDataSub');
+    save([analysisPath '\furtherAnalysis\exp1\eyeTrialDataSub_' names{subN} '.mat'], 'eyeTrialDataSub');
 end
-save([analysisPath '\furtherAnalysis\eyeTrialData_all.mat'], 'eyeTrialData');
+save([analysisPath '\furtherAnalysis\exp1\eyeTrialData_all.mat'], 'eyeTrialData');

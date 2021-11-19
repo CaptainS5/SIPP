@@ -23,7 +23,7 @@ paramsFree = [1 1 1 1];  %1: free parameter, 0: fixed parameter
 %brute-force search for values to be used as initial guesses in iterative
 %parameter search.
 searchGrid.alpha = -3:.01:3;
-searchGrid.beta = logspace(0,10,200);
+searchGrid.beta = logspace(0,1,100);
 searchGrid.gamma = 0:0.01:0.05;  %scalar here (since fixed) but may be vector
 searchGrid.lambda = 0:0.001:0.05;  %ditto
 

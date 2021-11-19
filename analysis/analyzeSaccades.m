@@ -19,9 +19,10 @@
 
 function [trial, saccades] = analyzeSaccades(trial)
 % define the window you want to analyze saccades in
-% all saccade properties are within this window
-startFrame = trial.log.perturbationOnset;
-endFrame = trial.log.targetOffset;
+% all saccade properties are within this window, using onsets_pursuit and
+% offsets_pursuit
+startFrame = nanmax(trial.log.targetOnset, trial.pursuit.summary.onset);
+endFrame = trial.log.targetOffset-ms2frames(100);
 
 % then find the proper onsets and offsets
 idx = find(trial.saccades.onsets>=startFrame & trial.saccades.onsets<=endFrame);

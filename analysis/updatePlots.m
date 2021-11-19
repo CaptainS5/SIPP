@@ -77,7 +77,6 @@ plot(trial.saccades.Y.offsets,trial.eyeY_filt(trial.saccades.Y.offsets),'c*');
 %     'sacOn', 'sacOff'},'Location','NorthWest');%, 'AutoUpdate','off');
 % vertical lines indicate events/target onsets
 line([trial.log.targetOnset trial.log.targetOnset], [minPosX maxPosX],'Color','k','LineStyle','--');
-line([trial.log.perturbationOnset trial.log.perturbationOnset], [minPosX maxPosX],'Color','k','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minPosX maxPosX],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
     line([trial.pursuit.summary.onset trial.pursuit.summary.onset], [minPosX maxPosX],'Color','b','LineStyle','--');
@@ -115,7 +114,6 @@ plot(trial.saccades.Y.onsets,trial.eyeDY_filt(trial.saccades.Y.onsets),'y*');
 plot(trial.saccades.Y.offsets,trial.eyeDY_filt(trial.saccades.Y.offsets),'c*');
 % vertical lines indicate events/target onsets
 line([trial.log.targetOnset trial.log.targetOnset], [minVel maxVel],'Color','k','LineStyle','--');
-line([trial.log.perturbationOnset trial.log.perturbationOnset], [minVel maxVel],'Color','k','LineStyle','--');
 % line([trial.stim_offset-ms2frames(100) trial.stim_offset-ms2frames(100)], [minVel maxVel],'Color','b','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minVel maxVel],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
@@ -166,7 +164,6 @@ plot(trial.saccades.Y.onsets,trial.eyeDDY_filt(trial.saccades.Y.onsets),'y*');
 plot(trial.saccades.Y.offsets,trial.eyeDDY_filt(trial.saccades.Y.offsets),'c*');
 % vertical lines indicate events/target onsets
 line([trial.log.targetOnset trial.log.targetOnset], [minAcc maxAcc],'Color','k','LineStyle','--');
-line([trial.log.perturbationOnset trial.log.perturbationOnset], [minAcc maxAcc],'Color','k','LineStyle','--');
 line([trial.stim_offset trial.stim_offset], [minAcc maxAcc],'Color','k','LineStyle','--');
 % if trial.log.eyeCondition==1 % pursuit trials
     line([trial.pursuit.summary.onset trial.pursuit.summary.onset], [minAcc maxAcc],'Color','b','LineStyle','--');

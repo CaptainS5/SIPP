@@ -82,20 +82,19 @@ if trial.signalLoss
         trial.log.eyeType = 1; % pursuit condition
     end
     trial.log.blockN = Experiment.trialData.blockN(trialIdxInData, 1);
-    trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDirBefore(trialIdxInData, 1); % either left or right, the "base" direction
+    trial.log.rdkApertureDir = Experiment.trialData.rdkApertureDir(trialIdxInData, 1); % either left or right, the "base" direction
     if trial.log.rdkApertureDir==0 % moving rightward
-        trial.log.rdkApertureAngle = Experiment.trialData.rdkApertureAnglePerturbation(trialIdxInData, 1); % positive is up, negative is down
+        trial.log.rdkApertureAngle = Experiment.trialData.rdkApertureAngle(trialIdxInData, 1); % positive is up, negative is down
     else % moving leftward
-        trial.log.rdkApertureAngle = trial.log.rdkApertureDir - Experiment.trialData.rdkApertureAnglePerturbation(trialIdxInData, 1); % positive is up, negative is down, relative to the aperture direction
+        trial.log.rdkApertureAngle = trial.log.rdkApertureDir - Experiment.trialData.rdkApertureAngle(trialIdxInData, 1); % positive is up, negative is down, relative to the aperture direction
     end
     trial.log.rdkInternalSpeed = Experiment.const.rdk.internalSpeed;
-    if Experiment.trialData.rdkInternalPerturbationCons(trialIdxInData, 1)==0
+    if Experiment.trialData.rdkInternalCons(trialIdxInData, 1)==0
         trial.log.rdkInternalDir = 0;
         trial.log.rdkCoh = 0;
     else
-        trial.log.rdkInternalDir = Experiment.trialData.rdkInternalPerturbationCons(trialIdxInData, 1); % relative direction within the RDK
+        trial.log.rdkInternalDir = Experiment.trialData.rdkInternalCons(trialIdxInData, 1); % relative direction within the RDK
         trial.log.rdkCoh = 1;
     end
-    trial.log.perturbTime = Experiment.trialData.rdkPerturbationTime(trialIdxInData, 1)+1;
     trial.log.response = NaN;
 end
