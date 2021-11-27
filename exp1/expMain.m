@@ -431,17 +431,17 @@ try
                     % initialize trial information for the added trial
                     trialData.tMainSync(end, 1)          = 0;                   % Time (GetSecs) at trial start, also fixation on.
                     trialData.tRDKon(end, 1)        = NaN;
-                    trialData.tPerturbationOn(end, 1)         = NaN;
+%                     trialData.tPerturbationOn(end, 1)         = NaN;
                     trialData.tRDKoff(end, 1)  = NaN;                     % actual measured time that the target appeared/disappeared
                     trialData.tResponse(end, 1)          = NaN;               % also the end of the trial
                     trialData.t_start_VBL(end, 1:5)        = NaN;
                     trialData.t_rdkOn_VBL(end, 1:5)         = NaN;
-                    trialData.t_perturbationOn_VBL(:, 1:5)         = NaN;
+%                     trialData.t_perturbationOn_VBL(:, 1:5)         = NaN;
                     trialData.t_rdkOff_VBL(end, 1:5)        = NaN;
                     trialData.t_response_VBL(end, 1:5)        = NaN;
                     trialData.iterations(end, 1)        = NaN;
                     %                     trialData.pursuitOn(end, 1)         = NaN;
-                    trialData.choice(end, 1)          = NaN; % -1=up, 1=down
+                    trialData.reportAngle(end, 1)          = NaN; % -1=up, 1=down
                     trialData.repeat(end, 1)          = 0; % if the trial was repeated, mark repeat as 1
                     trialData.trialCounter(end, 1) = trialData.trialCounter(end-1, 1)+1;
                     

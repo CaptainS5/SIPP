@@ -1,19 +1,20 @@
-% Xiuyun Wu, 13/Jan/2021
+% Exp2, Xiuyun Wu, 22/Nov/2021
 % getting the raw processed eye data... will be much more convenient for
 % later analysis; run this after getting the errorfiles
 
 clear all; close all; clc
 
-names = {'w00'};
+names = {'w01'};
 subStartI = 1;
 
+cd ..
 cd ..
 analysisPath = pwd; % folder for the eye movement preprocessing codes
 dataPath = ['..\data\']; % still need to go into specific folders
 
 %% All trials
 if subStartI>1 % if starting halway, load the current eyeTrialDataAll
-    load([analysisPath '\furtherAnalysis\eyeTrialData_all.mat'])
+    load([analysisPath '\furtherAnalysis\exp2\eyeTrialData_all.mat'])
 else
     clear eyeTrialData
 end
@@ -120,6 +121,6 @@ for subN = subStartI:length(names)
             eyeTrialDataSub.trial{1, currentTrial} = NaN; % for velocity traces
         end
     end
-    save([analysisPath '\furtherAnalysis\eyeTrialDataSub_' names{subN} '.mat'], 'eyeTrialDataSub');
+    save([analysisPath '\furtherAnalysis\exp2\eyeTrialDataSub_' names{subN} '.mat'], 'eyeTrialDataSub');
 end
-save([analysisPath '\furtherAnalysis\eyeTrialData_all2.mat'], 'eyeTrialData');
+save([analysisPath '\furtherAnalysis\exp2\eyeTrialData_all.mat'], 'eyeTrialData');

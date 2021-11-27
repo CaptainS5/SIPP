@@ -1,11 +1,12 @@
+% Exp1:
 % grouped bars plots for any applicable results in different conditions
 initializeParas;
 
-% choose which plot to look at
+%% choose which plot to look at
 individualPlots = 1;
-averagePlots = 1;
-plotVarStart = 1;
-plotVarEnd = 1;
+averagePlots = 0;
+plotVarStart = 6;
+plotVarEnd = 13;
 
 %%
 if individualPlots
@@ -46,48 +47,47 @@ if individualPlots
                 saveas(gcf, [pursuitFolder, '\individuals\pursuitDiff_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
             end
             
-            % plot all conditions
-            figure
-            hold on
-            % line plot
-            for internalConN = 1:size(internalCons, 2)
-                errorbar(apertureAngles, yMeanSub.(plotVariables{varN}){subN}(:, internalConN), yStdSub.(plotVariables{varN}){subN}(:, internalConN), 'color', colorCons(internalConN, :))
-            end
-            
-%             % bar plot
-%             b = bar(yMeanSub.(plotVariables{varN}){subN});
-%             for ii = 1:size(yMeanSub.(plotVariables{varN}){subN}, 2)
-%                 xtips{ii} = b(ii).XEndPoints;
-%                 ytips{ii} = b(ii).YEndPoints;
-%                 for jj = 1:length(b(ii).YData)
-%                     labels{ii}{jj} = num2str(b(ii).YData(jj), '%.2f');
-%                 end
-%                 text(xtips{ii},ytips{ii},labels{ii},'HorizontalAlignment','center',...
-%                     'VerticalAlignment','bottom')
-%                 errorbar(xtips{ii},ytips{ii},yStdSub.(plotVariables{varN}){subN}(:, ii), 'lineStyle', 'none', 'color', 'k')
+%             % plot all conditions
+%             figure
+%             hold on
+%             % line plot
+%             for internalConN = 1:size(internalCons, 2)
+%                 errorbar(apertureAngles, yMeanSub.(plotVariables{varN}){subN}(:, internalConN), yStdSub.(plotVariables{varN}){subN}(:, internalConN), 'color', colorCons(internalConN, :))
 %             end
-%             xticks(1:length(apertureAngles))
-%             xticklabels(apertureAngleNames)
-
-            xlabel('Aperture angle (deg)')
-            legend(internalConNames, 'box', 'on', 'location', 'best', 'color', 'w')
-            
-            ylabel(plotVariables{varN})
-            title(names{subN})
-            if varN>=saccadeVarStart
-                saveas(gcf, [saccadeFolder, 'individuals\sac_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
-            elseif varN==1
-                saveas(gcf, [perceptFolder, 'individuals\', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
-            else
-                saveas(gcf, [pursuitFolder, 'individuals\pursuit_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
-            end
-            
-%             close all
+%             
+% %             % bar plot
+% %             b = bar(yMeanSub.(plotVariables{varN}){subN});
+% %             for ii = 1:size(yMeanSub.(plotVariables{varN}){subN}, 2)
+% %                 xtips{ii} = b(ii).XEndPoints;
+% %                 ytips{ii} = b(ii).YEndPoints;
+% %                 for jj = 1:length(b(ii).YData)
+% %                     labels{ii}{jj} = num2str(b(ii).YData(jj), '%.2f');
+% %                 end
+% %                 text(xtips{ii},ytips{ii},labels{ii},'HorizontalAlignment','center',...
+% %                     'VerticalAlignment','bottom')
+% %                 errorbar(xtips{ii},ytips{ii},yStdSub.(plotVariables{varN}){subN}(:, ii), 'lineStyle', 'none', 'color', 'k')
+% %             end
+% %             xticks(1:length(apertureAngles))
+% %             xticklabels(apertureAngleNames)
+% 
+%             xlabel('Aperture angle (deg)')
+%             legend(internalConNames, 'box', 'on', 'location', 'best', 'color', 'w')
+%             
+%             ylabel(plotVariables{varN})
+%             title(names{subN})
+%             if varN>=saccadeVarStart
+%                 saveas(gcf, [saccadeFolder, 'individuals\sac_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
+%             elseif varN==1
+%                 saveas(gcf, [perceptFolder, 'individuals\', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
+%             else
+%                 saveas(gcf, [pursuitFolder, 'individuals\pursuit_', plotVariables{varN}, '_lineplot_', names{subN}, '.pdf'])
+%             end
         end
+        close all
     end
 end
 
-%%
+%
 if averagePlots
     for varN = plotVarStart:plotVarEnd
         % plot difference from baseline

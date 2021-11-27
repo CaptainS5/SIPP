@@ -1,12 +1,13 @@
 initializeParas;
-
+%%
 checkVariables = {'response', 'initialMeanVelocity2D', 'initialPeakVelocity2D', 'initialAccelerationFit2D', 'dirOlp', ...
     'gainXexternal', 'gainYexternal', 'gainYaverage', 'gain2Dexternal', 'gain2Daverage', 'dirGainExternal', ...
+    'dirEarly', 'dirLate', 'dirChange', ...
     'dirClp', 'dirClpEarly', 'dirClpLate', 'dirClpChange', 'dirError', 'disCenterMean', 'disCenterMeanEarly', 'disCenterMeanLate', ...
     'num', 'numXLeft', 'numXRight', 'numYUp', 'numYDown', 'meanAmp2D', 'meanAmpXLeft', 'meanAmpXRight', 'meanAmpYUp', 'meanAmpYDown',...
     'sumAmp2D', 'sumAmpXLeft', 'sumAmpXRight', 'sumAmpYUp', 'sumAmpYDown'}; % always put all saccade parameters at last
 openloopVarEnd = 6;
-saccadeVarStart = 20; % if there is no saccade variables, just use a number larger than the number of all variables to be plotted
+saccadeVarStart = 23; % if there is no saccade variables, just use a number larger than the number of all variables to be plotted
 
 % delete obvious error trials
 idxT = find(eyeTrialData.errorStatus==0 & ...
@@ -76,6 +77,7 @@ for subN = 1:size(names, 2)
                         yStdDiffSub.(checkVariables{varN}){subN}(angleN, internalConN-1) = nanstd(onsetT-rdkOnT-yMeanSub.(checkVariables{varN}){subN}(angleN, 1));
                     end
                 elseif strcmp(checkVariables{varN}, 'dirClp') || strcmp(checkVariables{varN}, 'dirOlp') ...
+                        || strcmp(checkVariables{varN}, 'dirEarly') || strcmp(checkVariables{varN}, 'dirLate') ...
                         || strcmp(checkVariables{varN}, 'dirClpEarly') || strcmp(checkVariables{varN}, 'dirClpLate') % needs to calculate from vectors
                     dirXName = [checkVariables{varN}, 'X'];
                     dirYName = [checkVariables{varN}, 'Y'];
@@ -138,5 +140,5 @@ save('summaryData.mat', 'summaryData')
 save('summaryDataDiff.mat', 'summaryDataDiff')
 
 %% generate csv for plotting in R
-% writetable(summaryData, [RFolder, 'summaryData.csv'])
-% writetable(summaryDataDiff, [RFolder, 'summaryDataDiff.csv'])
+writetable(summaryData, [RFolder, 'summaryData.csv'])
+writetable(summaryDataDiff, [RFolder, 'summaryDataDiff.csv'])

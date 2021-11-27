@@ -5,7 +5,9 @@
 clear all; close all; clc
 
 names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz' 'dc1' 'ja' 'mg' 'yz' 'lk' 'as'};
-subStartI = 16;
+subStartI = 1;
+
+load('summaryDataDiff_TP.mat')
 
 cd ..
 cd ..
@@ -14,7 +16,7 @@ dataPath = ['..\data\']; % still need to go into specific folders
 
 %% All trials
 if subStartI>1 % if starting halway, load the current eyeTrialDataAll
-    load([analysisPath '\furtherAnalysis\eyeTrialData_all.mat'])
+    load([analysisPath '\furtherAnalysis\exp1\eyeTrialData_all.mat'])
 else
     clear eyeTrialData
 end
@@ -47,6 +49,15 @@ for subN = subStartI:length(names)
         eyeTrialData.errorStatus(subN, currentTrial) = errorStatus(currentTrial, 1);
         
         if errorStatus(currentTrial, 1)==0
+            % get the turning point latency from summaryDataDiff
+            internalCon = Experiment.trialData.rdkInternalCons(trialIdxInData, 1);
+            if internalCon~=0
+                idxT = find(summaryDataDiff.sub==subN & summaryDataDiff.rdkInternalDir==internalCon);
+                tp = summaryDataDiff.turningPoint(idxT(1));
+            else
+                idxT = find(summaryDataDiff.sub==subN);
+                tp = round(mean(summaryDataDiff.turningPoint(idxT)));
+            end
             analyzeTrial;
             % to get target info
             eyeTrialData.rdkApertureDir(subN, currentTrial) = trial.log.rdkApertureDir; % positive is up, negative is down
@@ -132,4 +143,4 @@ for subN = subStartI:length(names)
     end
     save([analysisPath '\furtherAnalysis\exp1\eyeTrialDataSub_' names{subN} '.mat'], 'eyeTrialDataSub');
 end
-save([analysisPath '\furtherAnalysis\exp1\eyeTrialData_all.mat'], 'eyeTrialData');
+save([analysisPath '\furtherAnalysis\exp1\eyeTrialData_all.mat'], 'eyeTrialData', '-v7.3'); % apparently it won't save if the file is too large...

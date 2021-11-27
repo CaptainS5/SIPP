@@ -1,9 +1,10 @@
+% Exp2
 % use eyeTrialData to do analysis, initialize parameters for the predictive
 % pursuit task
 
 clear all; close all; clc
 
-names = {'w00'}; % 
+names = {'w01'}; % 
 apertureAngles = [-9 -6 -3 0 3 6 9];
 apertureAngleNames = {'-9', '-6', '-3', '0', '3', '6', '9'};
 internalCons = [-90, 90];
@@ -23,17 +24,17 @@ saccadeVarStart = 12;
 sampleRate = 1000;
 
 analysisFolder = pwd;
-load('eyeTrialData_all2.mat');
+load('eyeTrialData_all.mat');
 load('summaryData')
 % load('summaryDataDiff')
 load('summaryDataSub')
-perceptFolder = ['..\perceptPlots\'];
-eyeTracesFolder = ['..\eyeTraces\'];
-pursuitFolder = ['..\pursuitPlots\'];
-saccadeFolder = ['..\saccadePlots\'];
-correlationFolder = ['..\corrPlots\'];
-perceptFolder = ['..\perceptualPlots\'];
-RFolder = ['..\R\'];
+perceptFolder = ['..\..\perceptPlots\'];
+eyeTracesFolder = ['..\..\eyeTraces\'];
+pursuitFolder = ['..\..\pursuitPlots\'];
+saccadeFolder = ['..\..\saccadePlots\'];
+correlationFolder = ['..\..\corrPlots\'];
+perceptFolder = ['..\..\perceptualPlots\'];
+RFolder = ['..\..\R\'];
 
 % for plotting
 textFontSize = 8;

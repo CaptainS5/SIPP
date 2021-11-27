@@ -59,7 +59,8 @@ else
     trial.log.rdkCoh = 1;
 end
 trial.log.perturbTime = Experiment.trialData.rdkPerturbationTime(trialIdxInData, 1)+1; % 1: perturbation during initiation; 2: perturbation during steady-state
-trial.log.response = Experiment.trialData.choice(trialIdxInData, 1);
+% trial.log.response = Experiment.trialData.choice(trialIdxInData, 1);
+trial.log.response = Experiment.trialData.reportAngle(trialIdxInData, 1);
 trial.log.eyeSampleRate = eyeData.sampleRate;
 
 % frame indices of all events; after comparing eventLog with eyeData.frameIdx

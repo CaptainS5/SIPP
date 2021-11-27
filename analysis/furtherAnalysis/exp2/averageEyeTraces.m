@@ -1,3 +1,4 @@
+% Exp2
 % plot position&velocity traces for translating RDK
 % also generate csv file for further plotting in R
 
@@ -56,8 +57,8 @@ for subN = subStart:subEnd
                 eyeTrialData.perturbPhase(subN, :)==perturbPhase(perturbN));
             
             lengthT = length(idxT);
-            %         frames.onset{subN, internalDirN}.posX = NaN(lengthT, frameLength(subN, 1));
-            %         frames.onset{subN, internalDirN}.posY = NaN(lengthT, frameLength(subN, 1));
+            frames.onset{subN}{perturbN, internalConN}.posX = NaN(lengthT, frameLength(subN, 1));
+            frames.onset{subN}{perturbN, internalConN}.posY = NaN(lengthT, frameLength(subN, 1));
             frames.onset{subN}{perturbN, internalConN}.velX = NaN(lengthT, frameLength(subN, 1));
             frames.onset{subN}{perturbN, internalConN}.velY = NaN(lengthT, frameLength(subN, 1));
             
@@ -65,8 +66,10 @@ for subN = subStart:subEnd
                 % align at 100 ms before perturbation onset
                 startI = eyeTrialData.frameLog.perturbationOn(subN, idxT(trialN))-100+1;
                 endI = startI+frameLength(subN, 1)-1;
-                %             frames.onset{subN, internalDirN}.posX(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.X_interpolSac(startI:endI);
-                %             frames.onset{subN, internalDirN}.posY(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.Y_interpolSac(startI:endI);
+                frames.onset{subN}{perturbN, internalConN}.posX(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.X_interpolSac(startI:endI);
+                frames.onset{subN}{perturbN, internalConN}.posX(trialN, :) = frames.onset{subN}{perturbN, internalConN}.posX(trialN, :)-frames.onset{subN}{perturbN, internalConN}.posX(trialN, 1);
+                frames.onset{subN}{perturbN, internalConN}.posY(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.Y_interpolSac(startI:endI);
+                frames.onset{subN}{perturbN, internalConN}.posY(trialN, :) = frames.onset{subN}{perturbN, internalConN}.posY(trialN, :)-frames.onset{subN}{perturbN, internalConN}.posY(trialN, 1);
                 frames.onset{subN}{perturbN, internalConN}.velX(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.DX_interpolSac(startI:endI);
                 frames.onset{subN}{perturbN, internalConN}.velY(trialN, :) = eyeTrialDataSub.trial{1, idxT(trialN)}.DY_interpolSac(startI:endI);
             end
@@ -91,12 +94,40 @@ for ii = 1:length(groupN)
     % plot mean traces for each participant
     if individualPlots
         for subN = subStart:subEnd
-            
+            % position, all conditions
             for perturbN = 1:length(allCons.perturbPhase)
                 figure
                 for internalConN = 1:length(allCons.internalCons)
-                    for dimN = 1:2
-                        subplot(2, 2, (internalConN-1)*2+dimN)
+                    subplot(2, 1, internalConN)
+                    hold on
+                    for angleN = 1:length(allCons.apertureAngles)
+                        if allCons.apertureAngles(angleN)>0 % upward internal dir
+                            lineStyle = '-';
+                        else % downward internal dir
+                            lineStyle = '--';
+                        end
+                        p{angleN} = plot(indiMean{ii}.pos{perturbN}{angleN, internalConN}{1}(subN, :), ...
+                            indiMean{ii}.pos{perturbN}{angleN, internalConN}{2}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
+                    end
+                    title([names{subN}, ', ', internalConNames{internalConN}])
+                    xlabel('Horizontal eye pos (deg)')
+                    ylabel('Vertical eye pos (deg)')
+%                     xlim([-100 300])
+                    
+                    if internalConN==1
+                        legend([p{:}], apertureAngleNames, 'Location', 'best')
+                    end
+                    box off
+                    saveas(gcf, [eyeTracesFolder, 'individuals\exp2\posTrace_perturbPhase' num2str(allCons.perturbPhase(perturbN)) '_' names{subN} '.pdf'])
+                end
+            end
+            
+            % position; difference: up-down
+            for perturbN = 1:length(allCons.perturbPhase)
+                figure
+                for internalConN = 2:length(allCons.internalCons)
+%                     for dimN = 1:2
+%                         subplot(1, 2, (internalConN-2)*2+dimN)
                         hold on
                         for angleN = 1:length(allCons.apertureAngles)
                             if allCons.apertureAngles(angleN)>0 % upward internal dir
@@ -104,48 +135,78 @@ for ii = 1:length(groupN)
                             else % downward internal dir
                                 lineStyle = '--';
                             end
-                            p{angleN} = plot(timePointsOnset, indiMean{ii}.vel{perturbN}{angleN, internalConN}{dimN}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
+                            p{angleN} = plot(timePointsOnset, indiMean{ii}.velDiff{perturbN}{angleN, internalConN}{2}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
                         end
-                        title([names{subN}, ', ', internalConNames{internalConN}])
+                        title([names{subN}, ', up-down'])
                         xlabel('Time from perturbation onset (ms)')
-                        ylabel([dimNames{dimN}, ' eye velocity (deg/s)'])
+                        ylabel(['Diff in vertical eye position (deg'])
                         xlim([-100 300])
                         
-                        if internalConN==1 && dimN==1
+                        if internalConN==1
                             legend([p{:}], apertureAngleNames, 'Location', 'best')
                         end
                         box off
-                    end
-                    saveas(gcf, [eyeTracesFolder, 'individuals\exp2\velTraceDiff_perturbPhase' num2str(allCons.perturbPhase(perturbN)) '_' names{subN} '.pdf'])
+%                     end
+                    saveas(gcf, [eyeTracesFolder, 'individuals\exp2\posYTraceDiff_perturbPhase' num2str(allCons.perturbPhase(perturbN)) '_' names{subN} '.pdf'])
                 end
             end
             
-%             % velocity; each internal cons is one figure; difference from
-%             % baseline
-%             for internalConN = 2:length(allCons.internalCons)
+%             % velocity, all conditions
+%             for perturbN = 1:length(allCons.perturbPhase)
 %                 figure
-%                 for dimN = 1:2
-%                     subplot(2, 1, dimN)
-%                     hold on
-%                     for angleN = 1:length(allCons.apertureAngles)
-%                         if allCons.apertureAngles(angleN)>0 % upward internal dir
-%                             lineStyle = '-';
-%                         else % downward internal dir
-%                             lineStyle = '--';
+%                 for internalConN = 1:length(allCons.internalCons)
+%                     for dimN = 1:2
+%                         subplot(2, 2, (internalConN-1)*2+dimN)
+%                         hold on
+%                         for angleN = 1:length(allCons.apertureAngles)
+%                             if allCons.apertureAngles(angleN)>0 % upward internal dir
+%                                 lineStyle = '-';
+%                             else % downward internal dir
+%                                 lineStyle = '--';
+%                             end
+%                             p{angleN} = plot(timePointsOnset, indiMean{ii}.vel{perturbN}{angleN, internalConN}{dimN}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
 %                         end
-%                         p{angleN} = plot(timePointsOnset, indiMean{ii}.velDiff{angleN, internalConN}{dimN}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
+%                         title([names{subN}, ', ', internalConNames{internalConN}])
+%                         xlabel('Time from perturbation onset (ms)')
+%                         ylabel([dimNames{dimN}, ' eye velocity (deg/s)'])
+%                         xlim([-100 300])
+%                         
+%                         if internalConN==1 && dimN==1
+%                             legend([p{:}], apertureAngleNames, 'Location', 'best')
+%                         end
+%                         box off
 %                     end
-%                     title([names{subN}, ', ', internalConNames{internalConN}])
-%                     xlabel('Time from RDK onset (ms)')
-%                     ylabel([dimNames{dimN}, ' eye velocity difference (deg/s)'])
-%                     xlim([-200 800])
-%                     
-%                     if dimN==1
-%                         legend([p{:}], apertureAngleNames, 'Location', 'best')
-%                     end
-%                     box off
+%                     saveas(gcf, [eyeTracesFolder, 'individuals\exp2\velTrace_perturbPhase' num2str(allCons.perturbPhase(perturbN)) '_' names{subN} '.pdf'])
 %                 end
-%                 saveas(gcf, [eyeTracesFolder, 'individuals\velTraceDiff_internalCon' num2str(allCons.internalCons(internalConN)) '_' names{subN} '.pdf'])
+%             end
+%             
+%             % velocity; difference: up-down
+%             for perturbN = 1:length(allCons.perturbPhase)
+%                 figure
+%                 for internalConN = 2:length(allCons.internalCons)
+%                     for dimN = 1:2
+%                         subplot(1, 2, (internalConN-2)*2+dimN)
+%                         hold on
+%                         for angleN = 1:length(allCons.apertureAngles)
+%                             if allCons.apertureAngles(angleN)>0 % upward internal dir
+%                                 lineStyle = '-';
+%                             else % downward internal dir
+%                                 lineStyle = '--';
+%                             end
+%                             p{angleN} = plot(timePointsOnset, indiMean{ii}.velDiff{perturbN}{angleN, internalConN}{dimN}(subN, :), 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
+%                         end
+%                         title([names{subN}, ', up-down'])
+%                         xlabel('Time from perturbation onset (ms)')
+%                         ylabel(['Diff ', dimNames{dimN}, ' eye velocity (deg/s)'])
+%                         xlim([-100 300])
+%                         
+%                         if internalConN==1 && dimN==1
+%                             legend([p{:}], apertureAngleNames, 'Location', 'best')
+%                         end
+%                         box off
+%                     end
+%                     saveas(gcf, [eyeTracesFolder, 'individuals\exp2\velTraceDiff_perturbPhase' num2str(allCons.perturbPhase(perturbN)) '_' names{subN} '.pdf'])
+%                 end
 %             end
         end
     end
@@ -274,8 +335,8 @@ for perturbN = 1:length(allCons.perturbPhase)
             indiMean.vel{perturbN}{angleN, internalConN}{1} = NaN(length(names), minFrameLength); % horizontal
             indiMean.vel{perturbN}{angleN, internalConN}{2} = NaN(length(names), minFrameLength); % vertical
             
-            %     indiMean.pos{conN, 1} = NaN(length(names), minFrameLength); % horizontal
-            %     indiMean.pos{conN, 2} = NaN(length(names), minFrameLength); % vertical
+            indiMean.pos{perturbN}{angleN, internalConN}{1} = NaN(length(names), minFrameLength); % horizontal
+            indiMean.pos{perturbN}{angleN, internalConN}{1} = NaN(length(names), minFrameLength); % vertical
             
             for subN = subStart:subEnd
                 idxT = find(eyeTrialData.errorStatus(subN, :)==0 & ...
@@ -302,12 +363,20 @@ for perturbN = 1:length(allCons.perturbPhase)
                     nanmean(frames.onset{subN}{perturbN, internalConN}.velX(idx, 1:minFrameLength), 1);
                 indiMean.vel{perturbN}{angleN, internalConN}{2}(subN, :) = ...
                     nanmean(frames.onset{subN}{perturbN, internalConN}.velY(idx, 1:minFrameLength), 1);
-%                 if internalConN>=2
-%                     indiMean.velDiff{angleN, internalConN}{1}(subN, :) = ...
-%                         indiMean.vel{angleN, internalConN}{1}(subN, :)-indiMean.vel{angleN, 1}{1}(subN, :);
-%                     indiMean.velDiff{angleN, internalConN}{2}(subN, :) = ...
-%                         indiMean.vel{angleN, internalConN}{2}(subN, :)-indiMean.vel{angleN, 1}{2}(subN, :);
-%                 end
+                indiMean.pos{perturbN}{angleN, internalConN}{1}(subN, :) = ...
+                    nanmean(frames.onset{subN}{perturbN, internalConN}.posX(idx, 1:minFrameLength), 1);
+                indiMean.pos{perturbN}{angleN, internalConN}{2}(subN, :) = ...
+                    nanmean(frames.onset{subN}{perturbN, internalConN}.posY(idx, 1:minFrameLength), 1);
+                if internalConN>=2
+                    indiMean.velDiff{perturbN}{angleN, internalConN}{1}(subN, :) = ...
+                        indiMean.vel{perturbN}{angleN, internalConN}{1}(subN, :)-indiMean.vel{perturbN}{angleN, 1}{1}(subN, :);
+                    indiMean.velDiff{perturbN}{angleN, internalConN}{2}(subN, :) = ...
+                        indiMean.vel{perturbN}{angleN, internalConN}{2}(subN, :)-indiMean.vel{perturbN}{angleN, 1}{2}(subN, :);
+                    indiMean.posDiff{perturbN}{angleN, internalConN}{1}(subN, :) = ...
+                        indiMean.pos{perturbN}{angleN, internalConN}{1}(subN, :)-indiMean.pos{perturbN}{angleN, 1}{1}(subN, :);
+                    indiMean.posDiff{perturbN}{angleN, internalConN}{2}(subN, :) = ...
+                        indiMean.pos{perturbN}{angleN, internalConN}{2}(subN, :)-indiMean.pos{perturbN}{angleN, 1}{2}(subN, :);
+                end
                 %         indiMean.pos{conN, 1}(subN, :) = nanmean([-frames.onset{subN, internalDirN}.posX(leftIdx, 1:minFrameLength); frames.onset{subN, internalDirN}.posX(rightIdx, 1:minFrameLength)], 1);
                 %         indiMean.pos{conN, 2}(subN, :) = nanmean([frames.onset{subN, internalDirN}.posY(leftIdx, 1:minFrameLength); frames.onset{subN, internalDirN}.posY(rightIdx, 1:minFrameLength)], 1);
                 
@@ -317,12 +386,22 @@ for perturbN = 1:length(allCons.perturbPhase)
             % collapsed all participants
             allMean.vel{perturbN}{angleN, internalConN}{1} = nanmean(indiMean.vel{perturbN}{angleN, internalConN}{1}, 1);
             allMean.vel{perturbN}{angleN, internalConN}{2} = nanmean(indiMean.vel{perturbN}{angleN, internalConN}{2}, 1);
-%             if internalConN>=2
-%                 allMean.velDiff{angleN, internalConN}{1} = ...
-%                     allMean.vel{angleN, internalConN}{1}-allMean.vel{angleN, 1}{1};
-%                 allMean.velDiff{angleN, internalConN}{2} = ...
-%                     allMean.vel{angleN, internalConN}{2}-allMean.vel{angleN, 1}{2};
-%             end
+            allMean.pos{perturbN}{angleN, internalConN}{1} = nanmean(indiMean.pos{perturbN}{angleN, internalConN}{1}, 1);
+            allMean.pos{perturbN}{angleN, internalConN}{2} = nanmean(indiMean.pos{perturbN}{angleN, internalConN}{2}, 1);
+            if internalConN>=2
+                allMean.velDiff{perturbN}{angleN, internalConN}{1} = nanmean(indiMean.velDiff{perturbN}{angleN, internalConN}{1}, 1);
+                allMean.velDiff{perturbN}{angleN, internalConN}{2} = nanmean(indiMean.velDiff{perturbN}{angleN, internalConN}{2}, 1);
+                allMean.posDiff{perturbN}{angleN, internalConN}{1} = nanmean(indiMean.posDiff{perturbN}{angleN, internalConN}{1}, 1);
+                allMean.posDiff{perturbN}{angleN, internalConN}{2} = nanmean(indiMean.posDiff{perturbN}{angleN, internalConN}{2}, 1);
+%                 allMean.velDiff{perturbN}{angleN, internalConN}{1} = ...
+%                     allMean.vel{perturbN}{angleN, internalConN}{1}-allMean.vel{perturbN}{angleN, internalConN}{1};
+%                 allMean.velDiff{perturbN}{angleN, internalConN}{2} = ...
+%                     allMean.vel{perturbN}{angleN, internalConN}{2}-allMean.vel{perturbN}{angleN, internalConN}{2};
+%                 allMean.posDiff{perturbN}{angleN, internalConN}{1} = ...
+%                     allMean.pos{perturbN}{angleN, internalConN}{1}-allMean.pos{perturbN}{angleN, internalConN}{1};
+%                 allMean.posDiff{perturbN}{angleN, internalConN}{2} = ...
+%                     allMean.pos{perturbN}{angleN, internalConN}{2}-allMean.pos{perturbN}{angleN, internalConN}{2};
+            end
         end
     end
 end
