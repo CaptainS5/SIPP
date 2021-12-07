@@ -17,10 +17,11 @@ plotVariables = {'response', 'turningPoint', ...
     'dirEarly', 'dirLate', 'dirChange', ...
     'dirClp', 'dirClpEarly', 'dirClpLate', 'dirClpChange', 'dirError', 'disCenterMean', 'disCenterMeanEarly', 'disCenterMeanLate', ...
     'gainXexternal', 'gainYexternal', 'gainYaverage', 'gain2Dexternal', 'gain2Daverage', 'dirGainExternal', ...
+    'meanPosErrOnsetX', 'meanPosErrOnsetY', 'meanPosErrOnset2D', 'meanPosErrOffsetX', 'meanPosErrOffsetY', 'meanPosErrOffset2D', ...
     'num', 'numXLeft', 'numXRight', 'numYUp', 'numYDown', 'meanAmp2D', 'meanAmpXLeft', 'meanAmpXRight', 'meanAmpYUp', 'meanAmpYDown',...
     'sumAmp2D', 'sumAmpXLeft', 'sumAmpXRight', 'sumAmpYUp', 'sumAmpYDown'}; % always put all saccade parameters at last
 openloopVarEnd = 7;
-saccadeVarStart = 20; 
+saccadeVarStart = 24; 
 
 % names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07' 'w08' 'w09' 'w10'};
 % cohCons = [0; 0.5; 1]; % RDK coherence'
@@ -41,7 +42,7 @@ saccadeVarStart = 20;
 sampleRate = 1000;
 
 analysisFolder = pwd;
-load('eyeTrialData_all.mat');
+load('eyeTrialData_all_100.mat');
 load('summaryData')
 load('summaryDataDiff')
 load('summaryDataSub')

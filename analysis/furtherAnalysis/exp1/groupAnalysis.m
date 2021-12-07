@@ -5,8 +5,8 @@ initializeParas;
 %% choose which plot to look at
 individualPlots = 0;
 averagePlots = 1;
-plotVarStart = 6;
-plotVarEnd = 13;
+plotVarStart = 30;
+plotVarEnd = 30;
 
 %% first, generate the list of different groups of participants to separately look at
 % calculate the average difference in all aperture angles in each
@@ -156,9 +156,9 @@ if averagePlots
                     end
                     errorbar(apertureAngles, meanDiffAll, stdDiffAll, 'color', colorCons(internalConN, :))
                 end
-                title(['subGroup2', num2str(groupN), ', n=', num2str(length(subList))])
+                title(['subGroup', num2str(size(subGroup, 2)), num2str(groupN), ', n=', num2str(length(subList))])
                 %                 xlim([-10 10])
-                %                 ylim([-15 15])
+                ylim([-1 2])
                 legend(internalConNames(2:3), 'box', 'on', 'location', 'northwest', 'color', 'w')
                 xlabel('Aperture trajectory angle (deg)')
                 ylabel(['Diff ', plotVariables{varN}])

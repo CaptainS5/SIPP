@@ -3,10 +3,10 @@
 initializeParas;
 
 %% choose which plot to look at
-individualPlots = 1; % within-sub
-averagePlots = 0; % across-sub
-plotVarStart = 11;
-plotVarEnd = 13;
+individualPlots = 0; % within-sub
+averagePlots = 1; % across-sub
+plotVarStart = 24;
+plotVarEnd = 29;
 
 %%
 close all
@@ -14,9 +14,108 @@ if individualPlots
     for varN = plotVarStart:plotVarEnd
         for subN = 1:size(names, 2)
             % trial by trial
+            % bias vs. bias, only for trials with internal dot motion,
+            % difference from the average in baseline individually
+            corrE = [];
+            corrP = [];
+            s = {};
+            figure
+            hold on
+            for internalConN = 2:size(internalCons, 2)
+                dataEye = [];
+                dataP = [];              
+                % find the eye trial data, all trials for the current
+                % internal condition...
+                if varN>=3 && varN<=openloopVarEnd
+                    idxT = find(eyeTrialData.rdkInternalCon(subN, :)==internalCons(internalConN) ...
+                        & eyeTrialData.errorStatus(subN, :)==0 ...
+                        & eyeTrialData.pursuit.onsetType(subN, :)==0);
+                elseif varN>=3 && varN<saccadeVarStart
+                    if strcmp(plotVariables{varN}, 'dirClp') ...
+                            || strcmp(plotVariables{varN}, 'dirEarly') || strcmp(plotVariables{varN}, 'dirLate') ...
+                            || strcmp(plotVariables{varN}, 'dirClpEarly') || strcmp(plotVariables{varN}, 'dirClpLate')
+                        dirXName = [plotVariables{varN}, 'X'];
+                        idxT = find(eyeTrialData.rdkInternalCon(subN, :)==internalCons(internalConN) ...
+                            & eyeTrialData.errorStatus(subN, :)==0 ...
+                            & ~isnan(eyeTrialData.pursuit.(dirXName)(subN, :)));
+                    else
+                        idxT = find(eyeTrialData.rdkInternalCon(subN, :)==internalCons(internalConN) ...
+                            & eyeTrialData.errorStatus(subN, :)==0 ...
+                            & ~isnan(eyeTrialData.pursuit.(plotVariables{varN})(subN, :)));
+                    end
+                else
+                    idxT = find(eyeTrialData.rdkInternalCon(subN, :)==internalCons(internalConN) & eyeTrialData.errorStatus(subN, :)==0);
+                end
+                
+                if strcmp(plotVariables{varN}, 'dirClp') || strcmp(plotVariables{varN}, 'dirOlp') ...
+                        || strcmp(plotVariables{varN}, 'dirEarly') || strcmp(plotVariables{varN}, 'dirLate') ...
+                        || strcmp(plotVariables{varN}, 'dirClpEarly') || strcmp(plotVariables{varN}, 'dirClpLate')
+                    dirXName = [plotVariables{varN}, 'X'];
+                    dirYName = [plotVariables{varN}, 'Y'];
+                    dir = atan2(eyeTrialData.pursuit.(dirYName)(subN, idxT), eyeTrialData.pursuit.(dirXName)(subN, idxT))/pi*180;
+                    
+                    %                     % delete extreme values for Olp pursuit direction... or
+                    %                     % better, just do not analyze olp pursuit or really
+                    %                     % figure out the problem with finding pursuit onset
+                    %                     if strcmp(plotVariables{varN}, 'dirOlp')
+                    %                         dir(abs(dir)>90)=[]; % has to be wrong, shouldn't be moving to the left...
+                    %                     end
+                    
+                    dataEye = dir;
+                    %                 elseif strcmp(plotVariables{varN}, 'latency')
+                else
+                    if strcmp(plotVariables{varN}, 'response') % should never be this though...
+                        dataEye = eyeTrialData.(plotVariables{varN})(subN, idxT);
+                    elseif varN>=saccadeVarStart
+                        dataEye = eyeTrialData.saccades.(plotVariables{varN})(subN, idxT);
+                    else
+                        dataEye = eyeTrialData.pursuit.(plotVariables{varN})(subN, idxT);
+                    end
+                end
+                dataP = eyeTrialData.response(subN, idxT);
+                
+                % need to go trial by trial since we have to identify the
+                % baseline and substract...
+                for tN = 1:length(idxT)
+                    % condition of the current trial
+                    angle = eyeTrialData.rdkApertureAngle(subN, idxT(tN));
+                    baseI = find(summaryData.sub==subN & summaryData.rdkApertureAngle==angle & summaryData.rdkInternalDir==0);
+                    
+                    % substract the baseline in summaryData
+                    dataEye(tN) = dataEye(tN)-summaryData.(plotVariables{varN})(baseI); % eye data baseline
+                    dataP(tN) = dataP(tN)-summaryData.response(baseI); % perception baseline
+                end
+                
+                %                 if internalConN==1
+                %                     corrE = y2;
+                %                     corrP = eyeTrialData.response(subN, idxT);
+                %                 else
+                corrE = [corrE dataEye];
+                corrP = [corrP dataP];
+                %                 end
+                s{internalConN-1} = scatter(dataEye, dataP, 'MarkerEdgeColor', colorCons(internalConN, :));
+            end
+            % exclude NaN trials...
+            idxD = find(isnan(corrE));
+            corrE(idxD) = [];
+            corrP(idxD) = [];
+            
+            [rho, pval] = corr(corrE', corrP');
+            %
+            ylabel('Bias in perceived direction (deg)')
+            xlabel(['Bias in ' plotVariables{varN}])
+            legend([s{:}], internalConNames{2:3}, 'box', 'on', 'location', 'best', 'color', 'w')
+            title([names{subN}, ', r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
+            if varN>=saccadeVarStart
+                saveas(gcf, [correlationFolder, 'individuals\sacTrialBias_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
+            else
+                saveas(gcf, [correlationFolder, 'individuals\pursuitTrialBias_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
+            end
+%             
             % raw vs. raw...
             corrD = [];
             corrR = [];
+            s = {};
             figure
             hold on
             for internalConN = 1:size(internalCons, 2)
@@ -74,6 +173,9 @@ if individualPlots
                 end
                 s{internalConN} = scatter(y2, eyeTrialData.response(subN, idxT), 'MarkerEdgeColor', colorCons(internalConN, :));
             end
+            idxD = find(isnan(corrD));
+            corrD(idxD) = [];
+            corrR(idxD) = [];
             [rho, pval] = corr(corrD', corrR');
             %
             ylabel('Perceptual response (deg)')
@@ -213,20 +315,27 @@ end
 %%
 if averagePlots
     summaryDataDiff.response(summaryDataDiff.rdkInternalDir==-90) = -summaryDataDiff.response(summaryDataDiff.rdkInternalDir==-90); % flip the responses, bias in the direction of the internal motion
+%     summaryData.response(summaryDataDiff.rdkInternalDir==-90) = -summaryDataDiff.response(summaryDataDiff.rdkInternalDir==-90);
     for varN = plotVarStart:plotVarEnd
         corrData = table;
         count = 1;
         
         % one point per person...
         summaryDataDiff.(plotVariables{varN})(summaryDataDiff.rdkInternalDir==-90) = -summaryDataDiff.(plotVariables{varN})(summaryDataDiff.rdkInternalDir==-90);
-        %         summaryData.(plotVariables{varN})(summaryDataDiff.rdkInternalDir==-90) = -summaryData.(plotVariables{varN})(summaryDataDiff.rdkInternalDir==-90);
         for subN = 1:size(names, 2) % first, get the summary data... each row is one sub, each column is one variable
             %             corrData.sub(subN, 1) = subN;
             % one point per person...
-            idxT = find(summaryDataDiff.sub==subN);
-            corrData.response(subN, 1) = nanmean(summaryDataDiff.response(idxT));
-            % diff vs. diff
-            corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDataDiff.(plotVariables{varN})(idxT));
+%             % diff vs. diff
+%             idxT = find(summaryDataDiff.sub==subN);
+%             corrData.response(subN, 1) = nanmean(summaryDataDiff.response(idxT));
+%             corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDataDiff.(plotVariables{varN})(idxT));
+            
+%             % raw vs. raw
+%             idxT = find(summaryData.sub==subN);
+%             corrData.response(subN, 1) = nanmean(summaryDataDiff.response(idxT));
+%             corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDataDiff.(plotVariables{varN})(idxT));
+%             
+            
             %             % raw vs. diff in response
             %             idxT = find(summaryData.sub==subN & ...
             %                 summaryData.rdkInternalDir ~= 0); % exclude the baseline condition

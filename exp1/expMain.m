@@ -123,6 +123,7 @@ try
             eyelink.edfName = [sbj.name '_b', num2str(block, '%02d'), '.edf'];
             if (size(eyelink.edfName, 2)-4>8)
                 errorEyelink('edf filename is too long!'); % Security loop against Eyelink
+                cleanup(eyelink)
                 % Un-registration of data if namefile
             end
             % open file to record data to

@@ -52,6 +52,13 @@ if numel(trial.saccades.onsets_pursuit) == 0
     trial.saccades.targetPosOnset = NaN;
     trial.saccades.targetPosOffset = NaN; 
     
+    trial.saccades.summary.meanPosErrOnsetX = NaN;
+    trial.saccades.summary.meanPosErrOnsetY = NaN;
+    trial.saccades.summary.meanPosErrOnset2D = NaN;
+    trial.saccades.summary.meanPosErrOffsetX = NaN;
+    trial.saccades.summary.meanPosErrOffsetY = NaN;
+    trial.saccades.summary.meanPosErrOffset2D = NaN;
+    
     trial.saccades.summary.meanAmp2D = NaN;
     trial.saccades.summary.meanAmpXLeft = NaN;
     trial.saccades.summary.meanAmpXRight = NaN;
@@ -80,6 +87,14 @@ else
     trial.saccades.eyePosOffset = [trial.eyeX_filt(trial.saccades.offsets_pursuit) trial.eyeY_filt(trial.saccades.offsets_pursuit)];
     trial.saccades.targetPosOnset = [trial.target.posX(trial.saccades.onsets_pursuit) trial.target.posY(trial.saccades.onsets_pursuit)];
     trial.saccades.targetPosOffset = [trial.target.posX(trial.saccades.offsets_pursuit) trial.target.posY(trial.saccades.offsets_pursuit)];    
+    
+    % position errors before & after saccades
+    trial.saccades.summary.meanPosErrOnsetX = nanmean(abs(trial.saccades.targetPosOnset(:, 1)-trial.saccades.eyePosOnset(:, 1)));
+    trial.saccades.summary.meanPosErrOnsetY = nanmean(abs(trial.saccades.targetPosOnset(:, 2)-trial.saccades.eyePosOnset(:, 2)));
+    trial.saccades.summary.meanPosErrOnset2D = nanmean(sqrt( trial.saccades.summary.meanPosErrOnsetX.^2 + trial.saccades.summary.meanPosErrOnsetY.^2 ));
+    trial.saccades.summary.meanPosErrOffsetX = nanmean(abs(trial.saccades.targetPosOffset(:, 1)-trial.saccades.eyePosOffset(:, 1)));
+    trial.saccades.summary.meanPosErrOffsetY = nanmean(abs(trial.saccades.targetPosOffset(:, 2)-trial.saccades.eyePosOffset(:, 2)));
+    trial.saccades.summary.meanPosErrOffset2D = nanmean(sqrt( trial.saccades.summary.meanPosErrOffsetX.^2 + trial.saccades.summary.meanPosErrOffsetY.^2 ));
     
     % direction vector (unit length) of each saccade
     eyeVec = [trial.eyeX_filt(trial.saccades.offsets_pursuit) - trial.eyeX_filt(trial.saccades.onsets_pursuit), ...
