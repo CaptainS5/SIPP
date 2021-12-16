@@ -213,71 +213,73 @@ for ii = 1:length(groupN)
                 else % downward internal dir
                     lineStyle = '--';
                 end
-                p{angleN} = plot(allMean{ii}.pos{angleN, internalConN}{1}, allMean{ii}.pos{angleN, internalConN}{2}, 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
+                p{angleN} = plot(allMean{ii}.pos{angleN, internalConN}{1}, allMean{ii}.pos{angleN, internalConN}{2}, 'LineStyle', lineStyle, 'color', colorObjAngles(angleN, :)); %, 'LineWidth', 1);
                 
                 % average pursuit onset
                 plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI), 'ok')
                 % average olp end
-                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI+140), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140), 'ob')
+                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI+140), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140), 'ok')
                 % average early/late clp phase border
                 plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI+140+round((900-meanLatencyI-140)/2)), ...
-                    allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140+round((900-meanLatencyI-140)/2)), 'ob')
+                    allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140+round((900-meanLatencyI-140)/2)), 'ok')
                 % end of clp analysis window
                 plot(allMean{ii}.pos{angleN, internalConN}{1}(900), allMean{ii}.pos{angleN, internalConN}{2}(900), 'ok')
             end
             
+            xlim([0, 6])
+            ylim([-1, 1])
             title(['all, ', internalConNames{internalConN}])
-            xlabel('Horizontal position (deg)')
-            ylabel(['Vertical position (deg)'])
+            xlabel('Horizontal eye position (deg)')
+            ylabel(['Vertical eye\n position (deg)'])
         end
         
         if internalConN==1
             legend([p{:}], apertureAngleNames, 'Location', 'best')
         end
         box off
-        saveas(gcf, [eyeTracesFolder, 'posTrace__all.pdf'])
+        saveas(gcf, [eyeTracesFolder, 'posTrace_all.pdf'])
         
-        % position difference from baseline
-        figure
-        for internalConN = 2:length(allCons.internalCons)
-            subplot(2, 1, internalConN-1)
-            hold on
-            for angleN = 1:length(allCons.apertureAngles)
-                if allCons.apertureAngles(angleN)>0 % upward internal dir
-                    lineStyle = '-';
-                else % downward internal dir
-                    lineStyle = '--';
-                end
-                p{angleN} = plot(timePointsOnset, allMean{ii}.posDiff{angleN, internalConN}{2}, 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
-                % average pursuit onset
-                line([mean(latency) mean(latency)], [-0.5, 0.5])
-                % average olp end
-                line([mean(latency)+140 mean(latency)+140], [-0.5, 0.5])
-                % average early/late clp phase border
-                line([mean(latency)+140+(700-mean(latency)-140)/2 mean(latency)+140+(700-mean(latency)-140)/2], [-0.5, 0.5])
-                % end of clp analysis window
-                line([700 700], [-0.5, 0.5])
-                
-                %                 % average pursuit onset
-                %                 plot(allMean{ii}.posDiff{angleN, internalConN}{1}(subN, meanLatencyI), allMean{ii}.posDiff{angleN, internalConN}{2}(subN, meanLatencyI), 'ok')
-                %                 % average olp end
-                %                 plot(allMean{ii}.posDiff{angleN, internalConN}{1}(subN, meanLatencyI+140), allMean{ii}.posDiff{angleN, internalConN}{2}(subN, meanLatencyI+140), 'ob')
-                %                 % average early/late clp phase border
-                %                 plot(allMean{ii}.posDiff{angleN, internalConN}{1}(subN, meanLatencyI+140+round((900-meanLatencyI-140)/2)), ...
-                %                     allMean{ii}.posDiff{angleN, internalConN}{2}(subN, meanLatencyI+140+round((900-meanLatencyI-140)/2)), 'ob')
-                %                 % end of clp analysis window
-                %                 plot(allMean{ii}.posDiff{angleN, internalConN}{1}(subN, 900), allMean{ii}.posDiff{angleN, internalConN}{2}(subN, 900), 'ok')
-                title(['all, ', internalConNames{internalConN}])
-                xlabel('Horizontal position (deg)')
-                ylabel(['Vertical position (deg)'])
-            end
-            
-            if internalConN==2
-                legend([p{:}], apertureAngleNames, 'Location', 'best')
-            end
-            box off
-            saveas(gcf, [eyeTracesFolder, 'posTraceDiff_all.pdf'])
-        end
+%         % position difference from baseline
+%         figure
+%         for internalConN = 2:length(allCons.internalCons)
+%             subplot(2, 1, internalConN-1)
+%             hold on
+%             for angleN = 1:length(allCons.apertureAngles)
+%                 if allCons.apertureAngles(angleN)>0 % upward internal dir
+%                     lineStyle = '-';
+%                 else % downward internal dir
+%                     lineStyle = '--';
+%                 end
+%                 p{angleN} = plot(timePointsOnset, allMean{ii}.posDiff{angleN, internalConN}{2}, 'LineStyle', lineStyle, 'color', colorPlot(angleN, :)); %, 'LineWidth', 1);
+%                 % average pursuit onset
+%                 line([mean(latency) mean(latency)], [-0.5, 0.5])
+%                 % average olp end
+%                 line([mean(latency)+140 mean(latency)+140], [-0.5, 0.5])
+%                 % average early/late clp phase border
+%                 line([mean(latency)+140+(700-mean(latency)-140)/2 mean(latency)+140+(700-mean(latency)-140)/2], [-0.5, 0.5])
+%                 % end of clp analysis window
+%                 line([700 700], [-0.5, 0.5])
+%                 
+%                 %                 % average pursuit onset
+%                 %                 plot(allMean{ii}.posDiff{angleN, internalConN}{1}(subN, meanLatencyI), allMean{ii}.posDiff{angleN, internalConN}{2}(subN, meanLatencyI), 'ok')
+%                 %                 % average olp end
+%                 %                 plot(allMean{ii}.posDiff{angleN, internalConN}{1}(subN, meanLatencyI+140), allMean{ii}.posDiff{angleN, internalConN}{2}(subN, meanLatencyI+140), 'ob')
+%                 %                 % average early/late clp phase border
+%                 %                 plot(allMean{ii}.posDiff{angleN, internalConN}{1}(subN, meanLatencyI+140+round((900-meanLatencyI-140)/2)), ...
+%                 %                     allMean{ii}.posDiff{angleN, internalConN}{2}(subN, meanLatencyI+140+round((900-meanLatencyI-140)/2)), 'ob')
+%                 %                 % end of clp analysis window
+%                 %                 plot(allMean{ii}.posDiff{angleN, internalConN}{1}(subN, 900), allMean{ii}.posDiff{angleN, internalConN}{2}(subN, 900), 'ok')
+%                 title(['all, ', internalConNames{internalConN}])
+%                 xlabel('Horizontal position (deg)')
+%                 ylabel(['Vertical position (deg)'])
+%             end
+%             
+%             if internalConN==2
+%                 legend([p{:}], apertureAngleNames, 'Location', 'best')
+%             end
+%             box off
+%             saveas(gcf, [eyeTracesFolder, 'posTraceDiff_all.pdf'])
+%         end
         
 %         % velocity, all conditions
 %         for internalConN = 1:length(allCons.internalCons)
@@ -352,7 +354,7 @@ for ii = 1:length(groupN)
 %         end
     end
 end
-save('eyeTracesAll.mat', 'indiMean', 'allMean')
+% save('eyeTracesAll.mat', 'indiMean', 'allMean')
 
 %% generate csv files, each file for one probability condition
 % % each row is the mean velocity trace of one participant

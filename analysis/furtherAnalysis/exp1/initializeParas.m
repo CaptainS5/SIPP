@@ -42,7 +42,22 @@ saccadeVarStart = 24;
 sampleRate = 1000;
 
 analysisFolder = pwd;
-load('eyeTrialData_all_100.mat');
+load('eyeTrialData_all.mat');
+% delete obvious error trials
+idxT = find(eyeTrialData.errorStatus==0 & ...
+    abs(eyeTrialData.rdkApertureAngle-eyeTrialData.response)>20 & ...
+    eyeTrialData.rdkApertureAngle.*eyeTrialData.response<=0); % leftward valid trials;
+eyeTrialData.errorStatus(idxT) = -2;
+
+% delete trials with little eye movements
+idxT = find(eyeTrialData.errorStatus==0 & ...
+    eyeTrialData.pursuit.gainXexternal<0.5); 
+eyeTrialData.errorStatus(idxT) = -3;
+
+idxT = find(eyeTrialData.errorStatus==0 & ...
+    eyeTrialData.pursuit.travelClpDis<eyeTrialData.pursuit.targetClpDis/2); 
+eyeTrialData.errorStatus(idxT) = -3;
+
 load('summaryData')
 load('summaryDataDiff')
 load('summaryDataSub')
@@ -69,8 +84,9 @@ for t = 1:size(names, 2) % individual color for scatter plots, can do 10 people
         markerC(t, :) = (t-6)/4*[255 90 255]/255;
     end
 end
-colorCons = [0 0 0; 1 0 0; 0 0 1];
+colorDotCons = [0 0 0; 248 118 109; 0 191 196]/255; % dot motion conditions
+colorGroup = [199 124 255; 124 174 0; 0 0 0]/255; % perceptual bias group, assimilation-contrast-no bias
 % colorProb = [8,48,107;198,219,239;8,48,107]/255; % all blue hues
 % colorProb = [8,48,107;66,146,198;198,219,239;66,146,198;8,48,107]/255; % all blue hues
 % colorPlot = [232 113 240; 15 204 255; 255 182 135; 137 126 255; 113 204 100]/255; % each row is one colour for one probability
-colorPlot = [232 113 240; 15 204 255; 255 182 135; 0 0 0; 255 182 135; 15 204 255; 232 113 240]/255; % each row is one colour for one probability
+colorObjAngles = [232 113 240; 15 204 255; 255 182 135; 0 0 0; 255 182 135; 15 204 255; 232 113 240]/255; % each row is one colour for one object motion angle

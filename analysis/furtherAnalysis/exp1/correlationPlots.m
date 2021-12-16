@@ -1,16 +1,21 @@
 % Exp1:
 % correlation plots
 initializeParas;
+load('subGroupList.mat')
+groupCons = unique(groupAll);
 
 %% choose which plot to look at
 individualPlots = 0; % within-sub
 averagePlots = 1; % across-sub
-plotVarStart = 24;
-plotVarEnd = 29;
+plotVarStart = 40;
+plotVarEnd = 40;
 
 %%
 close all
 if individualPlots
+    corrDiffStats = table;
+    corrStats = table;
+    count = 1;
     for varN = plotVarStart:plotVarEnd
         for subN = 1:size(names, 2)
             % trial by trial
@@ -23,7 +28,7 @@ if individualPlots
             hold on
             for internalConN = 2:size(internalCons, 2)
                 dataEye = [];
-                dataP = [];              
+                dataP = [];
                 % find the eye trial data, all trials for the current
                 % internal condition...
                 if varN>=3 && varN<=openloopVarEnd
@@ -54,12 +59,12 @@ if individualPlots
                     dirYName = [plotVariables{varN}, 'Y'];
                     dir = atan2(eyeTrialData.pursuit.(dirYName)(subN, idxT), eyeTrialData.pursuit.(dirXName)(subN, idxT))/pi*180;
                     
-                    %                     % delete extreme values for Olp pursuit direction... or
-                    %                     % better, just do not analyze olp pursuit or really
-                    %                     % figure out the problem with finding pursuit onset
-                    %                     if strcmp(plotVariables{varN}, 'dirOlp')
-                    %                         dir(abs(dir)>90)=[]; % has to be wrong, shouldn't be moving to the left...
-                    %                     end
+                    % delete extreme values for Olp pursuit direction... or
+                    % better, just do not analyze olp pursuit or really
+                    % figure out the problem with finding pursuit onset
+                    if strcmp(plotVariables{varN}, 'dirOlp')
+                        dir(abs(dir)>90)=NaN; % has to be wrong, shouldn't be moving to the left...
+                    end
                     
                     dataEye = dir;
                     %                 elseif strcmp(plotVariables{varN}, 'latency')
@@ -93,25 +98,27 @@ if individualPlots
                 corrE = [corrE dataEye];
                 corrP = [corrP dataP];
                 %                 end
-                s{internalConN-1} = scatter(dataEye, dataP, 'MarkerEdgeColor', colorCons(internalConN, :));
+                s{internalConN-1} = scatter(dataEye, dataP, 'MarkerEdgeColor', colorDotCons(internalConN, :));
             end
             % exclude NaN trials...
             idxD = find(isnan(corrE));
             corrE(idxD) = [];
             corrP(idxD) = [];
             
-            [rho, pval] = corr(corrE', corrP');
+            corrDiffStats.sub(count) = subN;
+            corrDiffStats.varEye{count} = plotVariables{varN};
+            [corrDiffStats.rho(count), corrDiffStats.p(count)] = corr(corrE', corrP');
             %
             ylabel('Bias in perceived direction (deg)')
             xlabel(['Bias in ' plotVariables{varN}])
             legend([s{:}], internalConNames{2:3}, 'box', 'on', 'location', 'best', 'color', 'w')
-            title([names{subN}, ', r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
+            title([names{subN}, ', r=', num2str(corrDiffStats.rho(count), '%.2f'), ' p=', num2str(corrDiffStats.p(count), '%.2f')])
             if varN>=saccadeVarStart
                 saveas(gcf, [correlationFolder, 'individuals\sacTrialBias_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
             else
                 saveas(gcf, [correlationFolder, 'individuals\pursuitTrialBias_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
             end
-%             
+            %
             % raw vs. raw...
             corrD = [];
             corrR = [];
@@ -146,15 +153,15 @@ if individualPlots
                     dirYName = [plotVariables{varN}, 'Y'];
                     dir = atan2(eyeTrialData.pursuit.(dirYName)(subN, idxT), eyeTrialData.pursuit.(dirXName)(subN, idxT))/pi*180;
                     
-%                     % delete extreme values for Olp pursuit direction... or
-%                     % better, just do not analyze olp pursuit or really
-%                     % figure out the problem with finding pursuit onset
-%                     if strcmp(plotVariables{varN}, 'dirOlp')
-%                         dir(abs(dir)>90)=[]; % has to be wrong, shouldn't be moving to the left...
-%                     end
+                    % delete extreme values for Olp pursuit direction... or
+                    % better, just do not analyze olp pursuit or really
+                    % figure out the problem with finding pursuit onset
+                    if strcmp(plotVariables{varN}, 'dirOlp')
+                        dir(abs(dir)>90)=NaN; % has to be wrong, shouldn't be moving to the left...
+                    end
                     
                     y2 = dir;
-%                 elseif strcmp(plotVariables{varN}, 'latency')
+                    %                 elseif strcmp(plotVariables{varN}, 'latency')
                 else
                     if strcmp(plotVariables{varN}, 'response')
                         y2 = eyeTrialData.(plotVariables{varN})(subN, idxT);
@@ -171,17 +178,20 @@ if individualPlots
                     corrD = [corrD y2];
                     corrR = [corrR eyeTrialData.response(subN, idxT)];
                 end
-                s{internalConN} = scatter(y2, eyeTrialData.response(subN, idxT), 'MarkerEdgeColor', colorCons(internalConN, :));
+                s{internalConN} = scatter(y2, eyeTrialData.response(subN, idxT), 'MarkerEdgeColor', colorDotCons(internalConN, :));
             end
             idxD = find(isnan(corrD));
             corrD(idxD) = [];
             corrR(idxD) = [];
-            [rho, pval] = corr(corrD', corrR');
-            %
+            
+            corrStats.sub(count) = subN;
+            corrStats.varEye{count} = plotVariables{varN};
+            [corrStats.rho(count), corrStats.p(count)] = corr(corrD', corrR');
+            %             %
             ylabel('Perceptual response (deg)')
             xlabel([plotVariables{varN}])
             legend([s{:}], internalConNames, 'box', 'on', 'location', 'best', 'color', 'w')
-            title([names{subN}, ', r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
+            title([names{subN}, ', r=', num2str(corrStats.rho(count), '%.2f'), ' p=', num2str(corrStats.p(count), '%.2f')])
             if varN>=saccadeVarStart
                 saveas(gcf, [correlationFolder, 'individuals\sacTrial_', plotVariables{varN}, 'VSperception_', names{subN}, '.pdf'])
             else
@@ -307,34 +317,94 @@ if individualPlots
             %             else
             %                 saveas(gcf, [correlationFolder, 'individuals\pursuit_', plotVariables{varN}, 'VSdirError_', names{subN}, '.pdf'])
             %             end
+            count = count+1;
         end
-        close all
+        %         close all
+        
+        %% plot summary
+        idxCorr = find(strcmp(corrStats.varEye, plotVariables{varN}));
+        idxCorrDiff = find(strcmp(corrDiffStats.varEye, plotVariables{varN}));
+        
+        dataCorr = corrStats(idxCorr, :);
+        dataCorrDiff = corrDiffStats(idxCorrDiff, :);
+        
+        % raw vs. raw
+        figure
+        hold on
+        fill([0.5:3.5 fliplr(0.5:3.5)]', [-0.5*ones(4, 1); 0.5*ones(4, 1)], 0.95*[1 1 1], 'EdgeColor', 'none')
+        for groupN = 1:length(groupCons)
+            dataT = dataCorr(groupAll==groupCons(groupN), :);
+            
+            dataSig = dataT(dataT.p<0.05, :);
+            dataNonsig = dataT(dataT.p>=0.05, :);
+            
+            scatter(repmat(groupN, size(dataSig.rho)), dataSig.rho, 'jitter','on', 'jitterAmount',0.1, 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+            scatter(repmat(groupN, size(dataNonsig.rho)), dataNonsig.rho, 'jitter','on', 'jitterAmount',0.1, 'MarkerFaceColor', 'none', 'MarkerEdgeColor', colorGroup(groupN, :))
+        end
+        xlim([0.5, 3.5])
+        %     ylim([0, 1])
+        xlabel('Perceptual bias group')
+        ylabel('Correlation coefficient (r)')
+        title(['Raw ' plotVariables{varN} ' vs. perception'])
+        saveas(gcf, [correlationFolder, 'pursuitTrialSummary_' plotVariables{varN} 'vsPerception_all.pdf'])
+        
+        % diff vs. diff
+        figure
+        hold on
+        fill([0.5:3.5 fliplr(0.5:3.5)]', [-0.5*ones(4, 1); 0.5*ones(4, 1)], 0.95*[1 1 1], 'EdgeColor', 'none')
+        for groupN = 1:length(groupCons)
+            dataT = dataCorrDiff(groupAll==groupCons(groupN), :);
+            
+            dataSig = dataT(dataT.p<0.05, :);
+            dataNonsig = dataT(dataT.p>=0.05, :);
+            
+            scatter(repmat(groupN, size(dataSig.rho)), dataSig.rho, 'jitter','on', 'jitterAmount',0.1, 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+            scatter(repmat(groupN, size(dataNonsig.rho)), dataNonsig.rho, 'jitter','on', 'jitterAmount',0.1, 'MarkerFaceColor', 'none', 'MarkerEdgeColor', colorGroup(groupN, :))
+        end
+        xlim([0.5, 3.5])
+        %     ylim([-0.8, 0.8])
+        xlabel('Perceptual bias group')
+        ylabel('Correlation coefficient (r)')
+        title(['Bias of ' plotVariables{varN} ' vs. perception'])
+        saveas(gcf, [correlationFolder, 'pursuitTrialBiasSummary_' plotVariables{varN} 'vsPerception_all.pdf'])
     end
+%     save('corrStatsIndividual.mat', 'corrStats', 'corrDiffStats')
 end
 
 %%
+summaryDiffCopy = summaryDataDiff;
 if averagePlots
-    summaryDataDiff.response(summaryDataDiff.rdkInternalDir==-90) = -summaryDataDiff.response(summaryDataDiff.rdkInternalDir==-90); % flip the responses, bias in the direction of the internal motion
-%     summaryData.response(summaryDataDiff.rdkInternalDir==-90) = -summaryDataDiff.response(summaryDataDiff.rdkInternalDir==-90);
+    summaryDiffCopy.response(summaryDiffCopy.rdkInternalDir==-90) = -summaryDiffCopy.response(summaryDataDiff.rdkInternalDir==-90); % flip the responses, bias in the direction of the internal motion
+    summaryDiffCopy.dirClp(summaryDiffCopy.rdkInternalDir==-90) = -summaryDiffCopy.dirClp(summaryDiffCopy.rdkInternalDir==-90);
+    
     for varN = plotVarStart:plotVarEnd
         corrData = table;
         count = 1;
         
-        % one point per person...
-        summaryDataDiff.(plotVariables{varN})(summaryDataDiff.rdkInternalDir==-90) = -summaryDataDiff.(plotVariables{varN})(summaryDataDiff.rdkInternalDir==-90);
+%         summaryDiffCopy.(plotVariables{varN})(summaryDiffCopy.rdkInternalDir==-90) = -summaryDiffCopy.(plotVariables{varN})(summaryDiffCopy.rdkInternalDir==-90);
         for subN = 1:size(names, 2) % first, get the summary data... each row is one sub, each column is one variable
-            %             corrData.sub(subN, 1) = subN;
             % one point per person...
-%             % diff vs. diff
-%             idxT = find(summaryDataDiff.sub==subN);
-%             corrData.response(subN, 1) = nanmean(summaryDataDiff.response(idxT));
-%             corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDataDiff.(plotVariables{varN})(idxT));
+                        % saccades vs. magnitude of clp pursuit bias
+                        idxT = find(summaryDiffCopy.sub==subN);
+                        corrT = summaryDiffCopy(idxT, :);
+                        
+                        corrDT = [corrT.sumAmpYUp(corrT.rdkInternalDir==-90, 1); corrT.sumAmpYDown(corrT.rdkInternalDir==90, 1)];
+                        corrData.(plotVariables{varN})(subN, 1) = nanmean(corrDT);
+                        
+%                         corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDiffCopy.(plotVariables{varN})(idxT));
+                        corrData.dirClp(subN, 1) = nanmean(summaryDiffCopy.dirClp(idxT));
+                        corrData.response(subN, 1) = nanmean(summaryDiffCopy.response(idxT));
             
-%             % raw vs. raw
-%             idxT = find(summaryData.sub==subN);
-%             corrData.response(subN, 1) = nanmean(summaryDataDiff.response(idxT));
-%             corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDataDiff.(plotVariables{varN})(idxT));
-%             
+%             % diff vs. diff
+%             idxT = find(summaryDiffCopy.sub==subN);
+%             corrData.response(subN, 1) = nanmean(summaryDiffCopy.response(idxT));
+%             corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDiffCopy.(plotVariables{varN})(idxT));
+            
+            %             % raw vs. raw
+            %             idxT = find(summaryData.sub==subN);
+            %             corrData.response(subN, 1) = nanmean(summaryDataDiff.response(idxT));
+            %             corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDataDiff.(plotVariables{varN})(idxT));
+            %
             
             %             % raw vs. diff in response
             %             idxT = find(summaryData.sub==subN & ...
@@ -356,20 +426,26 @@ if averagePlots
         end
         %         % one point per internalCon x angle per person
         %         corrData.response = summaryDataDiff.response;
-        %
-        %         % diff vs. diff
-        %         corrData.(plotVariables{varN}) = summaryDataDiff.(plotVariables{varN});
         
-        [rho, pval] = corr(corrData.(plotVariables{varN}), corrData.response);
+                [rho, pval] = corr(corrData.(plotVariables{varN}), corrData.response);
+%         [rho, pval] = corr(corrData.(plotVariables{varN}), corrData.dirClp);
         
         figure
-        scatter(corrData.(plotVariables{varN}), corrData.response)
-        xlabel(['Bias in ', plotVariables{varN}])
+        hold on
+        for groupN = 1:length(subGroup)
+                        scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.response(subGroup{groupN}), ...
+                            'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+%             scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.dirClp(subGroup{groupN}), ...
+%                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+        end
+        xlabel(['Bias in ', plotVariables{varN}, ' opposite to dot motion'])
         %         xlabel(['Absolute ', plotVariables{varN}])
-        ylabel('Bias in perceived direction')
+%         ylabel('Bias in pursuit direction')
+ylabel('Bias in perceived direction')
         title(['r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
         if varN>=saccadeVarStart
-            saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
+                        saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
+%             saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'VSpursuitBias_all.pdf'])
         else
             saveas(gcf, [correlationFolder, 'pursuitDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
         end

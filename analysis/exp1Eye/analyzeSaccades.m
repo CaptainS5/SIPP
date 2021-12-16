@@ -71,10 +71,10 @@ if numel(trial.saccades.onsets_pursuit) == 0
     trial.saccades.summary.sumAmpYUp = NaN;
     trial.saccades.summary.sumAmpYDown = NaN;
     
-    trial.saccades.summary.numXLeft = NaN;
-    trial.saccades.summary.numXRight = NaN;
-    trial.saccades.summary.numYUp = NaN;
-    trial.saccades.summary.numYDown = NaN;
+    trial.saccades.summary.numXLeft = 0;
+    trial.saccades.summary.numXRight = 0;
+    trial.saccades.summary.numYUp = 0;
+    trial.saccades.summary.numYDown = 0;
 else
     trial.saccades.amplitudes2D = sqrt((trial.eyeX_filt(trial.saccades.offsets_pursuit) - trial.eyeX_filt(trial.saccades.onsets_pursuit)).^2 ...
         + (trial.eyeY_filt(trial.saccades.offsets_pursuit) - trial.eyeY_filt(trial.saccades.onsets_pursuit)).^2);
