@@ -19,51 +19,54 @@ for subN = 1:size(names, 2)
     idx2 = find(summaryDataDiff.sub==subN & ...
         summaryDataDiff.rdkInternalDir==90);
     tempData(subN, 1) = mean(summaryDataDiff.response(idx2))-mean(summaryDataDiff.response(idx1));
+    tempDataEye(subN, 1) = mean(summaryDataDiff.dirClp(idx2))-mean(summaryDataDiff.dirClp(idx1));
 end
-subGroup{1} = find(tempData>=2); % assimilation group
+border = quantile(abs(tempData), 0.25);
+
+subGroup{1} = find(tempData>=border); % assimilation group
 groupAll(subGroup{1}) = 1;
-subGroup{2} = find(tempData<=-2); % contrast group
+subGroup{2} = find(tempData<=-border); % contrast group
 groupAll(subGroup{2}) = 2;
-subGroup{3} = find(tempData<2 & tempData>-2); % those who doesn't have a large bias
+subGroup{3} = find(tempData<border & tempData>-border); % those who doesn't have a large bias
 groupAll(subGroup{3}) = 3;
 save('subGroupList.mat', 'subGroup', 'groupAll')
 
 %% analysis of the temporal relationship between pursuit & perception
-% generate csv for R
-load([analysisFolder, '\temporalCorrFit.mat'])
-tempCorr = table;
-for subN = 1:length(names)
-    % find the max R2adjusted for each participant, and the corresponding
-    % window start and length
-    maxR2 = max(R2adjusted{subN}(:));
-    [row col] = find(R2adjusted{subN}==maxR2(1));
-    tempCorr.sub(subN) = subN;
-    tempCorr.group(subN) = groupAll(subN);
-    tempCorr.wStart(subN) = windowGridStart(1, col(1));
-    tempCorr.wLength(subN) = windowGridLength(row(1), 1);
-    tempCorr.R2adjusted(subN) = maxR2(1);
-    tempCorr.pval(subN) = pval{subN}(row, col);
-    tempCorr.Fstat(subN) = Fstat{subN}(row, col);
-    tempCorr.RMSE(subN) = RMSE{subN}(row, col);
-    tempCorr.logLH(subN) = LogLH{subN}(row, col);
-end
-% writetable(tempCorr, [RFolder, 'tempCorrDataSubGroup.csv'])
-
-tempCorr.wMiddle = tempCorr.wStart+tempCorr.wLength/2;
-% plot
-figure
-hold on
-for groupN = 1:length(subGroup)
-    scatter(tempCorr.wStart(subGroup{groupN}), tempCorr.wLength(subGroup{groupN}), tempCorr.R2adjusted(subGroup{groupN})*80, ...
-                'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
-end
-scatter(300, 300, 0.5*80, ...
-                'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
-xlim([150, 550])
-ylim([150, 550])
-xlabel('Time of the middle of the optimal window from RDK onset (ms)')
-ylabel('Length of the optimal window (ms)')
-saveas(gcf, 'temporalOverview_wStart.pdf')
+% % generate csv for R
+% load([analysisFolder, '\temporalCorrFit.mat'])
+% tempCorr = table;
+% for subN = 1:length(names)
+%     % find the max R2adjusted for each participant, and the corresponding
+%     % window start and length
+%     maxR2 = max(R2adjusted{subN}(:));
+%     [row col] = find(R2adjusted{subN}==maxR2(1));
+%     tempCorr.sub(subN) = subN;
+%     tempCorr.group(subN) = groupAll(subN);
+%     tempCorr.wStart(subN) = windowGridStart(1, col(1));
+%     tempCorr.wLength(subN) = windowGridLength(row(1), 1);
+%     tempCorr.R2adjusted(subN) = maxR2(1);
+%     tempCorr.pval(subN) = pval{subN}(row, col);
+%     tempCorr.Fstat(subN) = Fstat{subN}(row, col);
+%     tempCorr.RMSE(subN) = RMSE{subN}(row, col);
+%     tempCorr.logLH(subN) = LogLH{subN}(row, col);
+% end
+% % writetable(tempCorr, [RFolder, 'tempCorrDataSubGroup.csv'])
+% 
+% tempCorr.wMiddle = tempCorr.wStart+tempCorr.wLength/2;
+% % plot
+% figure
+% hold on
+% for groupN = 1:length(subGroup)
+%     scatter(tempCorr.wStart(subGroup{groupN}), tempCorr.wLength(subGroup{groupN}), tempCorr.R2adjusted(subGroup{groupN})*80, ...
+%                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+% end
+% scatter(300, 300, 0.5*80, ...
+%                 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+% xlim([150, 550])
+% ylim([150, 550])
+% xlabel('Time of the middle of the optimal window from RDK onset (ms)')
+% ylabel('Length of the optimal window (ms)')
+% saveas(gcf, 'temporalOverview_wStart.pdf')
 
 %% saving csv files for plotting in R
 % all groups in one csv file, an additional factor in anova

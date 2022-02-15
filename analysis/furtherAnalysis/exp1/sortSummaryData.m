@@ -2,13 +2,12 @@ initializeParas;
 %%
 checkVariables = {'response', 'initialMeanVelocity2D', 'initialPeakVelocity2D', 'initialAccelerationFit2D', 'dirOlp', ...
     'gainXexternal', 'gainYexternal', 'gainYaverage', 'gain2Dexternal', 'gain2Daverage', 'dirGainExternal', ...
-    'dirEarly', 'dirLate', 'dirChange', ...
     'dirClp', 'dirClpEarly', 'dirClpLate', 'dirClpChange', 'dirError', 'disCenterMean', 'disCenterMeanEarly', 'disCenterMeanLate', ...
     'meanPosErrOnsetX', 'meanPosErrOnsetY', 'meanPosErrOnset2D', 'meanPosErrOffsetX', 'meanPosErrOffsetY', 'meanPosErrOffset2D', ...
     'num', 'numXLeft', 'numXRight', 'numYUp', 'numYDown', 'meanAmp2D', 'meanAmpXLeft', 'meanAmpXRight', 'meanAmpYUp', 'meanAmpYDown',...
     'sumAmp2D', 'sumAmpXLeft', 'sumAmpXRight', 'sumAmpYUp', 'sumAmpYDown'}; % always put all saccade parameters at last
-openloopVarEnd = 6;
-saccadeVarStart = 23; % if there is no saccade variables, just use a number larger than the number of all variables to be plotted
+openloopVarEnd = 5;
+saccadeVarStart = 20; % if there is no saccade variables, just use a number larger than the number of all variables to be plotted
 
 % delete obvious error trials
 idxT = find(eyeTrialData.errorStatus==0 & ...
@@ -140,6 +139,53 @@ save('summaryDataSub.mat', 'yMeanSub', 'yStdSub', 'yMeanDiffSub', 'yStdDiffSub')
 save('summaryData.mat', 'summaryData')
 save('summaryDataDiff.mat', 'summaryDataDiff')
 
+%% catch-up saccades grouped by whether it is vertically the same or opposite to the dot motion
+sacData = table;
+count = 1;
+varPre = {'numY', 'sumAmpY'};
+for subN = 1:size(names, 2)
+    for angleN = 1:length(apertureAngles)       
+        for groupN = 1:2
+            sacData.sub(count, 1) = subN;
+            sacData.rdkApertureAngle(count, 1) = apertureAngles(angleN);
+            sacData.sacGroup(count, 1) = groupN; % 1=same dir, 2=opposite dir
+            
+            for varN = 1:length(varPre)
+                % baseline
+                idxB = find(eyeTrialData.rdkInternalCon(subN, :)==0 & ...
+                    eyeTrialData.rdkApertureAngle(subN, :)==sacData.rdkApertureAngle(count, 1) & ...
+                    eyeTrialData.errorStatus(subN, :)==0);
+                baseSacUp = nanmean(eyeTrialData.saccades.([varPre{varN}, 'Up'])(subN, idxB));
+                baseSacDown = nanmean(eyeTrialData.saccades.([varPre{varN}, 'Down'])(subN, idxB));
+                
+                % the dot motion up trials
+                idx1 = find(eyeTrialData.rdkInternalCon(subN, :)==90 & ...
+                    eyeTrialData.rdkApertureAngle(subN, :)==sacData.rdkApertureAngle(count, 1) & ...
+                    eyeTrialData.errorStatus(subN, :)==0);
+                % the dot motion down trials
+                idx2 = find(eyeTrialData.rdkInternalCon(subN, :)==-90 & ...
+                    eyeTrialData.rdkApertureAngle(subN, :)==sacData.rdkApertureAngle(count, 1) & ...
+                    eyeTrialData.errorStatus(subN, :)==0);
+                
+                sacTemp = [];
+                if groupN==1 % the same direction saccades
+                    sacTemp = eyeTrialData.saccades.([varPre{varN}, 'Up'])(subN, idx1)'-baseSacUp;
+                    sacTemp = [sacTemp; eyeTrialData.saccades.([varPre{varN}, 'Down'])(subN, idx2)'-baseSacDown];
+                else % the opposite direction saccades
+                    sacTemp = eyeTrialData.saccades.([varPre{varN}, 'Down'])(subN, idx1)'-baseSacDown;
+                    sacTemp = [sacTemp; eyeTrialData.saccades.([varPre{varN}, 'Up'])(subN, idx2)'-baseSacUp];
+                end
+                
+                sacData.(varPre{varN})(count, 1) = nanmean(sacTemp);
+            end
+            count = count+1;
+        end
+        
+    end
+end
+save('sacData.mat', 'sacData')
+
 %% generate csv for plotting in R
 writetable(summaryData, [RFolder, 'summaryData.csv'])
 writetable(summaryDataDiff, [RFolder, 'summaryDataDiff.csv'])
+writetable(sacData, [RFolder, 'summaryCatchUpSaccades.csv'])

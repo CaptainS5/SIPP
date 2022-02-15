@@ -19,3 +19,4 @@
 *.xlsx
 data/*
 results/*
+osf/*

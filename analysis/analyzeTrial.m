@@ -32,7 +32,7 @@ else
     trial.stim_onset = trial.log.targetOnset;
     trial.stim_offset = trial.log.targetOffset;
     trial.length = trial.log.trialEnd;
-    trial.turningPoint = tp; % for the second round with summaryDataDiff...
+%     trial.turningPoint = tp; % for the second round with summaryDataDiff...
     
     if isempty(trial.stim_offset)
         trial.signalLoss = 1;

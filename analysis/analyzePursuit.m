@@ -302,38 +302,38 @@ else
 end
 
 %% use the calculated turning point for early/late phases
-earlyFrames = pursuit.summary.onset:trial.log.targetOnset+trial.turningPoint-1;
-lateFrames = trial.log.targetOnset+trial.turningPoint:pursuitOff;
-if isempty(earlyFrames) || all(isnan(earlyFrames))
-    pursuit.summary.earlyFrameN = NaN;
-    pursuit.summary.lateFrameN = NaN;
-    pursuit.summary.dirEarlyX = NaN;
-    pursuit.summary.dirEarlyY = NaN;
-    pursuit.summary.dirLateX = NaN;
-    pursuit.summary.dirLateY = NaN;
-    pursuit.summary.dirChange = NaN;
-else
-    pursuit.summary.earlyFrameN = length(earlyFrames);
-    pursuit.summary.lateFrameN = length(lateFrames);
-    
-    % the early phase
-    xTemp = nansum(eyeDir(earlyFrames, 1));
-    yTemp = nansum(eyeDir(earlyFrames, 2));
-    % again, normalize to unit length vector for later calculations
-    pursuit.summary.dirEarlyX = xTemp/sqrt(xTemp^2+yTemp^2);
-    pursuit.summary.dirEarlyY = yTemp/sqrt(xTemp^2+yTemp^2);
-    
-    % the late phase
-    xTemp = nansum(eyeDir(lateFrames, 1));
-    yTemp = nansum(eyeDir(lateFrames, 2));
-    % again, normalize to unit length vector for later calculations
-    pursuit.summary.dirLateX = xTemp/sqrt(xTemp^2+yTemp^2);
-    pursuit.summary.dirLateY = yTemp/sqrt(xTemp^2+yTemp^2);
-    
-    dirEarly = atan2(pursuit.summary.dirEarlyY, pursuit.summary.dirEarlyX)/pi*180;
-    dirLate = atan2(pursuit.summary.dirLateY, pursuit.summary.dirLateX)/pi*180;
-    pursuit.summary.dirChange = dirLate-dirEarly;
-end
+% earlyFrames = pursuit.summary.onset:trial.log.targetOnset+trial.turningPoint-1;
+% lateFrames = trial.log.targetOnset+trial.turningPoint:pursuitOff;
+% if isempty(earlyFrames) || all(isnan(earlyFrames))
+%     pursuit.summary.earlyFrameN = NaN;
+%     pursuit.summary.lateFrameN = NaN;
+%     pursuit.summary.dirEarlyX = NaN;
+%     pursuit.summary.dirEarlyY = NaN;
+%     pursuit.summary.dirLateX = NaN;
+%     pursuit.summary.dirLateY = NaN;
+%     pursuit.summary.dirChange = NaN;
+% else
+%     pursuit.summary.earlyFrameN = length(earlyFrames);
+%     pursuit.summary.lateFrameN = length(lateFrames);
+%     
+%     % the early phase
+%     xTemp = nansum(eyeDir(earlyFrames, 1));
+%     yTemp = nansum(eyeDir(earlyFrames, 2));
+%     % again, normalize to unit length vector for later calculations
+%     pursuit.summary.dirEarlyX = xTemp/sqrt(xTemp^2+yTemp^2);
+%     pursuit.summary.dirEarlyY = yTemp/sqrt(xTemp^2+yTemp^2);
+%     
+%     % the late phase
+%     xTemp = nansum(eyeDir(lateFrames, 1));
+%     yTemp = nansum(eyeDir(lateFrames, 2));
+%     % again, normalize to unit length vector for later calculations
+%     pursuit.summary.dirLateX = xTemp/sqrt(xTemp^2+yTemp^2);
+%     pursuit.summary.dirLateY = yTemp/sqrt(xTemp^2+yTemp^2);
+%     
+%     dirEarly = atan2(pursuit.summary.dirEarlyY, pursuit.summary.dirEarlyX)/pi*180;
+%     dirLate = atan2(pursuit.summary.dirLateY, pursuit.summary.dirLateX)/pi*180;
+%     pursuit.summary.dirChange = dirLate-dirEarly;
+% end
 
 trial.pursuit = pursuit;
 end

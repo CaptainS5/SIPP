@@ -4,24 +4,26 @@
 
 clear all; close all; clc
 
-names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz' 'dc1' 'ja' 'mg' 'yz' 'lk' 'as'}; % also for 500, 501, 504, ib1...
+% names = {'lw0' 'ib1' 'tk' 'xw1' 'pd' 'cl' 'pw' 'mc' 'pk' 'yp' 'ts' 'cf' 'hl' 'qz' 'dc1' 'ja' 'mg' 'yz' 'lk' 'as'}; 
+names = {'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8' 'p9' 'p10' 'p11' 'p12' 'p13' 'p14' 'p15' 'p16' 'p17' 'p18' 'p19' 'p20'}; 
 apertureAngles = [-9 -6 -3 0 3 6 9];
 apertureAngleNames = {'-9', '-6', '-3', '0', '3', '6', '9'};
 internalCons = [0, -90, 90];
-internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
-% internalConNames = {'static', 'dir down', 'dir up'}; % d00
+% internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
+internalConNames = {'static', 'dir down', 'dir up'}; % d00
+groupNames = {'Assimilation', 'Contrast', 'No bias'};
 
 % parameter settings for plots
-plotVariables = {'response', 'turningPoint', ...
+plotVariables = {'response', ...
     'initialMeanVelocity2D', 'initialPeakVelocity2D', 'initialAccelerationFit2D', 'dirOlp', ...
-    'dirEarly', 'dirLate', 'dirChange', ...
     'dirClp', 'dirClpEarly', 'dirClpLate', 'dirClpChange', 'dirError', 'disCenterMean', 'disCenterMeanEarly', 'disCenterMeanLate', ...
     'gainXexternal', 'gainYexternal', 'gainYaverage', 'gain2Dexternal', 'gain2Daverage', 'dirGainExternal', ...
     'meanPosErrOnsetX', 'meanPosErrOnsetY', 'meanPosErrOnset2D', 'meanPosErrOffsetX', 'meanPosErrOffsetY', 'meanPosErrOffset2D', ...
-    'num', 'numXLeft', 'numXRight', 'numYUp', 'numYDown', 'meanAmp2D', 'meanAmpXLeft', 'meanAmpXRight', 'meanAmpYUp', 'meanAmpYDown',...
+    'num', 'numXLeft', 'numXRight', 'numYUp', 'numYDown', 'meanAmp2D', ...
+    'meanAmpXLeft', 'meanAmpXRight', 'meanAmpYUp', 'meanAmpYDown',...
     'sumAmp2D', 'sumAmpXLeft', 'sumAmpXRight', 'sumAmpYUp', 'sumAmpYDown'}; % always put all saccade parameters at last
-openloopVarEnd = 7;
-saccadeVarStart = 24; 
+openloopVarEnd = 5;
+saccadeVarStart = 20; 
 
 % names = {'w00' 'w01' 'w02' 'w03' 'w04' 'w05' 'w06' 'w07' 'w08' 'w09' 'w10'};
 % cohCons = [0; 0.5; 1]; % RDK coherence'
@@ -61,12 +63,14 @@ eyeTrialData.errorStatus(idxT) = -3;
 load('summaryData')
 load('summaryDataDiff')
 load('summaryDataSub')
+load('summarySacData')
 perceptFolder = ['..\..\perceptPlots\'];
 eyeTracesFolder = ['..\..\eyeTraces\'];
 pursuitFolder = ['..\..\pursuitPlots\'];
 saccadeFolder = ['..\..\saccadePlots\'];
 correlationFolder = ['..\..\corrPlots\'];
 perceptFolder = ['..\..\perceptualPlots\'];
+MEFolder = ['..\..\motionEnergyPlots\'];
 RFolder = ['..\..\R\'];
 
 % for plotting

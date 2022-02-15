@@ -7,8 +7,8 @@ groupCons = unique(groupAll);
 %% choose which plot to look at
 individualPlots = 0; % within-sub
 averagePlots = 1; % across-sub
-plotVarStart = 40;
-plotVarEnd = 40;
+plotVarStart = 36;
+plotVarEnd = 36;
 
 %%
 close all
@@ -389,6 +389,7 @@ if averagePlots
                         corrT = summaryDiffCopy(idxT, :);
                         
                         corrDT = [corrT.sumAmpYUp(corrT.rdkInternalDir==-90, 1); corrT.sumAmpYDown(corrT.rdkInternalDir==90, 1)];
+%                         corrDT = [corrT.numYUp(corrT.rdkInternalDir==-90, 1); corrT.numYDown(corrT.rdkInternalDir==90, 1)];
                         corrData.(plotVariables{varN})(subN, 1) = nanmean(corrDT);
                         
 %                         corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDiffCopy.(plotVariables{varN})(idxT));
@@ -400,10 +401,10 @@ if averagePlots
 %             corrData.response(subN, 1) = nanmean(summaryDiffCopy.response(idxT));
 %             corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDiffCopy.(plotVariables{varN})(idxT));
             
-            %             % raw vs. raw
-            %             idxT = find(summaryData.sub==subN);
-            %             corrData.response(subN, 1) = nanmean(summaryDataDiff.response(idxT));
-            %             corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDataDiff.(plotVariables{varN})(idxT));
+%                         % raw vs. raw
+%                         idxT = find(summaryData.sub==subN);
+%                         corrData.response(subN, 1) = nanmean(summaryDataDiff.response(idxT));
+%                         corrData.(plotVariables{varN})(subN, 1) = nanmean(summaryDataDiff.(plotVariables{varN})(idxT));
             %
             
             %             % raw vs. diff in response
@@ -432,19 +433,29 @@ if averagePlots
         
         figure
         hold on
+        % all points together
+%         scatter(corrData.(plotVariables{varN}), corrData.response,...
+%                         'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+%         lsline(gca)
+        
+        % colour subgroups
         for groupN = 1:length(subGroup)
-                        scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.response(subGroup{groupN}), ...
-                            'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
-%             scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.dirClp(subGroup{groupN}), ...
-%                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+            scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.response(subGroup{groupN}), ...
+                'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+            %             scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.dirClp(subGroup{groupN}), ...
+            %                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
         end
-        xlabel(['Bias in ', plotVariables{varN}, ' opposite to dot motion'])
+        
+%         xlabel(['Bias in ', plotVariables{varN}, ' opposite to dot motion'])
         %         xlabel(['Absolute ', plotVariables{varN}])
+        xlabel(['Bias in ', plotVariables{varN}])
+        
 %         ylabel('Bias in pursuit direction')
-ylabel('Bias in perceived direction')
+                ylabel('Bias in perceived direction')
         title(['r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
+        
         if varN>=saccadeVarStart
-                        saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
+                        saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'YVSperceptualBias_all.pdf'])
 %             saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'VSpursuitBias_all.pdf'])
         else
             saveas(gcf, [correlationFolder, 'pursuitDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])

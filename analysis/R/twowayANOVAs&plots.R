@@ -1,25 +1,29 @@
 library(ggplot2)
 library(ez)
-library(Hmisc)
-library(reshape2)
+# library(Hmisc)
+# library(reshape2)
 library(psychReport)
-library(lsr)
-library(bayestestR)
-library(BayesFactor)
-library(TOSTER)
+# library(lsr)
+# library(bayestestR)
+# library(BayesFactor)
+# library(TOSTER)
 
 #### clear environment
 rm(list = ls())
 
 #### load data
 # on Inspiron 13
-setwd("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/micropursuit/analysis/R")
+setwd("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/SIPP/analysis/R")
 source("pairwise.t.test.with.t.and.df.R")
-plotFolder <- ("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/micropursuit/analysis/R/plots/")
+plotFolder <- ("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/SIPP/analysis/R/plots/")
 ### modify these parameters to plot different conditions
-varName <- "sumAmpYUp"
+# varName <- "response"
 dataFileName <- "summaryDataDiffSubgroup.csv"
-pdfFileName <- paste("diff_", varName, "_all.pdf", sep = "")
+# pdfFileName <- paste("diff_", varName, "_all.pdf", sep = "")
+## for catch-up saccades
+# varName <- "numY"
+# dataFileName <- "summaryCatchUpSaccades.csv"
+# pdfFileName <- paste("saccadeBias_consistency", varName, "_all.pdf", sep = "")
 
 # for plotting
 textSize <- 25
@@ -29,6 +33,59 @@ dotSize <- 3
 data <- read.csv(dataFileName)
 subAll <- unique(data$sub)
 subTotalN <- length(subAll)
+
+#### catch-up saccade analysis
+sub <- data["sub"]
+rdkApertureAngle <- data["rdkApertureAngle"]
+sacGroup <- data["sacGroup"]
+measure <- data[varName]
+measure[is.na(measure)] = 0
+dataAnova <- data.frame(sub, sacGroup, rdkApertureAngle, measure)
+dataAnova$sacGroup <- as.factor(dataAnova$sacGroup)
+dataAnova$sub <- as.factor(dataAnova$sub)
+dataAnova$rdkApertureAngle <- as.factor(dataAnova$rdkApertureAngle)
+colnames(dataAnova)[4] <- "measure"
+
+anovaData <- ezANOVA(dataAnova, dv = .(measure), wid = .(sub),
+    within = .(sacGroup, rdkApertureAngle), type = 3, return_aov = TRUE, detailed = TRUE)
+# print(aonvaData)
+aovEffectSize(anovaData, 'pes')
+
+dataPlot <- data.frame(sub, sacGroup, rdkApertureAngle, measure)
+colnames(dataPlot)[4] <- "measure"
+dataPlot$sub <- as.factor(dataPlot$sub)
+dataPlot$sacGroup <- as.factor(dataPlot$sacGroup)
+# saccades
+ylimLow <- -1
+ylimHigh <- 1
+
+p <- ggplot(dataPlot, aes(x = rdkApertureAngle, y = measure, color = sacGroup)) +
+        stat_summary(fun = mean, geom = "point", shape = 95, size = 17.5) +
+        stat_summary(fun = mean, geom = "line", width = 1) +
+        stat_summary(fun.data = 'mean_sdl', fun.args = list(mult = 1.96/sqrt(subTotalN)), geom = 'errorbar', width = 1, size = 1) +
+        stat_summary(aes(y = measure), fun.data = mean_se, geom = "errorbar", width = 0.1) +
+        geom_point(size = dotSize, shape = 1) +
+        geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(-9, -12), y = c(ylimLow, ylimLow), xend = c(9, -12), yend = c(ylimLow, ylimHigh)), size = axisLineWidth, inherit.aes = FALSE) +
+        # scale_y_continuous(name = "Bias in sum vertical amplitudes (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
+        scale_y_continuous(name = "Bias in number", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
+        # scale_y_continuous(name = varName, limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) + 
+        scale_x_continuous(name = "Object motion direction (deg)", breaks=c(-9,-6,-3,0,3,6,9), limits = c(-12, 12), expand = c(0, 0)) +
+        # scale_x_discrete(name = "Probability of rightward motion", breaks=c("50", "90")) +
+        scale_colour_manual(name = "Saccade direction", labels = c("same", "opposite"), values = c("#DBB167", "#2ADB77")) +
+        theme(axis.text=element_text(colour="black"),
+                      axis.ticks=element_line(colour="black", size = axisLineWidth),
+                      panel.grid.major = element_blank(),
+                      panel.grid.minor = element_blank(),
+                      panel.border = element_blank(),
+                      panel.background = element_blank(),
+                      text = element_text(size = textSize, colour = "black"),
+                      legend.background = element_rect(fill="transparent"),
+                      legend.key = element_rect(colour = "transparent", fill = "white"),
+                      legend.position="top")
+        # facet_wrap(~exp)
+print(p)
+ggsave(paste(plotFolder, pdfFileName, sep = ""))
+
 
 #### compare different dot motion conditions
 sub <- data["sub"]
@@ -66,18 +123,14 @@ aovEffectSize(anovaData, 'pes')
 dataPlot <- data.frame(sub, rdkApertureAngle, rdkInternalDir, measure)
 colnames(dataPlot)[4] <- "measure"
 dataPlot$sub <- as.factor(dataPlot$sub)
-# dataPlot$rdkApertureAngle <- as.factor(dataPlot$rdkApertureAngle)
-# is.numeric(dataPlot$timeBin)
 dataPlot$rdkInternalDir <- as.factor(dataPlot$rdkInternalDir)
-# dataPlot <- aggregate(measure ~ rdkInternalDir+prob, data = dataPlot, FUN = "mean")
-# show(dataPlot)
 
+# # pursuit bias clp
+# ylimLow <- -15
+# ylimHigh <- 15
 # response
 ylimLow <- -15
 ylimHigh <- 15
-# saccades
-ylimLow <- -1
-ylimHigh <- 1
 
 p <- ggplot(dataPlot, aes(x = rdkApertureAngle, y = measure, color = rdkInternalDir)) +
         stat_summary(fun = mean, geom = "point", shape = 95, size = 17.5) +
@@ -86,12 +139,10 @@ p <- ggplot(dataPlot, aes(x = rdkApertureAngle, y = measure, color = rdkInternal
         stat_summary(aes(y = measure), fun.data = mean_se, geom = "errorbar", width = 0.1) +
         geom_point(size = dotSize, shape = 1) +
         geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(-9, -12), y = c(ylimLow, ylimLow), xend = c(9, -12), yend = c(ylimLow, ylimHigh)), size = axisLineWidth, inherit.aes = FALSE) +
-        scale_y_continuous(name = "Bias in sum upward saccade amplitude (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
+        scale_y_continuous(name = "Bias in perceived direction (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
         # scale_y_continuous(name = "Bias in clp pursuit direction (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
         # scale_y_continuous(name = varName, limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) + 
         scale_x_continuous(name = "Object motion direction (deg)", breaks=c(-9,-6,-3,0,3,6,9), limits = c(-12, 12), expand = c(0, 0)) +
-        # scale_x_discrete(name = "Probability of rightward motion", breaks=c("50", "90")) +
-        # scale_colour_discrete(name = "After reversal\ndirection", labels = c("CCW", "CW")) +
         theme(axis.text=element_text(colour="black"),
                       axis.ticks=element_line(colour="black", size = axisLineWidth),
                       panel.grid.major = element_blank(),
@@ -108,9 +159,9 @@ ggsave(paste(plotFolder, pdfFileName, sep = ""))
 
 #### Comparison between perceptual bias groups
 ### separetly plot each group
-pdfFileName <- paste("diff_", varName, "_assimilationGroup.pdf", sep = "")
+pdfFileName <- paste("diff_", varName, "_nobiasGroup.pdf", sep = "")
 
-dataSub <- subset(data, group==1)
+dataSub <- subset(data, group==3)
 subAll <- unique(dataSub["sub"])
 subTotalN <- dim(subAll)[1]
 
@@ -256,13 +307,16 @@ for (subN in subAll) {
 dataBase$sub <- as.factor(dataBase$sub)
 dataBase$group <- as.factor(dataBase$group)
 
-slopeData <- data.frame(matrix(ncol=3,nrow=length(subAll), dimnames=list(NULL, c("sub", "group", "slope"))))
+slopeData <- data.frame(sub=double(20),
+                 group=double(20),
+                 slope=double(20),
+                 stringsAsFactors=FALSE)
 for (subN in subAll) {
     dataTemp <- subset(dataBase, sub==subN)
     LM <- lm( measure ~ pursuitPhase, dataTemp)
-    slopeData["sub"][subN, 1] <- subN
-    slopeData["group"][subN, 1] <- dataTemp["group"][1,]
-    slopeData["slope"][subN, 1] <- coef(LM)["pursuitPhase"]
+    slopeData$sub[subN] <- subN
+    slopeData$group[subN] <- dataTemp$group[1]
+    slopeData$slope[subN] <- coef(LM)["pursuitPhase"]
 }
 show(slopeData)
 slopeData$sub <- as.factor(slopeData$sub)
@@ -271,6 +325,50 @@ slopeData$group <- as.factor(slopeData$group)
 options(contrasts=c("contr.sum","contr.poly"))
 anovaData <- ezANOVA(slopeData, dv = .(slope), wid = .(sub),
     between = .(group), type = 3)
-print(aonvaData)
+print(anovaData)
 
-pdfFileName <- paste("diffPursuitTemporal_subgroup.pdf", sep = "")
+## post-hoc t-test
+aovData <- aov(slope ~ group, slopeData)
+res <- TukeyHSD(aovData)
+print(res)
+
+model = lm(slope ~ group, slopeData)
+library(emmeans)
+marginal = emmeans(model, ~ group)
+pairs(marginal, adjust="tukey")
+
+
+pdfFileName <- paste("slopePursuitBiasTemporal_subgroup.pdf", sep = "")
+dataPlot <- slopeData
+# # pursuit bias magnitude
+# ylimLow <- -2
+# ylimHigh <- 15
+# average response
+ylimLow <- -7
+ylimHigh <- -2
+
+p <- ggplot(data=dataPlot, aes(x = group, y = slope)) +
+        stat_summary(aes(y = slope), fun = mean, geom = "point", shape = 95, size = 17.5) +
+        stat_summary(fun.data = 'mean_sdl',
+               fun.args = list(mult = 1.96/sqrt(subTotalN)),
+               geom = 'linerange', size = 1) +
+        # geom_line(aes(x = group, y = slope, group = sub), size = 0.5, linetype = "dashed") +
+        geom_point(aes(x = group, y = slope), size = dotSize, shape = 1, position = position_jitter(w = 0.1, h = 0)) +
+        geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(1, 0.5), y = c(ylimLow, ylimLow), xend = c(3, 0.5), yend = c(ylimLow, ylimHigh)), size = axisLineWidth) +
+        scale_y_continuous(name = "Slope of the temporal change in pursuit bias", breaks = c(ylimLow, ylimHigh), limits = c(ylimLow, ylimHigh), expand = c(0, 0)) +
+        # scale_y_continuous(name = "Time of the start of the window after RDK onset (ms)", breaks = c(ylimLow, ylimHigh), limits = c(ylimLow, ylimHigh), expand = c(0, 0)) +
+        # scale_x_continuous(name = "Preceded perceived direction", breaks=c(0, 1), limits = c(-0.5, 1.5), expand = c(0, 0)) + # preceded perception
+        scale_x_discrete(name = "Perceptual bias group", breaks=1:3, labels = c("Assimilation", "Contrast", "No-bias")) + 
+        # scale_colour_discrete(name = "After reversal\ndirection", labels = c("CCW", "CW")) +
+        theme(axis.text=element_text(colour="black"),
+              axis.ticks=element_line(colour="black", size = axisLineWidth),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_blank(),
+              panel.background = element_blank(),
+              text = element_text(size = textSize, colour = "black"),
+              legend.background = element_rect(fill="transparent"),
+              legend.key = element_rect(colour = "transparent", fill = "white"))
+        # facet_wrap(~prob)
+print(p)
+ggsave(paste(plotFolder, pdfFileName, sep = ""))

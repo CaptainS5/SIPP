@@ -1,8 +1,8 @@
 library(ggplot2)
 library(ez)
-library(Hmisc)
-library(lsr)
-library(BayesFactor)
+# library(Hmisc)
+# library(lsr)
+# library(BayesFactor)
 
 #### clear environment
 rm(list = ls())
@@ -10,13 +10,13 @@ rm(list = ls())
 #### load data
 # on Inspiron 13
 # on Inspiron 13
-setwd("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/micropursuit/analysis/R")
+setwd("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/SIPP/analysis/R")
 source("pairwise.t.test.with.t.and.df.R")
-plotFolder <- ("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/micropursuit/analysis/R/plots/")
+plotFolder <- ("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/SIPP/analysis/R/plots/")
 
 ### modify these parameters to plot different conditions
 # varName <- "dirClp"
-dataFileName <- "tempCorrDataSubgroup.csv"
+dataFileName <- "summaryDataDiffSubgroup.csv"
 
 # for plotting
 textSize <- 25
@@ -54,11 +54,42 @@ anovaData <- ezANOVA(dataAnova, dv = .(measure), wid = .(sub),
     within = .(pursuitPhase), type = 3)
 print(anovaData)
 
+### plot
+# pursuit bias
+ylimLow <- -2
+ylimHigh <- 15
+
+p <- ggplot(data=dataAnova, aes(x = pursuitPhase, y = measure)) +
+        stat_summary(aes(y = measure), fun = mean, geom = "point", shape = 95, size = 17.5) +
+        stat_summary(fun.data = 'mean_sdl',
+               fun.args = list(mult = 1.96/sqrt(subTotalN)),
+               geom = 'linerange', size = 1) +
+        # geom_line(aes(x = group, y = measure, group = sub), size = 0.5, linetype = "dashed") +
+        geom_point(aes(x = pursuitPhase, y = measure), size = dotSize, shape = 1, position = position_jitter(w = 0.1, h = 0)) +
+        geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(1, 0.5), y = c(ylimLow, ylimLow), xend = c(3, 0.5), yend = c(ylimLow, ylimHigh)), size = axisLineWidth) +
+        scale_y_continuous(name = "Bias in pursuit direction (deg))", breaks = c(ylimLow, ylimHigh), limits = c(ylimLow, ylimHigh), expand = c(0, 0)) +
+        # scale_y_continuous(name = "Time of the start of the window after RDK onset (ms)", breaks = c(ylimLow, ylimHigh), limits = c(ylimLow, ylimHigh), expand = c(0, 0)) +
+        # scale_x_continuous(name = "Preceded perceived direction", breaks=c(0, 1), limits = c(-0.5, 1.5), expand = c(0, 0)) + # preceded perception
+        scale_x_discrete(name = "Pursuit phase", breaks=1:3, labels = c("Initiation", "Early steady-state", "Late steady-state")) + 
+        # scale_colour_discrete(name = "After reversal\ndirection", labels = c("CCW", "CW")) +
+        theme(axis.text=element_text(colour="black"),
+              axis.ticks=element_line(colour="black", size = axisLineWidth),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_blank(),
+              panel.background = element_blank(),
+              text = element_text(size = textSize, colour = "black"),
+              legend.background = element_rect(fill="transparent"),
+              legend.key = element_rect(colour = "transparent", fill = "white"))
+        # facet_wrap(~prob)
+print(p)
+ggsave(paste(plotFolder, pdfFileName, sep = ""))
+
 
 #### Comparison between perceptual bias groups
 ### about the temporal relationship
 varName <- c("wMiddle")
-pdfFileName <- paste("groupCompTemporal_", varName, ".pdf", sep = "")
+# pdfFileName <- paste("groupCompTemporal_", varName, ".pdf", sep = "")
 
 sub <- data["sub"]
 group <- data["group"]
@@ -173,7 +204,7 @@ dataPlot <- dataAnova
 # ylimHigh <- 15
 # average response
 ylimLow <- 0
-ylimHigh <- 10
+ylimHigh <- 6
 
 p <- ggplot(data=dataPlot, aes(x = group, y = measure)) +
         stat_summary(aes(y = measure), fun = mean, geom = "point", shape = 95, size = 17.5) +
