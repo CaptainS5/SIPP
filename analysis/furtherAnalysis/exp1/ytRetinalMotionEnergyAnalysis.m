@@ -212,31 +212,50 @@ end
 save(['netMotionEnergy_pureMotionOnScreen_', num2str(tw), 'ms.mat'], 'netME')
 
 %% Now we can plot and analyze the net motion energy across participants
-% load(['netMotionEnergy_', num2str(tw), 'ms.mat'])
-% load('subGroupList.mat')
+tw = 100;
+load(['netMotionEnergy_', num2str(tw), 'ms.mat'])
+load('subGroupList.mat')
 % allME = [];
-% groupME = [];
-% 
-% for subN = 1:length(names)
-%     for internalConN = 1:length(internalCons)
-%         idx = find(eyeTrialData.errorStatus(subN, :)==0 ...
-%             & eyeTrialData.rdkInternalCon(subN, :)==internalCons(internalConN));
-%         allME{internalConN}(subN, :) = nanmean(netME{subN}(:, idx), 2);
-%     end
-% end
-% 
-% for groupN = 1:3
-%     for internalConN = 1:length(internalCons)
-%         groupME{groupN}(internalConN, :) = nanmean(allME{internalConN}(subGroup{groupN}, :));
-%     end
-% end
-% 
-% figure
-% hold on
-% for groupN = 1:3
-%    plot(groupME{groupN}', 'color', colorGroup(groupN, :))
-% end
-% legend(groupNames, 'box', 'off')
-% xlabel('Time frame')
-% ylabel('Net motion energy (vertical)')
-% saveas(gcf, ['motionEnergySubgroup_', num2str(tw), 'ms.pdf'])
+subME = [];
+subAngleME = [];
+groupME = [];
+base = [];
+
+% subgroups, calculate difference from baseline, then average together
+for groupN = 1:3
+    subList = subGroup{groupN};
+    for subN = 1:length(subList)
+        for angleN = 1:length(apertureAngles)
+            for internalConN = 1:length(internalCons)
+                idx = find(eyeTrialData.rdkApertureAngle(subList(subN), :)==apertureAngles(angleN) & eyeTrialData.rdkInternalCon(subList(subN), :)==internalCons(internalConN));
+                if internalConN==1 % baseline
+                    base{groupN, subN}(angleN, :) = nanmean(netME{subList(subN)}(:, idx), 2);
+                else 
+                    subAngleME{groupN, subN, angleN}(internalConN-1, :) = nanmean(netME{subList(subN)}(:, idx), 2)'*sign(internalCons(internalConN))-base{groupN, subN}(angleN, :);
+                end
+            end
+            subAngleME{groupN, subN}(angleN, :) = nanmean(subAngleME{groupN, subN, angleN});
+        end
+        subME{groupN}(subN, :) = nanmean(subAngleME{groupN, subN});
+    end
+    groupME(groupN, :) = nanmean(subME{groupN});
+    groupME_upper(groupN, :) = groupME(groupN, :)+tinv(0.975,length(subList)-1)*nanstd(subME{groupN})/sqrt(length(subList)); % 95% CI
+    groupME_lower(groupN, :) = groupME(groupN, :)+tinv(0.025,length(subList)-1)*nanstd(subME{groupN})/sqrt(length(subList));
+    
+%     % output csv files for plotting in R
+%     writematrix(subME{groupN}, [RFolder, 'motionEnergyTrace_group', num2str(groupN), '.csv'])
+end
+%%
+figure
+hold on
+tMS = ([1:size(groupME, 2)]+8)*1000/85; % time in ms
+for drawN = 1:3
+   groupN = 4-drawN;
+   p{groupN} = plot(tMS, groupME(groupN, :), 'color', colorGroup(groupN, :));
+   patch('XData', [tMS, fliplr(tMS)], 'YData', [groupME_upper(groupN, :), fliplr(groupME_lower(groupN, :))], ...
+       'faceColor', colorGroup(groupN, :), 'faceAlpha', 0.2, 'edgeColor', 'none', 'lineWidth', 5)
+end
+legend([p{:}], fliplr(groupNames), 'box', 'off')
+xlabel('Time (ms)')
+ylabel('Net motion energy (vertical)')
+saveas(gcf, [MEFolder, 'motionEnergyMergedSubgroup_', num2str(tw), 'ms.pdf'])
