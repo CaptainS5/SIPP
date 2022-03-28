@@ -214,7 +214,7 @@ save(['netMotionEnergy_pureMotionOnScreen_', num2str(tw), 'ms.mat'], 'netME')
 %% Now we can plot and analyze the net motion energy across participants
 tw = 100;
 load(['netMotionEnergy_', num2str(tw), 'ms.mat'])
-load('subGroupList.mat')
+load('subGroupListLPA.mat')
 % allME = [];
 subME = [];
 subAngleME = [];
@@ -222,7 +222,7 @@ groupME = [];
 base = [];
 
 % subgroups, calculate difference from baseline, then average together
-for groupN = 1:3
+for groupN = 1:size(subGroup, 2)
     subList = subGroup{groupN};
     for subN = 1:length(subList)
         for angleN = 1:length(apertureAngles)
@@ -249,13 +249,21 @@ end
 figure
 hold on
 tMS = ([1:size(groupME, 2)]+8)*1000/85; % time in ms
-for drawN = 1:3
-   groupN = 4-drawN;
+p = [];
+for drawN = 1:2
+   groupN = 3-drawN;
    p{groupN} = plot(tMS, groupME(groupN, :), 'color', colorGroup(groupN, :));
    patch('XData', [tMS, fliplr(tMS)], 'YData', [groupME_upper(groupN, :), fliplr(groupME_lower(groupN, :))], ...
        'faceColor', colorGroup(groupN, :), 'faceAlpha', 0.2, 'edgeColor', 'none', 'lineWidth', 5)
 end
-legend([p{:}], fliplr(groupNames), 'box', 'off')
+
+% add time stamps
+meanLatency = 131;
+plot([meanLatency+140, meanLatency+140], [-0.45, 0], '--')
+plot([meanLatency+140+(700-meanLatency-140)/2, meanLatency+140+(700-meanLatency-140)/2], [-0.45, 0], '--')
+plot([700, 700], [-0.45, 0], '--')
+
+legend([p{:}], groupNames, 'box', 'off')
 xlabel('Time (ms)')
-ylabel('Net motion energy (vertical)')
+ylabel('Diff net motion energy (vertical)')
 saveas(gcf, [MEFolder, 'motionEnergyMergedSubgroup_', num2str(tw), 'ms.pdf'])

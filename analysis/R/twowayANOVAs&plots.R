@@ -17,13 +17,17 @@ setwd("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/SIPP/analysis/R")
 source("pairwise.t.test.with.t.and.df.R")
 plotFolder <- ("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/SIPP/analysis/R/plots/")
 ### modify these parameters to plot different conditions
-# varName <- "response"
-dataFileName <- "summaryDataDiffSubgroup.csv"
-# pdfFileName <- paste("diff_", varName, "_all.pdf", sep = "")
+# dataFileName <- "summaryDataDiff.csv"
+dataFileName <- "summaryDataDiffSubgroup_LPA.csv"
+varName <- "response"
+pdfFileName <- paste("diff_", varName, "_all.pdf", sep = "")
 ## for catch-up saccades
 # varName <- "numY"
 # dataFileName <- "summaryCatchUpSaccades.csv"
 # pdfFileName <- paste("saccadeBias_consistency", varName, "_all.pdf", sep = "")
+## for individual examples
+# varName <- "response"
+# dataFileName <- "trialDataCorr.csv"
 
 # for plotting
 textSize <- 25
@@ -62,8 +66,8 @@ ylimHigh <- 1
 p <- ggplot(dataPlot, aes(x = rdkApertureAngle, y = measure, color = sacGroup)) +
         stat_summary(fun = mean, geom = "point", shape = 95, size = 17.5) +
         stat_summary(fun = mean, geom = "line", width = 1) +
-        stat_summary(fun.data = 'mean_sdl', fun.args = list(mult = 1.96/sqrt(subTotalN)), geom = 'errorbar', width = 1, size = 1) +
-        stat_summary(aes(y = measure), fun.data = mean_se, geom = "errorbar", width = 0.1) +
+        stat_summary(fun.data = 'mean_sdl', fun.args = list(mult = 1.96/sqrt(subTotalN)), geom = 'linerange', width = 1, size = 1) +
+        # stat_summary(aes(y = measure), fun.data = mean_se, geom = "errorbar", width = 0.1) +
         geom_point(size = dotSize, shape = 1) +
         geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(-9, -12), y = c(ylimLow, ylimLow), xend = c(9, -12), yend = c(ylimLow, ylimHigh)), size = axisLineWidth, inherit.aes = FALSE) +
         # scale_y_continuous(name = "Bias in sum vertical amplitudes (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
@@ -139,10 +143,11 @@ p <- ggplot(dataPlot, aes(x = rdkApertureAngle, y = measure, color = rdkInternal
         stat_summary(aes(y = measure), fun.data = mean_se, geom = "errorbar", width = 0.1) +
         geom_point(size = dotSize, shape = 1) +
         geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(-9, -12), y = c(ylimLow, ylimLow), xend = c(9, -12), yend = c(ylimLow, ylimHigh)), size = axisLineWidth, inherit.aes = FALSE) +
-        scale_y_continuous(name = "Bias in perceived direction (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
-        # scale_y_continuous(name = "Bias in clp pursuit direction (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
+        scale_y_continuous(name = "Bias in perceived direction (deg)", limits = c(ylimLow, ylimHigh), breaks = seq(from = ylimLow, to = ylimHigh, by = 5), expand = c(0, 0)) +
+        # scale_y_continuous(name = "Bias in pursuit direction (deg)", limits = c(ylimLow, ylimHigh), breaks = seq(from = ylimLow, to = ylimHigh, by = 5), expand = c(0, 0)) +
         # scale_y_continuous(name = varName, limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) + 
         scale_x_continuous(name = "Object motion direction (deg)", breaks=c(-9,-6,-3,0,3,6,9), limits = c(-12, 12), expand = c(0, 0)) +
+        scale_colour_manual(name = "Internal motion", labels = c("Down", "Up"), values = c("#ef8a62", "#67a9cf")) +
         theme(axis.text=element_text(colour="black"),
                       axis.ticks=element_line(colour="black", size = axisLineWidth),
                       panel.grid.major = element_blank(),
@@ -157,11 +162,58 @@ p <- ggplot(dataPlot, aes(x = rdkApertureAngle, y = measure, color = rdkInternal
 print(p)
 ggsave(paste(plotFolder, pdfFileName, sep = ""))
 
+
+
+#### individual examples of perceptual bias
+pdfFileName <- paste("diff_", varName, "_p1.pdf", sep = "")
+
+dataS <- subset(data, sub==1)
+rdkApertureAngle <- dataS["rdkApertureAngle"]
+rdkInternalDir <- dataS["rdkInternalDir"]
+measure <- dataS[varName]
+
+## interaction plot
+dataPlot <- data.frame(rdkApertureAngle, rdkInternalDir, measure)
+colnames(dataPlot)[3] <- "measure"
+dataPlot$rdkInternalDir <- as.factor(dataPlot$rdkInternalDir)
+
+# response
+ylimLow <- -15
+ylimHigh <- 15
+
+p <- ggplot(dataPlot, aes(x = rdkApertureAngle, y = measure, color = rdkInternalDir)) +
+        stat_summary(fun = mean, geom = "point", shape = 95, size = 17.5) +
+        stat_summary(fun = mean, geom = "line", width = 1) +
+        stat_summary(fun.data = 'mean_sdl', fun.args = list(mult = 1), geom = 'errorbar', width = 1, size = 1) +
+        stat_summary(aes(y = measure), fun.data = mean_se, geom = "errorbar", width = 0.1) +
+        geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(-9, -12), y = c(ylimLow, ylimLow), xend = c(9, -12), yend = c(ylimLow, ylimHigh)), size = axisLineWidth, inherit.aes = FALSE) +
+        scale_y_continuous(name = "Bias in perceived direction (deg)", limits = c(ylimLow, ylimHigh), breaks = seq(from = ylimLow, to = ylimHigh, by = 5), expand = c(0, 0)) +
+        # scale_y_continuous(name = "Bias in pursuit direction (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
+        # scale_y_continuous(name = varName, limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) + 
+        scale_x_continuous(name = "Object motion direction (deg)", breaks=c(-9,-6,-3,0,3,6,9), limits = c(-12, 12), expand = c(0, 0)) +
+        scale_colour_manual(name = "Internal motion", labels = c("Down", "Up"), values = c("#ef8a62", "#67a9cf")) +
+        theme(axis.text=element_text(colour="black"),
+                      axis.ticks=element_line(colour="black", size = axisLineWidth),
+                      panel.grid.major = element_blank(),
+                      panel.grid.minor = element_blank(),
+                      panel.border = element_blank(),
+                      panel.background = element_blank(),
+                      text = element_text(size = textSize, colour = "black"),
+                      legend.background = element_rect(fill="transparent"),
+                      legend.key = element_rect(colour = "transparent", fill = "white"),
+                      legend.position="top")
+        # facet_wrap(~exp)
+print(p)
+ggsave(paste(plotFolder, pdfFileName, sep = ""))
+
+
+
+
 #### Comparison between perceptual bias groups
 ### separetly plot each group
-pdfFileName <- paste("diff_", varName, "_nobiasGroup.pdf", sep = "")
+pdfFileName <- paste("diff_", varName, "_assimilationGroup.pdf", sep = "")
 
-dataSub <- subset(data, group==3)
+dataSub <- subset(data, group==1)
 subAll <- unique(dataSub["sub"])
 subTotalN <- dim(subAll)[1]
 
@@ -201,11 +253,10 @@ p <- ggplot(dataPlot, aes(x = rdkApertureAngle, y = measure, color = rdkInternal
         # stat_summary(aes(y = measure), fun.data = mean_se, geom = "errorbar", width = 0.1) +
         geom_point(size = dotSize, shape = 1) +
         geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(-9, -12), y = c(ylimLow, ylimLow), xend = c(9, -12), yend = c(ylimLow, ylimHigh)), size = axisLineWidth, inherit.aes = FALSE) +
-        scale_y_continuous(name = "Bias in perceived direction (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
+        scale_y_continuous(name = "Bias in perceived direction (deg)", limits = c(ylimLow, ylimHigh), breaks = seq(from = ylimLow, to = ylimHigh, by = 5), expand = c(0, 0)) +
         # scale_y_continuous(name = varName, limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) + 
         scale_x_continuous(name = "Object motion direction (deg)", breaks=c(-9,-6,-3,0,3,6,9), limits = c(-12, 12), expand = c(0, 0)) +
-        # scale_x_discrete(name = "Probability of rightward motion", breaks=c("50", "90")) +
-        # scale_colour_discrete(name = "After reversal\ndirection", labels = c("CCW", "CW")) +
+        scale_colour_manual(name = "Internal motion", labels = c("Down", "Up"), values = c("#ef8a62", "#67a9cf")) +
         theme(axis.text=element_text(colour="black"),
                       axis.ticks=element_line(colour="black", size = axisLineWidth),
                       panel.grid.major = element_blank(),
@@ -249,6 +300,17 @@ anovaData <- ezANOVA(dataAnova, dv = .(measure), wid = .(sub),
 # print(aonvaData)
 aovEffectSize(anovaData, 'pes')
 
+## post-hoc t-test
+aovData <- aov(measure ~ pursuitPhase*group, dataAnova)
+res <- TukeyHSD(aovData)
+print(res)
+
+model = lm(measure ~ pursuitPhase*group, dataAnova)
+library(emmeans)
+marginal = emmeans(model, ~ pursuitPhase*group)
+pairs(marginal, adjust="tukey")
+
+
 ### plot
 dataPlot <- dataAnova
 
@@ -263,7 +325,7 @@ p <- ggplot(dataPlot, aes(x = pursuitPhase, y = measure, color = group)) +
         # stat_summary(aes(y = measure), fun.data = mean_se, geom = "errorbar", width = 0.1) +
         geom_point(size = dotSize, shape = 1, position = position_jitterdodge()) +
         geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(1, 0.5), y = c(ylimLow, ylimLow), xend = c(3, 0.5), yend = c(ylimLow, ylimHigh)), size = axisLineWidth, inherit.aes = FALSE) +
-        scale_y_continuous(name = "Mean pursuit bias (deg)", limits = c(ylimLow, ylimHigh), breaks = c(ylimLow, 0, ylimHigh), expand = c(0, 0)) +
+        scale_y_continuous(name = "Mean pursuit bias (deg)", limits = c(ylimLow, ylimHigh), breaks = seq(from = ylimLow, to = ylimHigh, by = 5), expand = c(0, 0)) +
         # scale_x_continuous(name = "Object motion direction (deg)", breaks=c(-9,-6,-3,0,3,6,9), limits = c(-12, 12), expand = c(0, 0)) +
         scale_x_discrete(name = "Pursuit phase", breaks=1:3, labels = c("Initiation", "Early steady-state", "Late steady-state")) +
         scale_colour_manual(name = "Perceptual bias group", labels = c("Assimilation", "Contrast", "No-bias"), values=c("#C77CFF", "#7CAE00", "#000000")) +

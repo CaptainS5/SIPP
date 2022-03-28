@@ -1,14 +1,14 @@
 % Exp1:
 % correlation plots
 initializeParas;
-load('subGroupList.mat')
-groupCons = unique(groupAll);
+% load('subGroupList.mat')
+% groupCons = unique(groupAll);
 
 %% choose which plot to look at
-individualPlots = 1; % within-sub
-averagePlots = 0; % across-sub
-plotVarStart = 5;
-plotVarEnd = 8;
+individualPlots = 0; % within-sub
+averagePlots = 1; % across-sub
+plotVarStart = 6;
+plotVarEnd = 6;
 
 %%
 close all
@@ -374,6 +374,17 @@ disp([dataCorrDiff.varEye{1}, ', r = ', num2str(mean(abs(dataCorrDiff.rho))), ' 
 %     save('corrStatsIndividual.mat', 'corrStats', 'corrDiffStats')
 end
 
+%% t-test for individual r...
+load('corrDiffStatsIndividual.mat')
+phaseName = {'dirOlp', 'dirClpEarly', 'dirClpLate'};
+for phaseN=1:3
+    idx = find(strcmp(corrDiffStats.varEye, phaseName{phaseN}));
+    [h(phaseN), p(phaseN), ci(:, phaseN), stats{phaseN}] = ttest(corrDiffStats.rho(idx));
+    std(corrDiffStats.rho(idx))
+    stats{phaseN}.sd
+    cohensD(phaseN) = mean(corrDiffStats.rho(idx))/std(corrDiffStats.rho(idx));
+end
+
 %%
 summaryDiffCopy = summaryDataDiff;
 if averagePlots
@@ -433,7 +444,7 @@ if averagePlots
         end
         %         % one point per internalCon x angle per person
         %         corrData.response = summaryDataDiff.response;
-        
+                
                 [rho, pval] = corr(corrData.(plotVariables{varN}), corrData.response);
 %         [rho, pval] = corr(corrData.(plotVariables{varN}), corrData.dirClp);
         
@@ -445,19 +456,20 @@ if averagePlots
         lsline(gca)
         
         % colour subgroups
-        for groupN = 1:length(subGroup)
-            scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.response(subGroup{groupN}), ...
-                'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
-            %             scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.dirClp(subGroup{groupN}), ...
-            %                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
-        end
+%         for groupN = 1:length(subGroup)
+%             scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.response(subGroup{groupN}), ...
+%                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+%             %             scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.dirClp(subGroup{groupN}), ...
+%             %                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+%         end
         
 %         xlabel(['Bias in ', plotVariables{varN}, ' opposite to dot motion'])
         %         xlabel(['Absolute ', plotVariables{varN}])
         xlabel(['Bias in ', plotVariables{varN}])
         
-%         ylabel('Bias in pursuit direction')
-                ylabel('Bias in perceived direction')
+        %         ylabel('Bias in pursuit direction')
+        ylabel('Bias in perceived direction')
+        ylim([-8, 8])
         title(['r=', num2str(rho, '%.2f'), ' p=', num2str(pval, '%.2f')])
         
         if varN>=saccadeVarStart

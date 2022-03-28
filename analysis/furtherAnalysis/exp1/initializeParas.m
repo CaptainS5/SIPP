@@ -11,7 +11,9 @@ apertureAngleNames = {'-9', '-6', '-3', '0', '3', '6', '9'};
 internalCons = [0, -90, 90];
 % internalConNames = {'coh 0', 'dir down', 'dir up'}; % 500 and 501
 internalConNames = {'static', 'dir down', 'dir up'}; % d00
-groupNames = {'Assimilation', 'Contrast', 'No bias'};
+% groupNames = {'Assimilation', 'Contrast', 'No bias'};
+groupNames = {'Assimilation', 'Contrast'};
+
 
 % parameter settings for plots
 plotVariables = {'response', ...

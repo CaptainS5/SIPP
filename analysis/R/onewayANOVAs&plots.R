@@ -15,8 +15,8 @@ source("pairwise.t.test.with.t.and.df.R")
 plotFolder <- ("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/SIPP/analysis/R/plots/")
 
 ### modify these parameters to plot different conditions
-# varName <- "dirClp"
-dataFileName <- "summaryDataDiffSubgroup.csv"
+varName <- "response"
+dataFileName <- "summaryData.csv"
 
 # for plotting
 textSize <- 25
@@ -27,6 +27,51 @@ dotSize <- 3
 data <- read.csv(dataFileName)
 subAll <- unique(data$sub)
 subTotalN <- length(subAll)
+
+
+
+#### plot baseline perception response
+pdfFileName <- paste("perceptionBias_baseline_all.pdf", sep = "")
+dataB <- subset(data, rdkInternalDir==0)
+
+sub <- dataB["sub"]
+rdkApertureAngle <- dataB["rdkApertureAngle"]
+measure <- dataB[varName]
+dataPlot <- data.frame(sub, rdkApertureAngle, measure)
+dataPlot$sub <- as.factor(dataPlot$sub)
+colnames(dataPlot)[3] <- "measure"
+
+# plotting
+ylimLow <- -25
+ylimHigh <- 25
+
+p <- ggplot(data=dataPlot, aes(x = rdkApertureAngle, y = measure)) +
+        stat_summary(aes(y = measure), fun = mean, geom = "point", shape = 95, size = 17.5) +
+        # stat_summary(fun = mean, geom = "line", width = 1) +
+        stat_summary(fun.data = 'mean_sdl',
+               fun.args = list(mult = 1.96/sqrt(subTotalN)),
+               geom = 'linerange', width = 2.13, size = 2.13) +
+        geom_point(size = dotSize, shape = 1) +
+        geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(-9, -12), y = c(ylimLow, ylimLow), xend = c(9, -12), yend = c(ylimLow, ylimHigh)), size = axisLineWidth) +
+        scale_y_continuous(name = "Bias in perceived direction (deg)", limits = c(ylimLow, ylimHigh), breaks = seq(from = ylimLow, to = ylimHigh, by = 5), expand = c(0, 0)) +
+        scale_x_continuous(name = "Object motion direction (deg)", breaks=c(-9,-6,-3,0,3,6,9), limits = c(-12, 12), expand = c(0, 0)) + 
+        # scale_colour_discrete(name = "Internal motion", labels = c("Up", "Down"), values = c("#67a9cf", "ef8a62")) +
+        theme(axis.text=element_text(colour="black"),
+              axis.ticks=element_line(colour="black", size = axisLineWidth),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_blank(),
+              panel.background = element_blank(),
+              text = element_text(size = textSize, colour = "black"),
+              legend.background = element_rect(fill="transparent"),
+              legend.key = element_rect(colour = "transparent", fill = "white"),
+              aspect.ratio = 0.85)
+        # facet_wrap(~prob)
+print(p)
+ggsave(paste(plotFolder, pdfFileName, sep = ""))
+
+
+
 
 #### process temporal dynamics in pursuit: three variables
 pdfFileName <- paste("pursuitBias_differentPhases_all.pdf", sep = "")

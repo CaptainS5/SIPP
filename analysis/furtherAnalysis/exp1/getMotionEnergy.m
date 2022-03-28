@@ -95,11 +95,14 @@ down_2 = -f2g2+f1g1;     % L2
 up_1 = -f2g1+f1g2;    % R1
 up_2 = f2g2+f1g1;     % R2
 
-% % have a look at the filters... they look about right!
-% for ii = 1:size(down_1, 3)
-%     imshow(up_1(:, :, ii)*255, 'InitialMagnification', 1000)
-% end
+% have a look at the filters... they look about right!
+for ii = 1:size(down_1, 3)
+    imshow(down_2(:, :, ii)*255, 'InitialMagnification', 1000)
+end
 
+for ii = 1:size(down_1, 3)
+    imshow(-down_2(:, :, ii)*255, 'InitialMagnification', 1000)
+end
 %--------------------------------------------------------------------------
 %         STEP 3: Convolve the filters with a stimulus
 %--------------------------------------------------------------------------

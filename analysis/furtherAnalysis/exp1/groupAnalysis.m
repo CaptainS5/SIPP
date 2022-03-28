@@ -12,24 +12,35 @@ plotVarEnd = 30;
 % calculate the average difference in all aperture angles in each
 % internal condition, then separate the participants into assimilation and
 % contrast groups
-groupAll = NaN(size(names));
-for subN = 1:size(names, 2)
-    idx1 = find(summaryDataDiff.sub==subN & ...
-        summaryDataDiff.rdkInternalDir==-90);
-    idx2 = find(summaryDataDiff.sub==subN & ...
-        summaryDataDiff.rdkInternalDir==90);
-    tempData(subN, 1) = mean(summaryDataDiff.response(idx2))-mean(summaryDataDiff.response(idx1));
-    tempDataEye(subN, 1) = mean(summaryDataDiff.dirClp(idx2))-mean(summaryDataDiff.dirClp(idx1));
-end
-border = quantile(abs(tempData), 0.25);
 
-subGroup{1} = find(tempData>=border); % assimilation group
-groupAll(subGroup{1}) = 1;
-subGroup{2} = find(tempData<=-border); % contrast group
-groupAll(subGroup{2}) = 2;
-subGroup{3} = find(tempData<border & tempData>-border); % those who doesn't have a large bias
-groupAll(subGroup{3}) = 3;
-save('subGroupList.mat', 'subGroup', 'groupAll')
+% the initial quick way to do subgroups
+% groupAll = NaN(size(names));
+% for subN = 1:size(names, 2)
+%     idx1 = find(summaryDataDiff.sub==subN & ...
+%         summaryDataDiff.rdkInternalDir==-90);
+%     idx2 = find(summaryDataDiff.sub==subN & ...
+%         summaryDataDiff.rdkInternalDir==90);
+%     tempData(subN, 1) = mean(summaryDataDiff.response(idx2))-mean(summaryDataDiff.response(idx1));
+%     tempDataEye(subN, 1) = mean(summaryDataDiff.dirClp(idx2))-mean(summaryDataDiff.dirClp(idx1));
+% end
+% border = quantile(abs(tempData), 0.25);
+% 
+% subGroup{1} = find(tempData>=border); % assimilation group
+% groupAll(subGroup{1}) = 1;
+% subGroup{2} = find(tempData<=-border); % contrast group
+% groupAll(subGroup{2}) = 2;
+% subGroup{3} = find(tempData<border & tempData>-border); % those who doesn't have a large bias
+% groupAll(subGroup{3}) = 3;
+% save('subGroupList.mat', 'subGroup', 'groupAll')
+
+% if using the bootstrap mean to do subgroups (whether the std covers 0 or not)
+% load('subGroupListBootStrap.mat')
+
+% if using the bootstrapped then LPA grouping... 2 groups only
+temp = readtable([RFolder, 'subGrouping2.csv']);
+subGroup{1} = find(temp.Class==2); % assimilation group
+subGroup{2} = find(temp.Class==1); % contrast group
+save('subGroupListLPA.mat', 'subGroup')
 
 %% analysis of the temporal relationship between pursuit & perception
 % % generate csv for R
@@ -83,8 +94,8 @@ for groupN = 1:length(subGroup)
     idxT = find(bSummary);
     summaryDataDiffSubgroup.group(idxT) = groupN;
 end
-writetable(summaryDataSubgroup, [RFolder, 'summaryDataSubgroup.csv'])
-writetable(summaryDataDiffSubgroup, [RFolder, 'summaryDataDiffSubgroup.csv'])
+writetable(summaryDataSubgroup, [RFolder, 'summaryDataSubgroup_LPA.csv'])
+writetable(summaryDataDiffSubgroup, [RFolder, 'summaryDataDiffSubgroup_LPA.csv'])
 
 %     % separate csv for each group
 % for groupN = 1:length(subGroup)

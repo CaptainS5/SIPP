@@ -203,10 +203,103 @@ for ii = 1:length(groupN)
     if averagedPlots
         meanLatencyI = round(mean(latency))+200;
         % align at rdk onset
-        % position, all conditions
-        figure
+        
+%         % position, averaged across all conditions, one trace from
+%         % each--NOT GONNA WORK
+%         % subgroup
+%         load('subGroupListLPA.mat')
+%         
+%         % averaging in each observer, need to minus individual baseline
+%         basePosAllX = []; % each row is one observer
+%         biasPosAllX = []; 
+%         basePosAllY = []; % each row is one observer
+%         biasPosAllY = []; 
+%         
+%         for subN = 1:size(names, 2)
+%             biasPosAllSubX = [];
+%             biasPosAllSubY = [];
+%             
+%             for internalConN = 1:length(allCons.internalCons)
+%                 if allCons.internalCons(internalConN)>0 % upward internal dir
+%                     signI = 1;
+%                 else % downward internal dir
+%                     signI = -1;
+%                 end
+%                 
+%                 subTempX = [];
+%                 subTempY = [];
+%                 for angleN = 1:length(allCons.apertureAngles)
+%                     subTempX(angleN, :) = indiMean{1}.pos{angleN, internalConN}{1}(subN, :);
+%                     subTempY(angleN, :) = indiMean{1}.pos{angleN, internalConN}{2}(subN, :);
+%                 end
+%                 
+%                 if allCons.internalCons(internalConN)==0
+%                     basePosAllX(subN, :) = nanmean(subTempX);
+%                     basePosAllY(subN, :) = nanmean(subTempY);
+%                 else
+%                     biasPosAllSubX = [biasPosAllSubX; nanmean(subTempX)];
+%                     biasPosAllSubY = [biasPosAllSubY; signI.*nanmean(subTempY)];
+%                 end
+%             end
+%             biasPosAllX(subN, :) = nanmean(biasPosAllSubX);
+%             biasPosAllY(subN, :) = nanmean(biasPosAllSubY);
+%         end
+%         
+%         % averaging in each subgroup
+%         biasPosX = []; % first rwo is assimilation group, second row is contrast group
+%         biasPosY = [];        
+%         basePosX = []; % first rwo is assimilation group, second row is contrast group
+%         basePosY = [];
+%         
+%         for subGroupN = 1:size(subGroup, 2)
+%             idx = subGroup{subGroupN};
+%             basePosX(subGroupN, :) = nanmean(basePosAllX(idx, :));
+%             basePosY(subGroupN, :) = nanmean(basePosAllY(idx, :));
+%             
+%             biasPosX(subGroupN, :) = nanmean(biasPosAllX(idx, :));
+%             biasPosY(subGroupN, :) = nanmean(biasPosAllY(idx, :));
+%         end
+%         
+%         figure
+%         hold on
+%         for subGroupN = 1:size(subGroup, 2)
+%             for conN = 1:2
+%                 if conN==1
+%                     xPlot = basePosX(subGroupN, :);
+%                     yPlot = basePosY(subGroupN, :);
+%                     lineStyle = '--';
+%                 else
+%                     xPlot = biasPosX(subGroupN, :);
+%                     yPlot = biasPosY(subGroupN, :);
+%                     lineStyle = '-';
+%                 end
+%             
+%             p{subGroupN} = plot(xPlot, yPlot, 'lineStyle', lineStyle, 'color', colorGroup(subGroupN, :)); %, 'LineWidth', 1);
+%             
+%             % average pursuit onset
+%             plot(xPlot(meanLatencyI), yPlot(meanLatencyI), '+k')
+%             % average olp end
+%             plot(xPlot(meanLatencyI+140), yPlot(meanLatencyI+140), '+k')
+%             % average early/late clp phase border
+%             plot(xPlot(meanLatencyI+140+round((900-meanLatencyI-140)/2)), ...
+%                 yPlot(meanLatencyI+140+round((900-meanLatencyI-140)/2)), '+k')
+%             % end of clp analysis window
+%             plot(xPlot(900), yPlot(900), '+k')
+%         end
+%         xlim([0, 6])
+%         ylim([-1, 1])
+%         xlabel('Horizontal eye position (deg)')
+%         ylabel(['Vertical eye\n position (deg)'])
+%     
+%         legend([p{:}], {'assimilation-base', 'assimilation-bias', 'contrast-base', 'contrast-bias'}, 'Location', 'best')
+%         box off
+%         saveas(gcf, [eyeTracesFolder, 'posTrace_subgroup.pdf'])
+        
+        % position, all object motion conditions
+        
         for internalConN = 1:length(allCons.internalCons)
-            subplot(3, 1, internalConN)
+            %             subplot(3, 1, internalConN)
+            figure
             hold on
             for angleN = 1:length(allCons.apertureAngles)
                 if allCons.apertureAngles(angleN)>0 % upward internal dir
@@ -217,28 +310,29 @@ for ii = 1:length(groupN)
                 p{angleN} = plot(allMean{ii}.pos{angleN, internalConN}{1}, allMean{ii}.pos{angleN, internalConN}{2}, 'LineStyle', lineStyle, 'color', colorObjAngles(angleN, :)); %, 'LineWidth', 1);
                 
                 % average pursuit onset
-                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI), '+k')
+                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI), '+k', 'MarkerSize', 15)
                 % average olp end
-                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI+140), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140), '+k')
+                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI+140), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140), '+k', 'MarkerSize', 15)
                 % average early/late clp phase border
-                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI+140+round((900-meanLatencyI-140)/2)), ...
-                    allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140+round((900-meanLatencyI-140)/2)), '+k')
+%                 plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI+140+round((900-meanLatencyI-140)/2)), ...
+%                     allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140+round((900-meanLatencyI-140)/2)), '+k', 'MarkerSize', 5)
                 % end of clp analysis window
-                plot(allMean{ii}.pos{angleN, internalConN}{1}(900), allMean{ii}.pos{angleN, internalConN}{2}(900), '+k')
+                plot(allMean{ii}.pos{angleN, internalConN}{1}(900), allMean{ii}.pos{angleN, internalConN}{2}(900), '+k', 'MarkerSize', 15)
             end
             
             xlim([0, 6])
             ylim([-1, 1])
-            title(['all, ', internalConNames{internalConN}])
+%             axis square
+            legend([p{:}], apertureAngleNames, 'Location', 'best', 'box', 'off')
+%             title(['all, ', internalConNames{internalConN}])
             xlabel('Horizontal eye position (deg)')
             ylabel(['Vertical eye\n position (deg)'])
+            saveas(gcf, [eyeTracesFolder, 'posTrace_all_', internalConNames{internalConN}, '.pdf'])
         end
         
-        if internalConN==1
-            legend([p{:}], apertureAngleNames, 'Location', 'best')
-        end
-        box off
-        saveas(gcf, [eyeTracesFolder, 'posTrace_all.pdf'])
+%         if internalConN==1
+%             legend([p{:}], apertureAngleNames, 'Location', 'best', 'box', 'off')
+%         end
         
 %         % position difference from baseline
 %         figure
