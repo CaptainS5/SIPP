@@ -50,8 +50,9 @@ p <- ggplot(data=dataPlot, aes(x = rdkApertureAngle, y = measure)) +
         # stat_summary(fun = mean, geom = "line", width = 1) +
         stat_summary(fun.data = 'mean_sdl',
                fun.args = list(mult = 1.96/sqrt(subTotalN)),
-               geom = 'linerange', width = 2.13, size = 2.13) +
+               geom = 'errorbar', width = 1, size = 0.75) +
         geom_point(size = dotSize, shape = 1) +
+        geom_segment(aes(x = -9, xend = 9, y = -9, yend = 9)) + # add the identity line
         geom_segment(aes_all(c('x', 'y', 'xend', 'yend')), data = data.frame(x = c(-9, -12), y = c(ylimLow, ylimLow), xend = c(9, -12), yend = c(ylimLow, ylimHigh)), size = axisLineWidth) +
         scale_y_continuous(name = "Bias in perceived direction (deg)", limits = c(ylimLow, ylimHigh), breaks = seq(from = ylimLow, to = ylimHigh, by = 5), expand = c(0, 0)) +
         scale_x_continuous(name = "Object motion direction (deg)", breaks=c(-9,-6,-3,0,3,6,9), limits = c(-12, 12), expand = c(0, 0)) + 

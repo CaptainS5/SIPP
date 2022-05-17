@@ -24,7 +24,7 @@ subTotalN <- length(subAll)
 
 m <- data[, 2:8] %>%
     single_imputation() %>%
-    estimate_profiles(2) 
+    estimate_profiles(2, covariances = "equal") 
 
 # compare_solutions(statistics = c("AIC", "BIC"))
 

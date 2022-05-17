@@ -446,6 +446,10 @@ if averagePlots
         %         corrData.response = summaryDataDiff.response;
                 
                 [rho, pval] = corr(corrData.(plotVariables{varN}), corrData.response);
+                
+                mycorr = @(x1,x2) corr(x1, x2);
+                nIterations = 1000;
+                [lower, upper] = bootci(nIterations,{mycorr,corrData.(plotVariables{varN}), corrData.response});
 %         [rho, pval] = corr(corrData.(plotVariables{varN}), corrData.dirClp);
         
         figure

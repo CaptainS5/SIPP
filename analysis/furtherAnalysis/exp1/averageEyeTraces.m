@@ -37,8 +37,6 @@ for subN = subStart:subEnd
     tempL = eyeTrialData.frameLog.rdkOff(subN, idxT)-eyeTrialData.frameLog.rdkOn(subN, idxT)+200; % starting from 200 ms before RDK onset, to the end of RDK
     tempL(tempL==0) = [];
     frameLength(subN, 1) = min(tempL);
-    % latency
-    latency(subN) = nanmean(eyeTrialData.pursuit.onset(subN, idxT)-eyeTrialData.frameLog.rdkOn(subN, idxT));
     
     for internalConN = 1:length(allCons.internalCons)
         if allCons.internalCons(internalConN)==0
@@ -52,6 +50,9 @@ for subN = subStart:subEnd
             eyeTrialData.rdkCoh(subN, :)==rdkCoh & ...
             eyeTrialData.rdkInternalDir(subN, :)==rdkInternalDir);
         %                 eyeTrialData.rdkApertureAngle(subN, :)==allCons.apertureAngles(angleN));
+        
+        % latency
+        latency(subN, internalConN) = nanmean(eyeTrialData.pursuit.onset(subN, idxT)-eyeTrialData.frameLog.rdkOn(subN, idxT));
         
         lengthT = length(idxT);
         frames.onset{subN, internalConN}.posX = NaN(lengthT, frameLength(subN, 1));
@@ -310,9 +311,9 @@ for ii = 1:length(groupN)
                 p{angleN} = plot(allMean{ii}.pos{angleN, internalConN}{1}, allMean{ii}.pos{angleN, internalConN}{2}, 'LineStyle', lineStyle, 'color', colorObjAngles(angleN, :)); %, 'LineWidth', 1);
                 
                 % average pursuit onset
-                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI), '+k', 'MarkerSize', 15)
+                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI(internalConN)), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI(internalConN)), '+k', 'MarkerSize', 15)
                 % average olp end
-                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI+140), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140), '+k', 'MarkerSize', 15)
+                plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI(internalConN)+140), allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI(internalConN)+140), '+k', 'MarkerSize', 15)
                 % average early/late clp phase border
 %                 plot(allMean{ii}.pos{angleN, internalConN}{1}(meanLatencyI+140+round((900-meanLatencyI-140)/2)), ...
 %                     allMean{ii}.pos{angleN, internalConN}{2}(meanLatencyI+140+round((900-meanLatencyI-140)/2)), '+k', 'MarkerSize', 5)
