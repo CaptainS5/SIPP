@@ -1,9 +1,9 @@
 % plot the "perfect" prediction of vector average and contrast
 clear all; clc; close all
-apertureAngles = [-9:3:9]';
+apertureAngles = [-27:9:27]';
 apertureSpeed = 10;
 dotAngles = [-90, 90];
-dotSpeed = 5;
+dotSpeed = 1;
 
 colorPlot = [1, 0, 0; 0, 0, 1];
 
@@ -22,8 +22,9 @@ plot(apertureAngles, dirSum(:, 1)-apertureAngles, '-', 'color', colorPlot(1, :),
 plot(apertureAngles, dirSum(:, 2)-apertureAngles, '-', 'color', colorPlot(2, :), 'lineWidth', 2)
 xlabel('Aperture angle (deg)')
 ylabel('Bias in vector sum')
+title('sum')
 legend({'dot down', 'dot up'}, 'location', 'best')
-saveas(gcf, 'predictSum.pdf')
+% saveas(gcf, 'predictSum.pdf')
 
 figure
 hold on
@@ -32,4 +33,5 @@ plot(apertureAngles, dirContrast(:, 2)-apertureAngles, '-', 'color', colorPlot(2
 xlabel('Aperture angle (deg)')
 ylabel('Bias in vector difference')
 legend({'dot down', 'dot up'}, 'location', 'best')
-saveas(gcf, 'predictContrast.pdf')
+title('contrast')
+% saveas(gcf, 'predictContrast.pdf')

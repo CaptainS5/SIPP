@@ -1,7 +1,7 @@
 % Exp1:
 % correlation plots
 initializeParas;
-% load('subGroupList.mat')
+load('subGroupListLPA.mat')
 % groupCons = unique(groupAll);
 
 %% choose which plot to look at
@@ -460,12 +460,12 @@ if averagePlots
         lsline(gca)
         
         % colour subgroups
-%         for groupN = 1:length(subGroup)
-%             scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.response(subGroup{groupN}), ...
-%                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
-%             %             scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.dirClp(subGroup{groupN}), ...
-%             %                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
-%         end
+        for groupN = 1:length(subGroup)
+            scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.response(subGroup{groupN}), ...
+                'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+            %             scatter(corrData.(plotVariables{varN})(subGroup{groupN}), corrData.dirClp(subGroup{groupN}), ...
+            %                 'MarkerFaceColor', colorGroup(groupN, :), 'MarkerEdgeColor', colorGroup(groupN, :))
+        end
         
 %         xlabel(['Bias in ', plotVariables{varN}, ' opposite to dot motion'])
         %         xlabel(['Absolute ', plotVariables{varN}])
@@ -480,7 +480,7 @@ if averagePlots
                         saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'YVSperceptualBias_all.pdf'])
 %             saveas(gcf, [correlationFolder, 'sacDiff_', plotVariables{varN}, 'VSpursuitBias_all.pdf'])
         else
-            saveas(gcf, [correlationFolder, 'pursuitDiff_', plotVariables{varN}, 'VSperceptualBias_all.pdf'])
+            saveas(gcf, [correlationFolder, 'pursuitDiff_', plotVariables{varN}, 'VSperceptualBias_all_subGroup.pdf'])
         end
         %         if varN>=saccadeVarStart
         %             saveas(gcf, [correlationFolder, 'sac_raw', plotVariables{varN}, 'VSperceptualBias_all.pdf'])

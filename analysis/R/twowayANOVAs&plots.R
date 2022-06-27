@@ -17,10 +17,10 @@ setwd("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/SIPP/analysis/R")
 source("pairwise.t.test.with.t.and.df.R")
 plotFolder <- ("C:/Users/wuxiu/Documents/PhD@UBC/Lab/3rdYear/SIPP/analysis/R/plots/")
 ### modify these parameters to plot different conditions
-# dataFileName <- "summaryDataDiff.csv"
-dataFileName <- "summaryDataDiffSubgroup_LPA.csv"
-varName <- "response"
-pdfFileName <- paste("diff_", varName, "_all.pdf", sep = "")
+dataFileName <- "summaryDataDiff.csv"
+# dataFileName <- "summaryDataDiffSubgroup_LPA.csv"
+varName <- "dirClp"
+pdfFileName <- paste("diff_", varName, "_all_new.pdf", sep = "")
 ## for catch-up saccades
 # varName <- "numY"
 # dataFileName <- "summaryCatchUpSaccades.csv"
@@ -128,13 +128,14 @@ dataPlot <- data.frame(sub, rdkApertureAngle, rdkInternalDir, measure)
 colnames(dataPlot)[4] <- "measure"
 dataPlot$sub <- as.factor(dataPlot$sub)
 dataPlot$rdkInternalDir <- as.factor(dataPlot$rdkInternalDir)
+dataPlot[dataPlot$rdkInternalDir==90, ]$measure <- -dataPlot[dataPlot$rdkInternalDir==90, ]$measure
 
-# # pursuit bias clp
-# ylimLow <- -15
-# ylimHigh <- 15
-# response
+# pursuit bias clp
 ylimLow <- -15
 ylimHigh <- 15
+# # response
+# ylimLow <- -15
+# ylimHigh <- 15
 
 p <- ggplot(dataPlot, aes(x = rdkApertureAngle, y = measure, color = rdkInternalDir)) +
         stat_summary(fun = mean, geom = "point", shape = 95, size = 17.5) +

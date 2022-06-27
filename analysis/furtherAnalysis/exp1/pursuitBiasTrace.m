@@ -106,24 +106,29 @@ load('subGroupListLPA.mat')
 biasDirGroup = [];
 biasUpper = [];
 biasLower = [];
-for subGroupN = 1:size(subGroup, 2)
-    biasDirGroup(subGroupN, :) = nanmean(biasDirSub(subGroup{subGroupN}, :));
-    biasUpper(subGroupN, :) = biasDirGroup(subGroupN, :)+tinv(0.975,length(subGroup{subGroupN})-1)*nanstd(biasDirSub(subGroup{subGroupN}, :))/sqrt(length(subGroup{subGroupN}));
-    biasLower(subGroupN, :) = biasDirGroup(subGroupN, :)+tinv(0.025,length(subGroup{subGroupN})-1)*nanstd(biasDirSub(subGroup{subGroupN}, :))/sqrt(length(subGroup{subGroupN}));
-end
+% for subGroupN = 1:size(subGroup, 2)
+%     biasDirGroup(subGroupN, :) = nanmean(biasDirSub(subGroup{subGroupN}, :));
+%     biasUpper(subGroupN, :) = biasDirGroup(subGroupN, :)+tinv(0.975,length(subGroup{subGroupN})-1)*nanstd(biasDirSub(subGroup{subGroupN}, :))/sqrt(length(subGroup{subGroupN}));
+%     biasLower(subGroupN, :) = biasDirGroup(subGroupN, :)+tinv(0.025,length(subGroup{subGroupN})-1)*nanstd(biasDirSub(subGroup{subGroupN}, :))/sqrt(length(subGroup{subGroupN}));
+% end
+
+% all together
+biasDirGroup = nanmean(biasDirSub);
+biasUpper = biasDirGroup+tinv(0.975,20-1)*nanstd(biasDirSub)/sqrt(20);
+biasLower = biasDirGroup+tinv(0.025,20-1)*nanstd(biasDirSub)/sqrt(20);
 
 %%
-figure
-hold on
-for ii = 1:7
-    if ii<4
-        lineStyle = '--';
-    else
-        lineStyle = '-';
-    end
-    plot(biasDirCon{1, 2}(ii, :), 'lineStyle', lineStyle, 'color', colorObjAngles(ii, :))
-end
-ylim([-20, 20])
+% figure
+% hold on
+% for ii = 1:7
+%     if ii<4
+%         lineStyle = '--';
+%     else
+%         lineStyle = '-';
+%     end
+%     plot(biasDirCon{1, 2}(ii, :), 'lineStyle', lineStyle, 'color', colorObjAngles(ii, :))
+% end
+% ylim([-20, 20])
 
 %%
 % plotting parameters
@@ -131,21 +136,27 @@ startI = floor(mean(latency));
 
 figure
 hold on
-tMS = [1:size(biasDirGroup, 2)]; % time in ms
+% tMS = [1:size(biasDirGroup, 2)]; % time in ms
+tMS = [1:length(biasDirGroup)]; % time in ms
 p = [];
-for drawN = 1:2
-   groupN = 3-drawN;
-   p{groupN} = plot(tMS(startI:end), biasDirGroup(groupN, startI:end), 'color', colorGroup(groupN, :));
-   patch('XData', [tMS(startI:end), fliplr(tMS(startI:end))], 'YData', [biasUpper(groupN, startI:end), fliplr(biasLower(groupN, startI:end))], ...
-       'faceColor', colorGroup(groupN, :), 'faceAlpha', 0.2, 'edgeColor', 'none', 'lineWidth', 5)
-end
+% for drawN = 1:2
+%    groupN = 3-drawN;
+%    p{groupN} = plot(tMS(startI:end), biasDirGroup(groupN, startI:end), 'color', colorGroup(groupN, :));
+%    patch('XData', [tMS(startI:end), fliplr(tMS(startI:end))], 'YData', [biasUpper(groupN, startI:end), fliplr(biasLower(groupN, startI:end))], ...
+%        'faceColor', colorGroup(groupN, :), 'faceAlpha', 0.2, 'edgeColor', 'none', 'lineWidth', 5)
+% end
+
+p = plot(tMS(startI:end), biasDirGroup(startI:end));
+patch('XData', [tMS(startI:end), fliplr(tMS(startI:end))], 'YData', [biasUpper(1, startI:end), fliplr(biasLower(1, startI:end))], ...
+    'faceColor', [0 0 0], 'faceAlpha', 0.2, 'edgeColor', 'none', 'lineWidth', 5)
+
 % add time stamps
 plot([startI+140, startI+140], [-5, 20], '--')
 plot([startI+140+(700-startI-140)/2, startI+140+(700-startI-140)/2], [-5, 20], '--')
 plot([700, 700], [-5, 20], '--')
 
-legend([p{:}], groupNames, 'box', 'off')
+% legend([p{:}], groupNames, 'box', 'off')
 xlim([100, 800])
 xlabel('Time (ms)')
 ylabel('Bias in pursuit direction (deg)')
-saveas(gcf, ['pursuitBiasTraceSubgroup.pdf'])
+saveas(gcf, ['pursuitBiasTraceAll.pdf'])
